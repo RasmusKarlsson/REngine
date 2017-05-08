@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Render">
+      <UniqueIdentifier>{87a328ab-c1f2-4503-8b34-8ac94d2633df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Window">
+      <UniqueIdentifier>{3a89f100-517d-4d30-a59b-9b1fec68af51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{ff83a689-cdcf-419b-b3d9-b8ff235d7410}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Geometries">
+      <UniqueIdentifier>{c870a1a5-17e0-4aef-8968-e63202452105}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Window.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Main.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Input.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Mesh.cpp">
+      <Filter>Geometries</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Quad.cpp">
+      <Filter>Geometries</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Sphere.cpp">
+      <Filter>Geometries</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Cube.cpp">
+      <Filter>Geometries</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Entity.cpp">
+      <Filter>Geometries</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Shader.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Texture.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Renderer.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Material.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Camera.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\OrbitCamera.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MathHelpers.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\TerrainMesh.cpp">
+      <Filter>Geometries</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Terrain.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\WASDCamera.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\TextMesh.cpp">
+      <Filter>Geometries</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Window.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Main.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Input.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Mesh.h">
+      <Filter>Geometries</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Quad.h">
+      <Filter>Geometries</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Sphere.h">
+      <Filter>Geometries</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Cube.h">
+      <Filter>Geometries</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Entity.h">
+      <Filter>Geometries</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Renderer.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Shader.hpp">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Texture.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Material.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Camera.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\OrbitCamera.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MathHelpers.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\TerrainMesh.h">
+      <Filter>Geometries</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Terrain.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\WASDCamera.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\TextMesh.h">
+      <Filter>Geometries</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Shaders\simple.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="src\Shaders\simple.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="ClassDiagram.cd" />
+    <None Include="src\Shaders\splatmap.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="src\Shaders\splatmap.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="src\Shaders\2dUI.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="src\Shaders\2dUI.vert">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
