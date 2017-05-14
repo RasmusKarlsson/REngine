@@ -36,3 +36,8 @@ vec3 MathHelpers::PixelPosToWorldPos(float x, float y)
 	vec3 worldPos = vec3((vec2(x, SCREEN_HEIGHT - y) - screen) / screen, 0.0f);
 	return worldPos;
 }
+
+int MathHelpers::CounterToPowerOfTwo(int c)
+{
+	return (1 << c);
+}

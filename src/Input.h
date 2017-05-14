@@ -19,9 +19,11 @@ public:
 	static void KeyDown(WPARAM wParam);
 	static void KeyUp(WPARAM wParam);
 	static bool IsPressed(WPARAM wParam);
+	static bool IsPressedOnce(WPARAM wParam);
 	static void ResetKeys();
 
 	static bool m_Keys[maxKeys];
+	static bool m_KeysPrev[maxKeys];
 
 	static POINT GetMousePos(bool ScreenRelative = true);
 

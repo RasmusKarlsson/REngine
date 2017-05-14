@@ -14,13 +14,13 @@ HWND g_hwnd;
 
 
 bool Input::m_Keys[256] = { false };
+bool Input::m_KeysPrev[256] = { false };
 
 int Input::	mouseWheel;
 
 void Input::KeyDown(WPARAM wParam)
 {
 	m_Keys[wParam] = true;
-	
 }
 
 void Input::KeyUp(WPARAM wParam)
@@ -31,6 +31,13 @@ void Input::KeyUp(WPARAM wParam)
 bool Input::IsPressed(WPARAM wParam)
 {
 	return m_Keys[wParam];
+}
+
+bool Input::IsPressedOnce(WPARAM wParam)
+{
+	bool previousState = m_KeysPrev[wParam];
+	m_KeysPrev[wParam] = m_Keys[wParam];
+	return (m_KeysPrev[wParam] && !previousState);
 }
 
 void Input::ResetKeys()

@@ -73,3 +73,8 @@ void Terrain::BindTextures()
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, m_normalMap->GetID());
 }
+
+void Terrain::Render(int lod, mat4 wvpMatrix)
+{
+
+}

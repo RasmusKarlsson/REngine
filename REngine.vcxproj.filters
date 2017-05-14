@@ -142,9 +142,6 @@
     <None Include="src\Shaders\simple.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="src\Shaders\simple.frag">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="ClassDiagram.cd" />
     <None Include="src\Shaders\splatmap.frag">
       <Filter>Shaders</Filter>
@@ -156,6 +153,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="src\Shaders\2dUI.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="src\Shaders\simple.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="src\Shaders\whiteColor.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

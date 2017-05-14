@@ -14,10 +14,12 @@ public:
 	void SetNormalMap(string filename);
 	void SetSplatMapTexture(string filename, int layer);
 	void UpdateUniforms();
-	TerrainMesh* GetTerrainEntity() {return m_terrainMesh;};
+	TerrainMesh* GetTerrainEntity() {return m_terrainMesh;}
 	
 
 	void BindTextures();
+
+	void Render(int lod, mat4 wvpMatrix);
 
 private:
 

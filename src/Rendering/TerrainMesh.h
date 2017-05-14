@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <lodepng.h>
+
 class TerrainMesh : public Entity
 {
 public:
@@ -13,7 +14,10 @@ public:
 
 	void CreateFromHeightmap(Texture* texture);
 
-	ivec2 GetResolution() { return m_resolution; };
+	ivec2 GetResolution() { return m_resolution; }
+
+	void SetLod(int lod);
+	int	 GetLod() { return m_currentLod;	}
 
 private:
 
@@ -21,4 +25,8 @@ private:
 	float m_size;
 
 	float m_heightScale;
+
+	vector<GLuint> m_lodBufferObjects;
+	vector<GLuint> m_lodTriangleSize;
+	int m_currentLod;
 };

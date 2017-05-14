@@ -58,7 +58,8 @@ void main()
 {
 	vec3 color = v_Color.rgb;
 	vec4 finalColor = vec4(0.0);
-	vec4 mask = texture2D(Sampler0,v_Texcoord*1.0/64.0);
+	float textureRes = float(textureSize(Sampler0,0));
+	vec4 mask = texture2D(Sampler0,v_Texcoord*1.0/textureRes);
 	vec4 tex1 = textureNoTile(Sampler1,4.0*v_Texcoord);
 	vec4 tex2 = textureNoTile(Sampler2,3.0*v_Texcoord);
 	vec4 tex3 = textureNoTile(Sampler3,2.0*v_Texcoord);
@@ -66,9 +67,10 @@ void main()
 	vec4 waterColor = vec4(0.0,0.5,0.8,1.0);
 	finalColor = mix(waterColor,finalColor,v_positionY);
 	gl_FragColor = finalColor;
-	vec3 normal = texture2D(Sampler4, 5.0*v_Texcoord).rgb;
-    normal = normalize(normal * 2.0 - 1.0);
-	vec3 lightDir = normalize(vec3(-1.0,-1.0,-1.0));
+	vec3 normal = v_Normal+4.0*(texture2D(Sampler4, 5.0*v_Texcoord).rgb-0.5);
+    normal = normalize(normal);
+   // normal = normalize(normal * 2.0 - 1.0);
+	vec3 lightDir = normalize(vec3(0.0,-1.0,0.0));
 	float light = max(0.0,0.5+0.5*dot(-lightDir,normal));
 	gl_FragColor.rgb *=light;
 	//gl_FragColor.rgb = 0.5+0.5*v_Normal;

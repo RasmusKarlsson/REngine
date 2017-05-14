@@ -19,5 +19,6 @@ public:
 	static vec2 Lerp(vec2 start, vec2 end, float t);
 	static vec3 PixelPosToWorldPos(vec2 screenPos);
 	static vec3 PixelPosToWorldPos(float x,float y);
+	static int CounterToPowerOfTwo(int c);
 
 };

@@ -26,6 +26,7 @@ public:
 	static GLuint m_simpleShader;
 	static GLuint m_terrainShader;
 	static GLuint m_textShader;
+	static GLuint m_whiteShader;
 
 	static vec4 m_clearColor;
 

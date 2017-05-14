@@ -22,6 +22,8 @@ extern double timeElapsed;
 extern int SCREEN_WIDTH;
 extern int SCREEN_HEIGHT;
 
+static bool wire = 0;
+
 Scene::Scene()
 {
 	Renderer::CompileShaders();
@@ -30,7 +32,7 @@ Scene::Scene()
 	m_currentCamera->SetOrbitDistance(5.0f);
 	m_currentCamera->SetCameraPosition(vec3(0.0f, 0.0f, 5.0f));
 	m_currentCamera->SetCameraTarget(vec3(0.0f, 0.0f, 0.0f));
-	m_currentCamera->CreateProjectionMatrix(45.0f, (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
+	m_currentCamera->CreateProjectionMatrix(45.0f, (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 4000.0f);
 
 	Texture* tex = new Texture();
 	tex->CreateFromFile("res\\Textures\\splatmap.png");
@@ -55,8 +57,8 @@ Scene::Scene()
 
 	m_terrain = new Terrain();
 	
-	m_terrain->SetHeightMap("res\\Textures\\heightmap65.png");
-	m_terrain->SetSplatMap("res\\Textures\\splatmap.png");
+	m_terrain->SetHeightMap("res\\Textures\\heightmap257.png");
+	m_terrain->SetSplatMap("res\\Textures\\splatmap257.png");
 	m_terrain->SetNormalMap("res\\Textures\\normalmap.png");
 	m_terrain->SetSplatMapTexture("res\\Textures\\sand.png",0);
 	m_terrain->SetSplatMapTexture("res\\Textures\\grass.png",1);
@@ -131,6 +133,23 @@ void Scene::UpdateScene(double dt)
 	if (Input::IsPressed('D'))
 		m_EntityList[0]->SetRotation(vec3(timeElapsed*1.4f, timeElapsed, 0.0f));
 
+	static int lod = 0;
+
+	if (Input::IsPressedOnce('1')) {
+		lod--;
+		if (lod < 0) lod = 0;
+		m_terrain->GetTerrainEntity()->SetLod(lod);
+	}
+	if (Input::IsPressedOnce('2')) {
+		lod++;
+		if (lod > 5) lod = 5;
+		m_terrain->GetTerrainEntity()->SetLod(lod);
+	}
+
+	if (Input::IsPressedOnce('W')) {
+		wire = !wire;
+	}
+
 	m_currentCamera->UpdateCameraState(dt);
 	m_currentCamera->CreateLookAtMatrix();
 
@@ -141,7 +160,6 @@ void Scene::UpdateScene(double dt)
 			(*it)->UpdateMatrices();
 		}
 	}
-
 
 	m_cursorMesh->SetPosition(MathHelpers::PixelPosToWorldPos(Input::GetMousePosV()));
 
@@ -154,6 +172,7 @@ void Scene::RenderScene(double dt)
 	Renderer::SetShader(Renderer::m_terrainShader);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glPolygonOffset(0.0, 0.0);
 //	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
 	m_terrain->BindTextures();
@@ -167,16 +186,21 @@ void Scene::RenderScene(double dt)
 		Renderer::SetShader(shader);
 		Renderer::Render(*it, MVPmatrix);
 	}
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	
-	glLineWidth(1.0f);
-	Renderer::Render(m_terrain->GetTerrainEntity(), SetModelViewProjectionMatrix());
 
-	Renderer::SetShader(Renderer::m_simpleShader);
-	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
-		mat4 MVPmatrix = SetModelViewProjectionMatrix((*it)->GetWorldMatrix());
-		(*it)->GetMaterial()->BindTextures();
-		Renderer::Render(*it, MVPmatrix);
+	if (wire)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonOffset(4.0, 4.0);
+
+		glLineWidth(1.0f);
+		Renderer::SetShader(Renderer::m_whiteShader);
+		Renderer::Render(m_terrain->GetTerrainEntity(), SetModelViewProjectionMatrix(m_terrain->GetTerrainEntity()->GetWorldMatrix()));
+
+		for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
+			mat4 MVPmatrix = SetModelViewProjectionMatrix((*it)->GetWorldMatrix());
+			(*it)->GetMaterial()->BindTextures();
+			Renderer::Render(*it, MVPmatrix);
+		}
 	}
 	
 

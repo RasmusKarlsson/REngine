@@ -2,12 +2,18 @@
 //#include <lodepng.cpp>
 #include "Entity.h"
 #include "TerrainMesh.h"
+#include "MathHelpers.h"
 
 using namespace std;
+
+const int C_TERRAINLODS = 6;
 
 TerrainMesh::TerrainMesh()
 {
 	//Create(64,64);
+	m_lodBufferObjects.resize(C_TERRAINLODS);
+	m_lodTriangleSize.resize(C_TERRAINLODS);
+	m_currentLod = 0;
 }
 
 TerrainMesh::~TerrainMesh()
@@ -160,6 +166,7 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 	}
 
 	int d = 0;
+	
 	for (int j = 0; j < (depth - 1); j++)
 	{
 		for (int i = 0; i < (width - 1); i++)
@@ -200,11 +207,43 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glGenBuffers(1, &m_vboIndex);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vboIndex);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (width - 1) * (depth - 1) * 6 * sizeof(GLint), indices.data(), GL_STATIC_DRAW);
+	vector<GLuint> lodIndices;
+	for (int lodIndex = C_TERRAINLODS-1; lodIndex >= 0; lodIndex--)
+	{
+		d = 0;
+		int lod = MathHelpers::CounterToPowerOfTwo(lodIndex);
+		lodIndices.resize((width - 1) /lod * (depth - 1)/lod * 6);
+		for (int j = 0; j < (depth - 1); j += lod)
+		{
+			for (int i = 0; i < (width - 1); i += lod)
+			{
+				int idx = j*(width)+i;
+				lodIndices[d++] = idx;
+				lodIndices[d++] = (idx + lod * width);
+				lodIndices[d++] = (idx + lod * width + lod);
+
+				lodIndices[d++] = idx;
+				lodIndices[d++] = (idx + lod * width + lod);
+				lodIndices[d++] = (idx + lod);
+			}
+		}
+
+		m_lodTriangleSize[lodIndex] = (width - 1) / lod * (depth - 1) / lod * 6;
+
+		glGenBuffers(1, &m_lodBufferObjects[lodIndex]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_lodBufferObjects[lodIndex]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, (width - 1) / lod * (depth - 1) / lod * 6 * sizeof(GLint), lodIndices.data(), GL_STATIC_DRAW);
+	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	m_triangleSize = (width - 1) * (depth - 1) * 6;
+}
+
+void TerrainMesh::SetLod(int lod)
+{
+	m_currentLod = lod;
+	m_triangleSize = m_lodTriangleSize[lod];
+	glBindVertexArray(m_vao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_lodBufferObjects[m_currentLod]);
 }
