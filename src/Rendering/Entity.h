@@ -9,6 +9,39 @@
 
 using namespace glm;
 
+class BBox
+{
+public:
+	BBox() {};
+	~BBox() {};
+
+	void SetBoundingBox(vec3 min, vec3 max) {
+		min = min;
+		max = max;
+	}
+	vec3 GetBoundingBoxMin() { return min; };
+	vec3 GetBoundingBoxMax() { return max; };
+	/*
+	bool RayIntersection(ray r) {
+		double tx1 = (b.min.x - r.x0.x)*r.n_inv.x;
+		double tx2 = (b.max.x - r.x0.x)*r.n_inv.x;
+
+		double tmin = min(tx1, tx2);
+		double tmax = max(tx1, tx2);
+
+		double ty1 = (b.min.y - r.x0.y)*r.n_inv.y;
+		double ty2 = (b.max.y - r.x0.y)*r.n_inv.y;
+
+		tmin = max(tmin, min(ty1, ty2));
+		tmax = min(tmax, max(ty1, ty2));
+
+		return tmax >= tmin;
+	}
+	*/
+	vec3 max = vec3();
+	vec3 min = vec3();
+};
+
 class Entity
 {
 public:
@@ -51,6 +84,8 @@ public:
 
 	void SetMaterial(Material* material) { m_material = material; };
 	Material* GetMaterial() { return m_material; };
+
+	BBox m_bbox;
 
 protected:
 

@@ -9,10 +9,10 @@
 #include "Window.h"
 #include <chrono>
 #include <algorithm>
-//#include "Scene.h"
 
 typedef std::chrono::duration<long, std::ratio<1, 60>> sixtieths_of_a_sec;
 constexpr auto kMaxDeltatime = sixtieths_of_a_sec{ 1 };
+static const double s_updateRate = 60.0;
 
 Window window;
 
@@ -28,6 +28,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 	bool active = true;
 
 	auto lastEndTime = std::chrono::high_resolution_clock::now();
+	double m_updateTimer = 0.0;
 
 	while (active) {
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -40,17 +41,16 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 		auto newEndTime = std::chrono::high_resolution_clock::now();
 		auto frameTime = newEndTime - lastEndTime;
 
-		//typedef std::common_type<decltype(frameTime), decltype(kMaxDeltatime)>::type common_duration;
-	//	auto mDeltaTime = std::min<common_duration>(frameTime, kMaxDeltatime);
-
-		//if (frameTime > std::chrono::milliseconds(0)) { continue; }
-
 		long microseconds = std::chrono::duration_cast<std::chrono::duration<long, std::micro>>(frameTime).count();
 		double dt = microseconds / 1000000.0;
-	//	printf("%lf \n", dt);
-		window.Render(dt);
-		window.WSwapBuffers();
-		lastEndTime = newEndTime;
+		m_updateTimer += dt;
+		if (m_updateTimer > 1.0 / s_updateRate)
+		{
+			window.Render(m_updateTimer);
+			window.WSwapBuffers();
+			lastEndTime = newEndTime;
+			m_updateTimer = 0.0;
+		}
 	}
 	window.Destroy();
 

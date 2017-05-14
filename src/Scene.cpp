@@ -55,7 +55,7 @@ Scene::Scene()
 
 	m_terrain = new Terrain();
 	
-	m_terrain->SetHeightMap("res\\Textures\\heightmap64.png");
+	m_terrain->SetHeightMap("res\\Textures\\heightmap65.png");
 	m_terrain->SetSplatMap("res\\Textures\\splatmap.png");
 	m_terrain->SetNormalMap("res\\Textures\\normalmap.png");
 	m_terrain->SetSplatMapTexture("res\\Textures\\sand.png",0);
@@ -168,8 +168,8 @@ void Scene::RenderScene(double dt)
 		Renderer::Render(*it, MVPmatrix);
 	}
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	/*
-	glLineWidth(0.1f);
+	
+	glLineWidth(1.0f);
 	Renderer::Render(m_terrain->GetTerrainEntity(), SetModelViewProjectionMatrix());
 
 	Renderer::SetShader(Renderer::m_simpleShader);
@@ -178,7 +178,7 @@ void Scene::RenderScene(double dt)
 		(*it)->GetMaterial()->BindTextures();
 		Renderer::Render(*it, MVPmatrix);
 	}
-	*/
+	
 
 
 }

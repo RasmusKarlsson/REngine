@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////
 //
-// Copyright(c) 2017 Mariusz Bartosik, mariuszbartosik.com
+// Copyright(c) 2017 Rasmus Karlsson
 // Subject to the MIT license, see LICENSE file.
 //
 ///////////////////////////////////////////////////////////
 
-#ifndef _PROJECT247_MAIN_H_
-#define _PROJECT247_MAIN_H_
+#ifndef _RENGINE_MAIN_H_
+#define _RENGINE_MAIN_H_
 
 // Including SDKDDKVer.h defines the highest available Windows platform.
 // If you wish to build your application for a previous Windows platform, include WinSDKVer.h and

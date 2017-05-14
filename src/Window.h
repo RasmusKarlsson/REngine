@@ -9,11 +9,7 @@
 #include <windows.h>
 #include <iostream>
 #include <string>
-
 #include "Scene.h"
-
-//using namespace std;
-//using namespace std::chrono;
 
 
 class Window {
@@ -51,7 +47,5 @@ public:
 private:
 
 	GLuint shader;
-
-	double m_updateTimer;
 
 };

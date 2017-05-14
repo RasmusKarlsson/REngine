@@ -5,6 +5,10 @@
 ///////////////////////////////////////////////////////////
 
 //#include "Input.h"
+#include "windows.h"
+#include "Shellapi.h"
+#include <string>"
+#include <atlstr.h>
 #include "Window.h"
 #include "gl/glew.h"
 #include "gl/glext.h"
@@ -36,15 +40,8 @@ static int g_glwin_fullscreen = 0;
 
 Window *staticWindow;
 
-static const double s_updateRate = 60.0;
-int glwin_enter_fullscreen(int width, int height, int bpp);
-bool change_settings(unsigned int width,
-	unsigned int height,
-	unsigned int redBits,
-	unsigned int greenBits,
-	unsigned int blueBits,
-	unsigned int alphaBits,
-	bool fullscreen);
+bool glwin_enter_fullscreen(int width, int height);
+bool glwin_leave_fullscreen(int width, int height);
 
 Window::Window() {
 	config.width = SCREEN_WIDTH;
@@ -52,7 +49,6 @@ Window::Window() {
 	config.posX = CW_USEDEFAULT;
 	config.posY = 0;
 	style = WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
-	m_updateTimer = 0.0;
 	staticWindow = this;
 }
 
@@ -259,29 +255,7 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow) {
 	printOglError(0);
 	SetWindowText(WND, (LPCSTR)glGetString(GL_VERSION));
 	ShowWindow(WND, nCmdShow);
-	/*
-		long g_extStyle = WS_EX_APPWINDOW;
-		long g_style = WS_POPUP;
-		g_style |= GetWindowLong(WND, GWL_STYLE);
-		g_extStyle |= GetWindowLong(WND, GWL_EXSTYLE);
-		SetWindowLong(WND, GWL_EXSTYLE, g_extStyle);
-		SetWindowLong(WND, GWL_STYLE, g_style);
-
-		RECT rect = { 0,0,config.width, config.height };
-
-		DEVMODE g_screenSettings;
-		ZeroMemory(&g_screenSettings, sizeof(DEVMODE));
-
-		g_screenSettings.dmSize = sizeof(g_screenSettings);
-		g_screenSettings.dmPelsWidth = config.width;
-		g_screenSettings.dmPelsHeight = config.height;
-		g_screenSettings.dmBitsPerPel = 32;
-		g_screenSettings.dmFields = DM_BITSPERPEL |
-			DM_PELSWIDTH |
-			DM_PELSHEIGHT;
-
-
-		ChangeDisplaySettings(&g_screenSettings, CDS_FULLSCREEN);*/
+	
 	return 0;
 }
 
@@ -307,6 +281,8 @@ ATOM Window::RegisterClass(HINSTANCE hInstance) {
 void Window::Init() {
 
 	ShowCursor(FALSE);
+	DragAcceptFiles(g_hwnd,TRUE);
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	Renderer::SetClearColor(vec4(0.2f, 0.4f, 0.6f, 1.0f));
@@ -317,23 +293,15 @@ void Window::Init() {
 
 void Window::Render(double dt) {
 
-	m_updateTimer += dt;
-	if (m_updateTimer > 1.0 / s_updateRate)
+	scene->UpdateScene((float)dt);
+	scene->RenderScene((float)dt);
+
+	if (dt > 0.0)
 	{
-		scene->UpdateScene((float)m_updateTimer);
-		scene->RenderScene((float)m_updateTimer);
-
-		if (dt > 0.0)
-		{
-			char buffer[100];
-			snprintf(buffer, 255, "%s %s - [FPS: %3.2f]", "REngine", "0.0.1", 1.0f / (float)m_updateTimer);
-			SetWindowText(WND, buffer);
-		}
-		m_updateTimer = 0.0;
+		char buffer[100];
+		snprintf(buffer, 255, "%s %s - [FPS: %3.2f]", "REngine", "0.0.1", 1.0f / (float)dt);
+		SetWindowText(WND, buffer);
 	}
-
-
-
 }
 
 ///////////////////////////////////////////////////////////
@@ -363,210 +331,169 @@ void Window::Destroy() {
 LRESULT CALLBACK Window::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 
 	switch (message) {
-		case WM_KEYDOWN:
-			if (wParam == VK_ESCAPE) {
-				PostQuitMessage(0);
-			}
-
-			Input::KeyDown(wParam);
-			if (wParam == VK_F1)
-			{
-				glwin_enter_fullscreen(1280, 720, 32);
-				//staticWindow->SetWindowSize(hWnd,staticWindow->config.width, staticWindow->config.height);
-				break;
-			}
-			if (wParam == VK_F2)
-			{
-				//staticWindow->SetWindowSize(hWnd,staticWindow->config.width*2, staticWindow->config.height*2);
-				change_settings(1280, 720, 8, 8, 8, 8, true);
-				break;
-			}
-			if (wParam == VK_F3)
-			{
-				//staticWindow->SetWindowSize(hWnd, staticWindow->config.width * 3, staticWindow->config.height * 3);
-				change_settings(1280, 720, 8, 8, 8, 8, false);
-				break;
-			}
-			break;
-
-		case WM_LBUTTONUP:
-			Input::KeyUp(MK_LBUTTON);
-			break; 
-		case WM_LBUTTONDOWN:
-			Input::KeyDown(MK_LBUTTON);
-			break;
-		case WM_RBUTTONUP:
-			Input::KeyUp(MK_RBUTTON);
-			break;
-		case WM_RBUTTONDOWN:
-			Input::KeyDown(MK_RBUTTON);
-			break;
-		case WM_MOUSEWHEEL:
-			Input::SetMouseWheelValue(GET_WHEEL_DELTA_WPARAM(wParam));
-			break;
-
-
-
-		case WM_KEYUP:
-			Input::KeyUp(wParam);
-			break;
-
-		case WM_KILLFOCUS:
-			Input::ResetKeys();
-			break;
-		case WM_CLOSE:
+	case WM_KEYDOWN:
+		if (wParam == VK_ESCAPE) {
 			PostQuitMessage(0);
-
-			break;
-
-		case WM_INPUT:
-		{
-			UINT dwSize = 40;
-			static BYTE lpb[40];
-
-			GetRawInputData((HRAWINPUT)lParam, RID_INPUT,
-				lpb, &dwSize, sizeof(RAWINPUTHEADER));
-
-			RAWINPUT* raw = (RAWINPUT*)lpb;
-
-			if (raw->header.dwType == RIM_TYPEMOUSE)
-			{
-				int xPosRelative = raw->data.mouse.lLastX;
-				int yPosRelative = raw->data.mouse.lLastY;
-				//GameState::Instance()->MoveCursor(xPosRelative, yPosRelative);
-				printf("Rel %d \n",xPosRelative);
-				RECT rect;
-				//resetting cursor to stay in center
-				if (GetWindowRect(g_hwnd, &rect))
-					SetCursorPos((rect.right - rect.left) / 2, (rect.bottom - rect.top) / 2);
-			}
-			break;
 		}
 
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
+		Input::KeyDown(wParam);
+		if (wParam == VK_F1)
+		{
+			glwin_enter_fullscreen(1920, 1200);
+			//staticWindow->SetWindowSize(hWnd,staticWindow->config.width, staticWindow->config.height);
+			break;
+		}
+		if (wParam == VK_F2)
+		{
+			//staticWindow->SetWindowSize(hWnd,staticWindow->config.width*2, staticWindow->config.height*2);
+			glwin_leave_fullscreen(1280, 720);
+			break;
+		}
+		if (wParam == VK_F3)
+		{
+			break;
+		}
+		break;
+
+	case WM_LBUTTONUP:
+		Input::KeyUp(MK_LBUTTON);
+		break;
+	case WM_LBUTTONDOWN:
+		Input::KeyDown(MK_LBUTTON);
+		break;
+	case WM_RBUTTONUP:
+		Input::KeyUp(MK_RBUTTON);
+		break;
+	case WM_RBUTTONDOWN:
+		Input::KeyDown(MK_RBUTTON);
+		break;
+	case WM_MOUSEWHEEL:
+		Input::SetMouseWheelValue(GET_WHEEL_DELTA_WPARAM(wParam));
+		break;
+
+
+
+	case WM_KEYUP:
+		Input::KeyUp(wParam);
+		break;
+
+	case WM_KILLFOCUS:
+		Input::ResetKeys();
+		break;
+	case WM_CLOSE:
+		PostQuitMessage(0);
+
+		break;
+
+	case WM_INPUT:
+	{
+		UINT dwSize = 40;
+		static BYTE lpb[40];
+
+		GetRawInputData((HRAWINPUT)lParam, RID_INPUT,
+			lpb, &dwSize, sizeof(RAWINPUTHEADER));
+
+		RAWINPUT* raw = (RAWINPUT*)lpb;
+
+		if (raw->header.dwType == RIM_TYPEMOUSE)
+		{
+			int xPosRelative = raw->data.mouse.lLastX;
+			int yPosRelative = raw->data.mouse.lLastY;
+			//GameState::Instance()->MoveCursor(xPosRelative, yPosRelative);
+			printf("Rel %d \n", xPosRelative);
+			RECT rect;
+			//resetting cursor to stay in center
+			if (GetWindowRect(g_hwnd, &rect))
+				SetCursorPos((rect.right - rect.left) / 2, (rect.bottom - rect.top) / 2);
+		}
+		break;
+	}
+	case WM_DROPFILES:
+	{
+		HDROP hDropInfo = (HDROP)wParam;
+		UINT nNumOfFiles = DragQueryFile(hDropInfo, 0xFFFFFFFF, NULL, NULL);
+		if (nNumOfFiles > 0)
+		{
+			for (int i = 0; i < nNumOfFiles; ++i)
+			{
+				CString strFile;
+				UINT nFilenameSize = DragQueryFile(hDropInfo, i, NULL, NULL);
+				DragQueryFile(hDropInfo, i, strFile.GetBuffer(nFilenameSize + 1), nFilenameSize + 1);
+				strFile.ReleaseBuffer();
+				printf("FilePath: %s \n", strFile);
+				// strFile contains the full path...
+			}
+		}
+		break;
+	}
+
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;		// message handled
 }
 
-
-bool change_settings(unsigned int width, 
-					unsigned int height,
-					unsigned int redBits, 
-					unsigned int greenBits, 
-					unsigned int blueBits, 
-					unsigned int alphaBits,
-					bool fullscreen) {
-
-	bool success = true;
-
-	RECT rect = { 0,0,(long)width,(long)height };
-	g_rect = rect;
-
-	ZeroMemory(&g_screenSettings, sizeof(DEVMODE));
-
-	g_screenSettings.dmSize = sizeof(g_screenSettings);
-	g_screenSettings.dmPelsWidth = (long)width;
-	g_screenSettings.dmPelsHeight = (long)height;
-	g_screenSettings.dmBitsPerPel = redBits + greenBits + blueBits
-		+ alphaBits;
-	g_screenSettings.dmFields = DM_BITSPERPEL |
-		DM_PELSWIDTH |
-		DM_PELSHEIGHT;
-
-	if (fullscreen) {
-		g_extStyle = WS_EX_APPWINDOW;
-		g_style = WS_POPUP;
-		if (g_hwnd) {
-			g_style |= GetWindowLong(g_hwnd, GWL_STYLE);
-			g_extStyle |= GetWindowLong(g_hwnd, GWL_EXSTYLE);
-			SetWindowLong(g_hwnd, GWL_EXSTYLE, g_extStyle);
-			SetWindowLong(g_hwnd, GWL_STYLE, g_style);
-		}
-		if (ChangeDisplaySettings(&g_screenSettings, CDS_FULLSCREEN)
-			!= DISP_CHANGE_SUCCESSFUL) {
-			g_hwnd = NULL;
-			success = false;
-		}
-		else {
-			g_bits = redBits + greenBits + blueBits + alphaBits;
-			ShowCursor(FALSE);
-		}
-	}
-	else {
-		g_extStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-		g_style = WS_OVERLAPPEDWINDOW;
-		if (g_hwnd) {
-			g_style |= GetWindowLong(g_hwnd, GWL_STYLE);
-			g_extStyle |= GetWindowLong(g_hwnd, GWL_EXSTYLE);
-			SetWindowLong(g_hwnd, GWL_EXSTYLE, g_extStyle);
-			SetWindowLong(g_hwnd, GWL_STYLE, g_style);
-		}
-		AdjustWindowRectEx(&g_rect, g_style, FALSE, g_extStyle);
-		if (ChangeDisplaySettings(NULL, 0)
-			!= DISP_CHANGE_SUCCESSFUL) {
-			g_hwnd = NULL;
-			success = false;
-		}
-		else {
-			g_bits = redBits + greenBits + blueBits + alphaBits;
-			ShowCursor(TRUE);
-			SetWindowPos(g_hwnd, HWND_TOPMOST,
-				0, 0,
-				g_rect.right - g_rect.left, g_rect.bottom - g_rect.top,
-				SWP_SHOWWINDOW);
-		}
-	}
-
-	return success;
-}
-
-int glwin_enter_fullscreen(int width, int height, int bpp)
-
+bool glwin_enter_fullscreen(int width, int height)
 {
-
 	DEVMODE screen;
-
 	DWORD style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
-
 	DWORD exstyle = 0;
 
-
-
-	if (g_glwin_fullscreen) return 1;
-
-
-
+	if (g_glwin_fullscreen) return true;
 	memset(&screen, 0, sizeof(screen));
-
 	screen.dmSize = sizeof(screen);
-
 	screen.dmPelsWidth = width;
-
 	screen.dmPelsHeight = height;
-
-	screen.dmBitsPerPel = bpp;
-
+	screen.dmBitsPerPel = 32;
 	screen.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 
-
-
-	if (ChangeDisplaySettings(&screen, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL) return 0;
-
+//	if (ChangeDisplaySettings(&screen, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL) return false;
 	SetWindowLong(g_hwnd, GWL_EXSTYLE, exstyle);
-
 	SetWindowLong(g_hwnd, GWL_STYLE, style);
-
 	SetParent(g_hwnd, NULL);
-
 	SetWindowPos(g_hwnd, HWND_TOP, 0, 0, width, height, SWP_SHOWWINDOW);
-
-
-
 	g_glwin_fullscreen = 1;
+	glViewport(0, 0, width, height);
+	return true;
+}
 
+bool glwin_leave_fullscreen(int width, int height)
+{
+	DEVMODE screen;
+	DWORD exstyle = WS_EX_STATICEDGE;
+	DWORD style = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
+	if (!g_glwin_fullscreen) return true;
 
-	return 1;
+	RECT rect = { 0,0,(long)width,(long)height };
 
+	g_extStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+	g_style = WS_OVERLAPPEDWINDOW;
+	if (g_hwnd) {
+		g_style |= GetWindowLong(g_hwnd, GWL_STYLE);
+		g_extStyle |= GetWindowLong(g_hwnd, GWL_EXSTYLE);
+		SetWindowLong(g_hwnd, GWL_EXSTYLE, g_extStyle);
+		SetWindowLong(g_hwnd, GWL_STYLE, g_style);
+	}
+	AdjustWindowRectEx(&rect, g_style, FALSE, g_extStyle);
+	if (ChangeDisplaySettings(NULL, 0)
+		!= DISP_CHANGE_SUCCESSFUL) {
+		g_hwnd = NULL;
+	}
+	RECT desktop;
+	const HWND hDesktop = GetDesktopWindow();
+	GetWindowRect(hDesktop, &desktop);
+//	RECT desktop;
+	HRESULT stat = DwmGetWindowAttribute(g_hwnd,DWMWA_EXTENDED_FRAME_BOUNDS,&desktop,sizeof(desktop));
+	int posX = (desktop.right - desktop.left) / 2 - width / 2;
+	int posY = (desktop.bottom - desktop.top) / 2 - height / 2;
+//	printf()
+	//int border_thickness = GetSystemMetrics(SM_CYCAPTION)+ GetSystemMetrics(SM_CXSIZEFRAME);;
+
+//	SetWindowLong(g_hwnd, GWL_EXSTYLE, exstyle);
+//	SetWindowLong(g_hwnd, GWL_STYLE, style);
+	SetWindowPos(g_hwnd, HWND_TOP, posX, posY, width, height, SWP_SHOWWINDOW);
+	glViewport(0, 0, width, height);
+	g_glwin_fullscreen = 0;
+	return true;
 }

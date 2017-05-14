@@ -19,7 +19,7 @@ void TerrainMesh::Create(int width, int depth)
 {
 	m_resolution = ivec2(8, 8);
 	m_heightScale = 1.0f;
-	m_size = 1.0f;
+	m_size = 10.0f;
 
 	GLfloat vertexBuffer[64*3] = {0.0f};
 
@@ -112,7 +112,7 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 	vector<unsigned char> imageData = texture->GetImageData();
 
 	m_resolution = ivec2(width, depth);
-	m_heightScale = 0.5f;
+	m_heightScale = 1.0f;
 	m_size = 0.1f;
 
 	GLfloat vertexBuffer[64 * 3] = { 0.0f };
