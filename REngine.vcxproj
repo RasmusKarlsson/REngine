@@ -76,7 +76,7 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
-    <IncludePath>D:\Data\RasmusEngine\src\;D:\Data\RasmusEngine\src\Rendering;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\src\;$(SolutionDir)\src\Rendering;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -85,7 +85,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)\</IntDir>
-    <IncludePath>D:\Data\RasmusEngine\src\;D:\Data\RasmusEngine\src\Rendering;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\src\;$(SolutionDir)\src\Rendering;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
