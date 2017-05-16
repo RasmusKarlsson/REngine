@@ -296,11 +296,23 @@ void Window::Render(double dt) {
 	scene->UpdateScene((float)dt);
 	scene->RenderScene((float)dt);
 
-	if (dt > 0.0)
+	if (dt > 0.0 && dt < 0.1)
 	{
-		char buffer[100];
-		snprintf(buffer, 255, "%s %s - [FPS: %3.2f]", "REngine", "0.0.1", 1.0f / (float)dt);
-		SetWindowText(WND, buffer);
+		static double frametimes = 0.0;
+		static int frames = 0;
+		static double fps = 60.0;
+		frametimes += dt;
+		frames++;
+		if (frames > 100)
+		{
+			fps = 100.0 / frametimes;
+			frames = 1;
+			frametimes = 0.0;
+			char buffer[100];
+			snprintf(buffer, 255, "%s %s - [FPS: %3.2f]", "REngine", "0.0.1", (float)fps);
+			SetWindowText(WND, buffer);
+		}
+		
 	}
 }
 

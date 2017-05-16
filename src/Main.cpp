@@ -12,7 +12,7 @@
 
 typedef std::chrono::duration<long, std::ratio<1, 60>> sixtieths_of_a_sec;
 constexpr auto kMaxDeltatime = sixtieths_of_a_sec{ 1 };
-static const double s_updateRate = 60.0;
+static const double s_updateRate = 600000.0;
 
 Window window;
 
