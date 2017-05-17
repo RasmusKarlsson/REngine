@@ -20,6 +20,13 @@
 #include "Sphere.h"
 #include "Input.h"
 
+extern "C"
+{
+	//Forces computers with 2 Gpus to use the performant one.
+	__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+
 
 ///////////////////////////////////////////////////////////
 

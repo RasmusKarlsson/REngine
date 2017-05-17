@@ -22,7 +22,7 @@ extern double timeElapsed;
 extern int SCREEN_WIDTH;
 extern int SCREEN_HEIGHT;
 
-static bool wire = 0;
+static bool m_wire = 0;
 
 Scene::Scene()
 {
@@ -45,12 +45,23 @@ Scene::Scene()
 	mat->SetDiffuseTexture(tex);
 
 	Quad* quad = new Quad();
+	quad->SetName("quad");
 	quad->SetMaterial(mat);
 	quad->SetPosition(0.0f, 2.0f, 0.0f);
 	AddEntity(quad);
 
+	Quad* quad3 = new Quad();
+	quad3->SetName("quad3");
+	quad3->SetMaterial(mat);
+	quad3->SetPosition(0.0f, 2.0f, 1.0f);
+	AddEntity(quad3);
+
 
 	Cube* cube = new Cube();
+	cube->SetName("cube");
+	cube->AddChild(quad3);
+	quad->AddChild(cube);
+	m_cube = cube;
 	cube->SetMaterial(mat);
 	cube->SetPosition(0.0f, 5.0f, 0.0f);
 	AddEntity(cube);
@@ -147,14 +158,42 @@ void Scene::UpdateScene(double dt)
 	}
 
 	if (Input::IsPressedOnce('W')) {
-		wire = !wire;
+		m_wire = !m_wire;
+	}
+
+	if (Input::IsPressedOnce('C')) {
+		if (!m_cube->IsDead())
+		{
+			m_cube->Kill();
+		}
+		else
+		{
+			m_cube = new Cube();
+			m_cube->SetName("newCube");
+			m_cube->SetPosition(0.0f, 2.0f, 0.0f);
+			Material* mat = new Material();
+			Texture* tex = new Texture();
+			tex->CreateFromFile("res\\Textures\\splatmap.png");
+			mat->SetDiffuseTexture(tex);
+			m_cube->SetMaterial(mat);
+			AddEntity(m_cube);
+		}
 	}
 
 	m_currentCamera->UpdateCameraState(dt);
 	m_currentCamera->CreateLookAtMatrix();
 
-	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
+	for (auto it = begin(m_EntityList); it != end(m_EntityList);) {
+		if ((*it)->IsDead()) {
+			delete (*it);
+			it = m_EntityList.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
 
+	for (auto it = begin(m_EntityList); it != end(m_EntityList);++it) {
 		if ((*it)->IsDirty())
 		{
 			(*it)->UpdateMatrices();
@@ -187,12 +226,12 @@ void Scene::RenderScene(double dt)
 		Renderer::Render(*it, MVPmatrix);
 	}
 
-	if (wire)
+	if (m_wire)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glPolygonOffset(4.0, 4.0);
 
-		glLineWidth(1.0f);
+		glLineWidth(2.0f);
 		Renderer::SetShader(Renderer::m_whiteShader);
 		Renderer::Render(m_terrain->GetTerrainEntity(), SetModelViewProjectionMatrix(m_terrain->GetTerrainEntity()->GetWorldMatrix()));
 

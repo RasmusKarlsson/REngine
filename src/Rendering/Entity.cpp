@@ -19,6 +19,12 @@ Entity::~Entity()
 
 void Entity::Delete()
 {
+	for (auto it = begin(m_children); it != end(m_children); ++it) {
+		(*it)->Kill();
+	}
+
+	m_children.clear();
+
 	if (m_vboVertex) {
 		glDeleteBuffers(1, &m_vboVertex);
 	}
@@ -32,6 +38,8 @@ void Entity::Delete()
 	m_vao = 0;
 	m_vboVertex = 0;
 	m_vboIndex = 0;
+
+	m_dead = true;
 }
 
 void Entity::UpdateMatrices()
@@ -88,8 +96,10 @@ void Entity::AddChild(Entity* child)
 
 	if (child->GetParent() == NULL)
 		child->SetParent(this);
-
-	m_children.push_back(child);
+	else{
+		m_children.push_back(child);
+	}
+	
 }
 
 void Entity::SetPosition(float x, float y, float z)

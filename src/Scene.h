@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Terrain.h"
 #include "Quad.h"
+#include "Cube.h"
 #include "TextMesh.h"
 
 using namespace glm;
@@ -25,6 +26,8 @@ public:
 
 	void UpdateScene(double dt);
 	void RenderScene(double dt);
+
+	Cube* m_cube;
 
 private:
 

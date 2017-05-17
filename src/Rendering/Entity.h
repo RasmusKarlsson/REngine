@@ -78,6 +78,11 @@ public:
 	void SetDirty();
 	bool m_dirty = true;
 
+	bool IsDead() { return m_dead; };
+	void Kill() { m_dead = true; };
+
+	bool m_dead = false;
+
 	void SetParent(Entity* parent);
 	Entity* GetParent() { return m_parent; };
 	void AddChild(Entity* child);
