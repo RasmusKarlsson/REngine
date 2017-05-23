@@ -13,6 +13,9 @@
     <Filter Include="Geometries">
       <UniqueIdentifier>{c870a1a5-17e0-4aef-8968-e63202452105}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Libs">
+      <UniqueIdentifier>{d07ae6df-d5a5-468f-ac56-36b87848af86}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Window.cpp">
@@ -74,6 +77,12 @@
     </ClCompile>
     <ClCompile Include="src\Rendering\TextMesh.cpp">
       <Filter>Geometries</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Skybox.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\HDRLoader\hdrloader.cpp">
+      <Filter>Libs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +146,12 @@
     <ClInclude Include="src\Rendering\TextMesh.h">
       <Filter>Geometries</Filter>
     </ClInclude>
+    <ClInclude Include="src\Rendering\Skybox.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\HDRLoader\hdrloader.h">
+      <Filter>Libs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\Shaders\simple.vert">
@@ -159,6 +174,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="src\Shaders\whiteColor.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="src\Shaders\skybox.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="src\Shaders\skybox.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

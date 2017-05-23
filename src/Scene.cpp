@@ -22,7 +22,7 @@ extern double timeElapsed;
 extern int SCREEN_WIDTH;
 extern int SCREEN_HEIGHT;
 
-static bool m_wire = 0;
+static bool m_bRenderWire = false;
 
 Scene::Scene()
 {
@@ -30,10 +30,10 @@ Scene::Scene()
 
 	m_currentCamera = new OrbitCamera();
 	m_currentCamera->SetOrbitDistance(5.0f);
-	m_currentCamera->SetCameraPosition(vec3(0.0f, 0.0f, 5.0f));
-	m_currentCamera->SetCameraTarget(vec3(0.0f, 0.0f, 0.0f));
+	m_currentCamera->SetCameraPosition(vec3(0.0f, 5.0f, 5.0f));
+	m_currentCamera->SetCameraTarget(vec3(0.0f, 5.0f, 0.0f));
 	m_currentCamera->CreateProjectionMatrix(45.0f, (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 4000.0f);
-
+	
 	Texture* tex = new Texture();
 	tex->CreateFromFile("res\\Textures\\splatmap.png");
 
@@ -62,7 +62,9 @@ Scene::Scene()
 	cube->AddChild(quad3);
 	quad->AddChild(cube);
 	m_cube = cube;
-	cube->SetMaterial(mat);
+	Material* skyMat = new Material();
+	skyMat->SetDiffuseTexture(new Texture("res\\Textures\\skyboxTest.png"));
+	cube->SetMaterial(skyMat);
 	cube->SetPosition(0.0f, 5.0f, 0.0f);
 	AddEntity(cube);
 
@@ -114,6 +116,22 @@ Scene::Scene()
 	m_fpsMesh->SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, 30.0f));
 	AddEntity(m_fpsMesh);
 
+
+
+
+	Quad* skyMesh = new Quad();
+	Material* skyMaterial = new Material();
+	Texture* equireTexture = new Texture();
+	equireTexture->CreateHDRFromFile("res/CubeMap/SkyWithGrass.hdr");
+
+	skyMesh->SetMaterial(skyMaterial);
+	skyMaterial->SetDiffuseTexture(equireTexture);
+	skyMaterial->SetShader(Renderer::m_skyShader);
+	AddEntity(skyMesh);
+
+
+
+
 	Renderer::SetShader(Renderer::m_simpleShader);
 }
 
@@ -158,7 +176,7 @@ void Scene::UpdateScene(double dt)
 	}
 
 	if (Input::IsPressedOnce('W')) {
-		m_wire = !m_wire;
+		m_bRenderWire = !m_bRenderWire;
 	}
 
 	if (Input::IsPressedOnce('C')) {
@@ -223,10 +241,17 @@ void Scene::RenderScene(double dt)
 		(*it)->GetMaterial()->BindTextures();
 		GLuint shader = (*it)->GetMaterial()->GetShader();
 		Renderer::SetShader(shader);
+
+
+		mat4 invView = glm::inverse(m_currentCamera->GetViewMatrix());
+		mat4 invProj = glm::inverse(m_currentCamera->GetProjectionMatrix());
+		glUniformMatrix4fv(glGetUniformLocation(Renderer::m_currentShader, "u_invView"), 1, GL_FALSE, value_ptr(invView));
+		glUniformMatrix4fv(glGetUniformLocation(Renderer::m_currentShader, "u_invProjection"), 1, GL_FALSE, value_ptr(invProj));
+
 		Renderer::Render(*it, MVPmatrix);
 	}
 
-	if (m_wire)
+	if (m_bRenderWire)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glPolygonOffset(4.0, 4.0);

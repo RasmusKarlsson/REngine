@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{0D8ABA56-ADDF-446F-8776-DA55FFFCAEF2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Project247</RootNamespace>
+    <RootNamespace>REngine</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <ProjectName>REngine</ProjectName>
   </PropertyGroup>
@@ -97,7 +97,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)deps\glm-0.9.8.4;$(SolutionDir)deps\opengl;$(SolutionDir)deps\lodepng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)deps\glm-0.9.8.4;$(SolutionDir)deps\opengl;$(SolutionDir)deps\lodepng;$(SolutionDir)deps\HDRLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -129,7 +129,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)deps\glm-0.9.8.4;$(SolutionDir)deps\opengl;$(SolutionDir)deps\lodepng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)deps\glm-0.9.8.4;$(SolutionDir)deps\opengl;$(SolutionDir)deps\lodepng;$(SolutionDir)deps\HDRLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -159,6 +159,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="deps\HDRLoader\hdrloader.cpp" />
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MathHelpers.cpp" />
@@ -171,6 +172,7 @@
     <ClCompile Include="src\Rendering\Quad.cpp" />
     <ClCompile Include="src\Rendering\Renderer.cpp" />
     <ClCompile Include="src\Rendering\Shader.cpp" />
+    <ClCompile Include="src\Rendering\Skybox.cpp" />
     <ClCompile Include="src\Rendering\Sphere.cpp" />
     <ClCompile Include="src\Rendering\Terrain.cpp" />
     <ClCompile Include="src\Rendering\TerrainMesh.cpp" />
@@ -181,6 +183,7 @@
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="deps\HDRLoader\hdrloader.h" />
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\MathHelpers.h" />
@@ -193,6 +196,7 @@
     <ClInclude Include="src\Rendering\Quad.h" />
     <ClInclude Include="src\Rendering\Renderer.h" />
     <ClInclude Include="src\Rendering\Shader.hpp" />
+    <ClInclude Include="src\Rendering\Skybox.h" />
     <ClInclude Include="src\Rendering\Sphere.h" />
     <ClInclude Include="src\Rendering\Terrain.h" />
     <ClInclude Include="src\Rendering\TerrainMesh.h" />
@@ -208,6 +212,8 @@
     <None Include="src\Shaders\2dUI.vert" />
     <None Include="src\Shaders\simple.frag" />
     <None Include="src\Shaders\simple.vert" />
+    <None Include="src\Shaders\skybox.frag" />
+    <None Include="src\Shaders\skybox.vert" />
     <None Include="src\Shaders\splatmap.frag" />
     <None Include="src\Shaders\splatmap.vert" />
     <None Include="src\Shaders\whiteColor.frag" />

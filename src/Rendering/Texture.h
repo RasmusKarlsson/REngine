@@ -11,8 +11,10 @@ class Texture
 public:
 	Texture();
 	~Texture();
+	Texture(string filename);
 
 	void CreateFromFile(string filename);
+	void CreateHDRFromFile(string filename);
 	void CreateFBO(string name, int width, int height);
 	void CreateMultipleRenderTargetFrameBuffer(int width, int height);
 

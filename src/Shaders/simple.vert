@@ -23,7 +23,7 @@ void main(){
 	rotmat[2][0] = -sin(u_Time);
 	rotmat[2][2] = cos(u_Time);*/
     gl_Position = u_WorldViewProjection * vec4(a_Position,1.0);
-	v_Texcoord = a_Texcoord.xy;
+	v_Texcoord = fract(a_Texcoord.xy);
 	v_Color = a_Color;
 	v_Normal = a_Normal;
 

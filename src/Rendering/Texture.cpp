@@ -6,6 +6,7 @@
 
 #pragma once
 #include <lodepng.cpp>
+#include "hdrloader.h"
 #include "Texture.h"
 
 Texture::Texture()
@@ -18,28 +19,51 @@ Texture::~Texture()
 
 }
 
+Texture::Texture(string filename)
+{
+	CreateFromFile(filename);
+}
+
+
 void Texture::CreateFromFile(string filename)
 {
 	m_fileName = filename;
 	unsigned int error = lodepng::decode(m_imageData, m_textureWidth, m_textureHeight, m_fileName.c_str());
-	//stop if there is an error
+
 	if (error)
 	{
 		std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << " at file path: " << filename << std::endl;
 		return;
 	}
+
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_textureWidth, m_textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, &m_imageData[0]);
 
-	// When MAGnifying the image (no bigger mipmap available), use LINEAR filtering
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// When MINifying the image, use a LINEAR blend of two mipmaps, each filtered LINEARLY too
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	// Generate mipmaps, by the way.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 	glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void Texture::CreateHDRFromFile(string filename)
+{
+	m_fileName = filename;
+	HDRLoaderResult hdrTexture;
+	bool result = HDRLoader::load(m_fileName.c_str(), hdrTexture);
+
+	glGenTextures(1, &m_textureID);
+	glBindTexture(GL_TEXTURE_2D, m_textureID);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, hdrTexture.width, hdrTexture.height, 0, GL_RGB, GL_FLOAT, hdrTexture.cols);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Texture::CreateFBO(string name, int width, int height)

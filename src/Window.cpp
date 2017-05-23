@@ -299,7 +299,7 @@ void Window::Init() {
 }
 
 void Window::Render(double dt) {
-
+	timeElapsed += dt;
 	scene->UpdateScene((float)dt);
 	scene->RenderScene((float)dt);
 

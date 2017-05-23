@@ -32,6 +32,7 @@ GLuint Renderer::m_simpleShader = 0;
 GLuint Renderer::m_terrainShader = 0;
 GLuint Renderer::m_textShader = 0;
 GLuint Renderer::m_whiteShader = 0;
+GLuint Renderer::m_skyShader = 0;
 
 vec4 Renderer::m_clearColor = vec4();
 
@@ -68,6 +69,7 @@ void Renderer::CompileShaders()
 	Renderer::m_terrainShader = LoadShaders("splatmap.vert", "splatmap.frag");
 	Renderer::m_textShader = LoadShaders("2dUI.vert", "2dUI.frag");
 	Renderer::m_whiteShader = LoadShaders("simple.vert", "whiteColor.frag");
+	Renderer::m_skyShader = LoadShaders("skybox.vert", "skybox.frag");
 	vec2 screenSize((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT);
 	vec2 elementSize(8.0f, 8.0f);
 	glUseProgram(Renderer::m_textShader);
