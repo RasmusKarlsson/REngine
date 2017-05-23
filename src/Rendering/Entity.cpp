@@ -9,6 +9,7 @@
 Entity::Entity()
 {
 	m_name = "DefaultEntity";
+	m_renderStyle = 0;
 	UpdateMatrices();
 }
 

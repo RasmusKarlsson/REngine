@@ -5,6 +5,7 @@
 ///////////////////////////////////////////////////////////
 
 #include "Renderer.h"
+#include "Scene.h"
 #include <iostream>
 
 extern double timeElapsed;
@@ -33,6 +34,8 @@ GLuint Renderer::m_terrainShader = 0;
 GLuint Renderer::m_textShader = 0;
 GLuint Renderer::m_whiteShader = 0;
 GLuint Renderer::m_skyShader = 0;
+
+int Renderer::m_currentRenderStyle = Entity::RENDERSTYLE_STANDARD;
 
 vec4 Renderer::m_clearColor = vec4();
 
@@ -81,4 +84,42 @@ void Renderer::ClearBuffer()
 {
 	glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::SetRenderStyle(int renderStyle)
+{
+	if (m_currentRenderStyle == renderStyle) return;
+	switch (renderStyle)
+	{
+	case Entity::RENDERSTYLE_STANDARD:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_DEPTH_TEST);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		break;
+	case Entity::RENDERSTYLE_OPACITY:
+		glDisable(GL_DEPTH_TEST);
+		break;
+	case Entity::RENDERSTYLE_ADD:
+		glDisable(GL_DEPTH_TEST);
+		break;
+	case Entity::RENDERSTYLE_2D:
+
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		break;
+
+	case Entity::RENDERSTYLE_STANDARD_WIRE:
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonOffset(4.0, 4.0);
+
+		glLineWidth(2.0f);
+
+		break;
+	}
+
+	m_currentRenderStyle = renderStyle;
 }

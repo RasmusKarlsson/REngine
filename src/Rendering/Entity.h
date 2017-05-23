@@ -45,8 +45,19 @@ public:
 class Entity
 {
 public:
+
 	Entity();
 	~Entity();
+
+	enum RENDERSTYLE
+	{
+		RENDERSTYLE_STANDARD = 0,
+		RENDERSTYLE_2D,
+		RENDERSTYLE_OPACITY,
+		RENDERSTYLE_ADD,
+		RENDERSTYLE_STANDARD_WIRE,
+		RENDERSTYLE_2D_WIRE,
+	};
 
 	void Delete();
 
@@ -90,6 +101,9 @@ public:
 	void SetMaterial(Material* material) { m_material = material; };
 	Material* GetMaterial() { return m_material; };
 
+	void SetRenderStyle(int renderStyle) { m_renderStyle = renderStyle; };
+	int GetRenderStyle() { return m_renderStyle; };
+
 	BBox m_bbox;
 
 protected:
@@ -114,5 +128,6 @@ protected:
 		m_shader;
 
 	Material* m_material;
+	int m_renderStyle = 0;
 };
 

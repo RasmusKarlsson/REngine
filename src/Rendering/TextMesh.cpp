@@ -10,7 +10,7 @@
 
 TextMesh::TextMesh()
 {
-	
+	SetRenderStyle(RENDERSTYLE_2D);
 }
 
 TextMesh::~TextMesh()

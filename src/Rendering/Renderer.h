@@ -17,7 +17,10 @@ public:
 
 	static void SetShader(GLuint shader);
 	static void ClearBuffer();
-	static void SetClearColor(vec4 color) {	m_clearColor = color; };
+	static void SetClearColor(vec4 color) { m_clearColor = color; };
+	static void SetRenderStyle(int renderStyle);
+
+	static int m_currentRenderStyle;
 
 	static void Render(Entity* entity, mat4 wvpMatrix);
 	static void CompileShaders();
@@ -32,7 +35,6 @@ public:
 	static vec4 m_clearColor;
 
 private:
-
 
 };
 

@@ -14,7 +14,7 @@
 #include "gl/glext.h"
 #include "gl/wglext.h"
 
-#include "Renderer.h"
+//#include "Renderer.h"
 #include "Quad.h"
 #include "Cube.h"
 #include "Sphere.h"
@@ -292,7 +292,7 @@ void Window::Init() {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-	Renderer::SetClearColor(vec4(0.2f, 0.4f, 0.6f, 1.0f));
+//	Renderer::SetClearColor(vec4(0.2f, 0.4f, 0.6f, 1.0f));
 
 
 	scene = new Scene();

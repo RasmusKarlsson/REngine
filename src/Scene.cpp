@@ -5,9 +5,10 @@
 ///////////////////////////////////////////////////////////
 
 #pragma once
-#include "Renderer.h"
 
 #include "Scene.h"
+#include "Entity.h"
+#include "Renderer.h"
 #include "Quad.h"
 #include "Input.h"
 #include "Cube.h"
@@ -37,10 +38,6 @@ Scene::Scene()
 	Texture* tex = new Texture();
 	tex->CreateFromFile("res\\Textures\\splatmap.png");
 
-	glEnable(GL_ALPHA_TEST);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	Material* mat = new Material();
 	mat->SetDiffuseTexture(tex);
 
@@ -100,6 +97,8 @@ Scene::Scene()
 	cursorMat->SetDiffuseTexture(cursorTex);
 	m_cursorMesh->SetScale((float)cursorTex->GetWidth() / SCREEN_WIDTH, (float)cursorTex->GetHeight() / SCREEN_HEIGHT, 1.0f);
 	m_cursorMesh->SetMaterial(cursorMat);
+
+	m_cursorMesh->SetRenderStyle(Entity::RENDERSTYLE_2D);
 	AddEntity(m_cursorMesh);
 
 	m_fpsMesh = new TextMesh();
@@ -118,7 +117,7 @@ Scene::Scene()
 
 
 
-
+	
 	Quad* skyMesh = new Quad();
 	Material* skyMaterial = new Material();
 	Texture* equireTexture = new Texture();
@@ -147,6 +146,15 @@ mat4 Scene::SetModelViewProjectionMatrix(mat4 worldMatrix)
 
 void Scene::AddEntity(Entity* entity)
 {
+	int newRenderStyle = entity->GetRenderStyle();
+	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
+		if ((*it)->GetRenderStyle() >= newRenderStyle)
+		{
+			m_EntityList.insert(it, entity);
+			return;
+		}
+	}
+
 	m_EntityList.push_back(entity);
 }
 
@@ -228,12 +236,10 @@ void Scene::RenderScene(double dt)
 	Renderer::ClearBuffer();
 	Renderer::SetShader(Renderer::m_terrainShader);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glPolygonOffset(0.0, 0.0);
-//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
 	m_terrain->BindTextures();
 	m_terrain->UpdateUniforms();
+	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD);
 	Renderer::Render(m_terrain->GetTerrainEntity(), SetModelViewProjectionMatrix(m_terrain->GetTerrainEntity()->GetWorldMatrix()));
 	
 	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
@@ -242,6 +248,7 @@ void Scene::RenderScene(double dt)
 		GLuint shader = (*it)->GetMaterial()->GetShader();
 		Renderer::SetShader(shader);
 
+		Renderer::SetRenderStyle((*it)->GetRenderStyle());
 
 		mat4 invView = glm::inverse(m_currentCamera->GetViewMatrix());
 		mat4 invProj = glm::inverse(m_currentCamera->GetProjectionMatrix());
@@ -253,16 +260,14 @@ void Scene::RenderScene(double dt)
 
 	if (m_bRenderWire)
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glPolygonOffset(4.0, 4.0);
 
-		glLineWidth(2.0f);
+		Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD);
+		Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD_WIRE);
 		Renderer::SetShader(Renderer::m_whiteShader);
 		Renderer::Render(m_terrain->GetTerrainEntity(), SetModelViewProjectionMatrix(m_terrain->GetTerrainEntity()->GetWorldMatrix()));
 
 		for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
 			mat4 MVPmatrix = SetModelViewProjectionMatrix((*it)->GetWorldMatrix());
-			(*it)->GetMaterial()->BindTextures();
 			Renderer::Render(*it, MVPmatrix);
 		}
 	}
