@@ -8,6 +8,7 @@
 #include "Quad.h"
 #include "Material.h"
 #include "Skybox.h"
+#include "Renderer.h"
 
 Skybox::Skybox()
 {
@@ -22,7 +23,16 @@ Skybox::~Skybox()
 void Skybox::Create()
 {
 	m_skyMesh = new Quad();
-	m_skyMaterial = new Material();
+	m_material = new Material();
 	m_equireTexture = new Texture();
-	m_equireTexture->CreateHDRFromFile("res/CubeMap/Sky.hdr");
+	m_equireTexture->CreateHDRFromFile("res/CubeMap/Sky512.hdr");
+
+	m_material->SetDiffuseTexture(m_equireTexture);
+	m_skyMesh->SetMaterial(m_material);
+	m_material->SetShader(Renderer::m_skyShader);
+}
+
+Quad* Skybox::GetSkyEntity()
+{
+	return m_skyMesh;
 }

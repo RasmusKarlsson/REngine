@@ -53,6 +53,9 @@ void Texture::CreateHDRFromFile(string filename)
 	HDRLoaderResult hdrTexture;
 	bool result = HDRLoader::load(m_fileName.c_str(), hdrTexture);
 
+	m_textureWidth = hdrTexture.width;
+	m_textureHeight = hdrTexture.height;
+
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 

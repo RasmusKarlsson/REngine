@@ -84,6 +84,10 @@ public:
 	void SetScale	(float x, float y, float z);
 	void SetRotation(float x, float y, float z);
 
+	void AddPosition(vec3 position) { m_LocalPosition += position;	SetDirty(); };
+	void AddScale(vec3 scale) { m_LocalScale += scale;			SetDirty(); };
+	void AddRotation(vec3 rotation) { m_LocalRotation += rotation;	SetDirty(); };
+
 	void UpdateMatrices();
 	bool IsDirty() { return m_dirty; };
 	void SetDirty();

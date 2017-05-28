@@ -6,6 +6,7 @@ class Skybox : public Entity
 public:
 	Skybox();
 	~Skybox();
+	Quad* GetSkyEntity();
 	void Create();
 
 private:

@@ -13,6 +13,7 @@
 #include "Input.h"
 #include "Cube.h"
 #include "Sphere.h"
+#include "SkyBox.h"
 #include "TerrainMesh.h"
 #include "MathHelpers.h"
 
@@ -60,19 +61,19 @@ Scene::Scene()
 	quad->AddChild(cube);
 	m_cube = cube;
 	Material* skyMat = new Material();
-	skyMat->SetDiffuseTexture(new Texture("res\\Textures\\skyboxTest.png"));
+	skyMat->SetDiffuseTexture(new Texture("res/Textures/skyboxTest.png"));
 	cube->SetMaterial(skyMat);
 	cube->SetPosition(0.0f, 5.0f, 0.0f);
 	AddEntity(cube);
 
 	m_terrain = new Terrain();
 	
-	m_terrain->SetHeightMap("res\\Textures\\heightmap257.png");
-	m_terrain->SetSplatMap("res\\Textures\\splatmap257.png");
-	m_terrain->SetNormalMap("res\\Textures\\normalmap.png");
-	m_terrain->SetSplatMapTexture("res\\Textures\\sand.png",0);
-	m_terrain->SetSplatMapTexture("res\\Textures\\grass.png",1);
-	m_terrain->SetSplatMapTexture("res\\Textures\\stone.png",2);
+	m_terrain->SetHeightMap("res/Textures/heightmap257.png");
+	m_terrain->SetSplatMap("res/Textures/splatmap257.png");
+	m_terrain->SetNormalMap("res/Textures/normalmap.png");
+	m_terrain->SetSplatMapTexture("res/Textures/sand.png",0);
+	m_terrain->SetSplatMapTexture("res/Textures/grass.png",1);
+	m_terrain->SetSplatMapTexture("res/Textures/stone.png",2);
 	m_terrain->CreateTerrainMesh();
 	TerrainMesh* terrainEntity = m_terrain->GetTerrainEntity();
 	terrainEntity->SetPosition(-(float)terrainEntity->GetResolution().x / 2, -3.0f, -(float)terrainEntity->GetResolution().y / 2);
@@ -87,13 +88,12 @@ Scene::Scene()
 	textQuad->SetScale(8.0f/ SCREEN_WIDTH,8.0f/ SCREEN_HEIGHT,1.0f);
 	textQuad->SetPosition(MathHelpers::PixelPosToWorldPos(10.0f,10.0f));
 	AddEntity(textQuad);
-	//AddEntity(textQuad2);
 	
 	m_cursorMesh = new Quad();
 	Material* cursorMat = new Material();
 	cursorMat->SetShader(Renderer::m_textShader);
 	Texture* cursorTex = new Texture();
-	cursorTex->CreateFromFile("res\\Textures\\cursor.png");
+	cursorTex->CreateFromFile("res/Textures/cursor.png");
 	cursorMat->SetDiffuseTexture(cursorTex);
 	m_cursorMesh->SetScale((float)cursorTex->GetWidth() / SCREEN_WIDTH, (float)cursorTex->GetHeight() / SCREEN_HEIGHT, 1.0f);
 	m_cursorMesh->SetMaterial(cursorMat);
@@ -105,31 +105,17 @@ Scene::Scene()
 	Material* fontMat = new Material();
 	Texture* fontTex = new Texture();
 	fontMat->SetShader(Renderer::m_textShader);
-	fontTex->CreateFromFile("res\\Textures\\font.png");
+	fontTex->CreateFromFile("res/Textures/font2.png");
 	fontMat->SetDiffuseTexture(fontTex);
 	m_fpsMesh->SetMaterial(fontMat);
-	m_fpsMesh->SetText("1000000");
-	m_fpsMesh->CreateMesh();
-	m_fpsMesh->UpdateText("1");
 	m_fpsMesh->SetScale(8.0f / SCREEN_WIDTH, 8.0f / SCREEN_HEIGHT, 1.0f);
 	m_fpsMesh->SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, 30.0f));
 	AddEntity(m_fpsMesh);
 
 
 
-	
-	Quad* skyMesh = new Quad();
-	Material* skyMaterial = new Material();
-	Texture* equireTexture = new Texture();
-	equireTexture->CreateHDRFromFile("res/CubeMap/SkyWithGrass.hdr");
-
-	skyMesh->SetMaterial(skyMaterial);
-	skyMaterial->SetDiffuseTexture(equireTexture);
-	skyMaterial->SetShader(Renderer::m_skyShader);
-	AddEntity(skyMesh);
-
-
-
+	Skybox* sky = new Skybox();
+	AddEntity(sky->GetSkyEntity());
 
 	Renderer::SetShader(Renderer::m_simpleShader);
 }
@@ -148,6 +134,7 @@ void Scene::AddEntity(Entity* entity)
 {
 	int newRenderStyle = entity->GetRenderStyle();
 	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
+		//Insert the entity sorted by render style
 		if ((*it)->GetRenderStyle() >= newRenderStyle)
 		{
 			m_EntityList.insert(it, entity);
@@ -161,14 +148,15 @@ void Scene::AddEntity(Entity* entity)
 void Scene::UpdateScene(double dt)
 {
 	static double counter = 0.0;
-	counter = 1.0/dt;
-	std::string varAsString = std::to_string(counter);
-	m_fpsMesh->UpdateText(varAsString);
+	counter = (1.0 / dt);
+	std::string intAsString = std::to_string(counter);
+	intAsString = intAsString.substr(0, 5);
+	m_fpsMesh->UpdateText(intAsString);
 	if (Input::IsPressed('A')) {
 		m_EntityList[0]->SetScale(vec3(1.0f, 2.0f, 1.0f));
 	}
 	if (Input::IsPressed('D'))
-		m_EntityList[0]->SetRotation(vec3(timeElapsed*1.4f, timeElapsed, 0.0f));
+		m_EntityList[0]->AddRotation(vec3(1.0f, 1.0f, 2.0f));
 
 	static int lod = 0;
 
@@ -244,6 +232,10 @@ void Scene::RenderScene(double dt)
 	
 	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
 		mat4 MVPmatrix = SetModelViewProjectionMatrix((*it)->GetWorldMatrix());
+		if ((*it)->GetName() == "sky")
+		{
+			int karl = 0;
+		}
 		(*it)->GetMaterial()->BindTextures();
 		GLuint shader = (*it)->GetMaterial()->GetShader();
 		Renderer::SetShader(shader);
@@ -260,7 +252,6 @@ void Scene::RenderScene(double dt)
 
 	if (m_bRenderWire)
 	{
-
 		Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD);
 		Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD_WIRE);
 		Renderer::SetShader(Renderer::m_whiteShader);

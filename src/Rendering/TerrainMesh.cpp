@@ -6,7 +6,7 @@
 
 using namespace std;
 
-const int C_TERRAINLODS = 6;
+int C_TERRAINLODS = 8;
 
 TerrainMesh::TerrainMesh()
 {
@@ -114,6 +114,16 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 {
 	unsigned int width = texture->GetWidth();
 	unsigned int depth = texture->GetHeight();
+
+	//Heightmap too small for C_TERRAINLODS amount of lods?
+	if ((int)log2((float)(width - 1)) < C_TERRAINLODS)
+	{
+		C_TERRAINLODS = (int)log2((float)(width - 1));
+		m_lodBufferObjects.resize(C_TERRAINLODS);
+		m_lodTriangleSize.resize(C_TERRAINLODS);
+	}
+
+
 	
 	vector<unsigned char> imageData = texture->GetImageData();
 

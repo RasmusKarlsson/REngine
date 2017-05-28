@@ -21,7 +21,9 @@ TextMesh::~TextMesh()
 void TextMesh::SetText(string text)
 {
 	m_textString = text;
+
 	std::transform(m_textString.begin(), m_textString.end(), m_textString.begin(), ::tolower);
+
 	m_stringSize = m_textString.size();
 }
 
@@ -149,7 +151,16 @@ void TextMesh::CreateMesh()
 
 void TextMesh::UpdateText(string newText)
 {
+	int oldTextStringSize = m_textString.size();
+
 	SetText(newText);
+
+	if (oldTextStringSize < m_stringSize)
+	{
+		CreateMesh();
+		printf("Redid text! Old size: %d new size: %d\n", oldTextStringSize, m_stringSize);
+		return;
+	}
 
 	int stringLength = m_textString.size();
 	vector<GLfloat> meshTexcoords;
@@ -184,9 +195,6 @@ void TextMesh::UpdateText(string newText)
 	
 	glBindBuffer(GL_ARRAY_BUFFER, m_texcoordBufferObject);
 	glBufferData(GL_ARRAY_BUFFER, meshTexcoords.size() * sizeof(GLfloat), meshTexcoords.data(), GL_STATIC_DRAW);
-
-	//glEnableVertexAttribArray(2);
-	//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
