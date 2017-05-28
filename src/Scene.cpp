@@ -37,7 +37,7 @@ Scene::Scene()
 	m_currentCamera->CreateProjectionMatrix(45.0f, (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 4000.0f);
 	
 	Texture* tex = new Texture();
-	tex->CreateFromFile("res\\Textures\\splatmap.png");
+	tex->CreateFromFile("res/Textures/splatmap.png");
 
 	Material* mat = new Material();
 	mat->SetDiffuseTexture(tex);
@@ -183,11 +183,10 @@ void Scene::UpdateScene(double dt)
 		else
 		{
 			m_cube = new Cube();
-			m_cube->SetName("newCube");
 			m_cube->SetPosition(0.0f, 2.0f, 0.0f);
 			Material* mat = new Material();
 			Texture* tex = new Texture();
-			tex->CreateFromFile("res\\Textures\\splatmap.png");
+			tex->CreateFromFile("res/Textures/splatmap.png");
 			mat->SetDiffuseTexture(tex);
 			m_cube->SetMaterial(mat);
 			AddEntity(m_cube);
@@ -232,10 +231,7 @@ void Scene::RenderScene(double dt)
 	
 	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
 		mat4 MVPmatrix = SetModelViewProjectionMatrix((*it)->GetWorldMatrix());
-		if ((*it)->GetName() == "sky")
-		{
-			int karl = 0;
-		}
+
 		(*it)->GetMaterial()->BindTextures();
 		GLuint shader = (*it)->GetMaterial()->GetShader();
 		Renderer::SetShader(shader);
