@@ -220,6 +220,7 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 	vector<GLuint> lodIndices;
+	bool transpose = false;
 	for (int lodIndex = C_TERRAINLODS-1; lodIndex >= 0; lodIndex--)
 	{
 		d = 0;
@@ -232,12 +233,22 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 				int idx = j*(width)+i;
 				lodIndices[d++] = idx;
 				lodIndices[d++] = (idx + lod * width);
-				lodIndices[d++] = (idx + lod * width + lod);
-
-				lodIndices[d++] = idx;
+				//Criss cross trangle binding
+				if (!transpose)
+				{
+					lodIndices[d++] = (idx + lod * width + lod);
+					lodIndices[d++] = idx;
+				}
+				else
+				{
+					lodIndices[d++] = (idx + lod);
+					lodIndices[d++] = (idx + lod * width);
+				}		
 				lodIndices[d++] = (idx + lod * width + lod);
 				lodIndices[d++] = (idx + lod);
+				transpose = !transpose;
 			}
+			transpose = !transpose;
 		}
 
 		m_lodTriangleSize[lodIndex] = (width - 1) / lod * (depth - 1) / lod * 6;
