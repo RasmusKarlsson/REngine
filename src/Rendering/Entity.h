@@ -3,6 +3,7 @@
 #include <gl\glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 #include "Material.h"
 #include <vector>
@@ -13,33 +14,37 @@ class BBox
 {
 public:
 	BBox() {};
+	BBox(vec3 min, vec3 max) { SetBoundingBox(min, max); };
 	~BBox() {};
 
 	void SetBoundingBox(vec3 min, vec3 max) {
-		min = min;
-		max = max;
+		m_min = min;
+		m_max = max;
 	}
-	vec3 GetBoundingBoxMin() { return min; };
-	vec3 GetBoundingBoxMax() { return max; };
+	vec3 GetBoundingBoxMin() { return m_min; };
+	vec3 GetBoundingBoxMax() { return m_max; };
+
+	vec3 GetBoundingScale() { return m_max - m_min; };
+	vec3 GetBoundingPosition() { return (m_max + m_min)/2.0f; };
 	/*
 	bool RayIntersection(ray r) {
-		double tx1 = (b.min.x - r.x0.x)*r.n_inv.x;
-		double tx2 = (b.max.x - r.x0.x)*r.n_inv.x;
+	double tx1 = (b.min.x - r.x0.x)*r.n_inv.x;
+	double tx2 = (b.max.x - r.x0.x)*r.n_inv.x;
 
-		double tmin = min(tx1, tx2);
-		double tmax = max(tx1, tx2);
+	double tmin = min(tx1, tx2);
+	double tmax = max(tx1, tx2);
 
-		double ty1 = (b.min.y - r.x0.y)*r.n_inv.y;
-		double ty2 = (b.max.y - r.x0.y)*r.n_inv.y;
+	double ty1 = (b.min.y - r.x0.y)*r.n_inv.y;
+	double ty2 = (b.max.y - r.x0.y)*r.n_inv.y;
 
-		tmin = max(tmin, min(ty1, ty2));
-		tmax = min(tmax, max(ty1, ty2));
+	tmin = glm::max(tmin, min(ty1, ty2));
+	tmax = min(tmax, max(ty1, ty2));
 
-		return tmax >= tmin;
-	}
-	*/
-	vec3 max = vec3();
-	vec3 min = vec3();
+	return tmax >= tmin;
+	}*/
+	
+	vec3 m_max = vec3(1.0);
+	vec3 m_min = vec3(0.0);
 };
 
 class Entity
@@ -64,11 +69,16 @@ public:
 	void SetName(string name) { m_name = name; };
 	string GetName() { return m_name; };
 
-	mat4 GetWorldMatrix() { if (IsDirty()) UpdateMatrices(); return m_WorldMatrix; };
+	mat4 GetWorldMatrix()		{ if (IsDirty()) UpdateMatrices(); return m_WorldMatrix; };
 	mat4 GetInvModelMatrix()	{ return m_ModelMatrixInv; };
 	vec3 GetPosition()			{ return m_LocalPosition; };
 	vec3 GetScale()				{ return m_LocalScale; };
 	vec3 GetRotation()			{ return m_LocalRotation; };
+
+	vec3 GetWorldPosition()		{ return vec3(m_WorldMatrix[3]); };
+	vec3 GetWorldScale();
+	vec3 GetWorldRotation();
+
 
 	GLuint GetVao()				{ return m_vao; };
 	GLuint GetVboVertex()		{ return m_vboVertex; };
@@ -87,6 +97,8 @@ public:
 	void AddPosition(vec3 position) { m_LocalPosition += position;	SetDirty(); };
 	void AddScale(vec3 scale) { m_LocalScale += scale;			SetDirty(); };
 	void AddRotation(vec3 rotation) { m_LocalRotation += rotation;	SetDirty(); };
+
+	void MulScale(vec3 scale) { m_LocalScale *= scale;			SetDirty(); };
 
 	void UpdateMatrices();
 	bool IsDirty() { return m_dirty; };
@@ -108,7 +120,10 @@ public:
 	void SetRenderStyle(int renderStyle) { m_renderStyle = renderStyle; };
 	int GetRenderStyle() { return m_renderStyle; };
 
-	BBox m_bbox;
+	void SetBoundingBox(BBox* bbox) { m_bbox = bbox; };
+	BBox* GetBoundingBox() { return m_bbox; };
+
+	BBox* m_bbox;
 
 protected:
 

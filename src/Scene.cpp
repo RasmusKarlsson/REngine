@@ -24,7 +24,8 @@ extern double timeElapsed;
 extern int SCREEN_WIDTH;
 extern int SCREEN_HEIGHT;
 
-static bool m_bRenderWire = false;
+static bool m_bRenderWire = false; 
+static bool m_bRenderBBox = false;
 
 Scene::Scene()
 {
@@ -153,10 +154,10 @@ void Scene::UpdateScene(double dt)
 	intAsString = intAsString.substr(0, 5);
 	m_fpsMesh->UpdateText(intAsString);
 	if (Input::IsPressed('A')) {
-		m_EntityList[0]->SetScale(vec3(1.0f, 2.0f, 1.0f));
+		m_EntityList[2]->SetScale(vec3(1.0f, 2.0f, 1.0f));
 	}
 	if (Input::IsPressed('D'))
-		m_EntityList[0]->AddRotation(vec3(1.0f, 1.0f, 2.0f));
+		m_EntityList[2]->AddRotation(vec3(0.01f)*vec3(1.0f, 1.0f, 2.0f));
 
 	static int lod = 0;
 
@@ -173,6 +174,9 @@ void Scene::UpdateScene(double dt)
 
 	if (Input::IsPressedOnce('W')) {
 		m_bRenderWire = !m_bRenderWire;
+	}
+	if (Input::IsPressedOnce('B')) {
+		m_bRenderBBox = !m_bRenderBBox;
 	}
 
 	if (Input::IsPressedOnce('C')) {
@@ -248,17 +252,40 @@ void Scene::RenderScene(double dt)
 
 	if (m_bRenderWire)
 	{
-		Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD);
-		Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD_WIRE);
-		Renderer::SetShader(Renderer::m_whiteShader);
-		Renderer::Render(m_terrain->GetTerrainEntity(), SetModelViewProjectionMatrix(m_terrain->GetTerrainEntity()->GetWorldMatrix()));
-
-		for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
-			mat4 MVPmatrix = SetModelViewProjectionMatrix((*it)->GetWorldMatrix());
-			Renderer::Render(*it, MVPmatrix);
-		}
+		Scene::RenderWireFrame();
 	}
 	
+	if (m_bRenderBBox)
+	{
+		Scene::RenderBoundingBoxes();
+	}
+}
 
+void Scene::RenderWireFrame()
+{
+	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD);
+	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD_WIRE);
+	Renderer::SetShader(Renderer::m_whiteShader);
+	Renderer::Render(m_terrain->GetTerrainEntity(), SetModelViewProjectionMatrix(m_terrain->GetTerrainEntity()->GetWorldMatrix()));
 
+	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
+		mat4 MVPmatrix = SetModelViewProjectionMatrix((*it)->GetWorldMatrix());
+		Renderer::Render(*it, MVPmatrix);
+	}
+}
+
+void Scene::RenderBoundingBoxes()
+{
+	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD_WIRE);
+	Renderer::SetShader(Renderer::m_whiteShader);
+
+	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
+
+		Cube cube = Cube();
+		cube.SetPosition((*it)->GetWorldPosition());
+		cube.SetScale((*it)->GetWorldScale() * (*it)->GetBoundingBox()->GetBoundingScale());
+		mat4 MVPmatrix = SetModelViewProjectionMatrix(cube.GetWorldMatrix());
+
+		Renderer::Render(&(Entity)cube, MVPmatrix);
+	}
 }

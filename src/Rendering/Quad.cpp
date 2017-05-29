@@ -26,6 +26,8 @@ void Quad::Create()
 		1.0f,  1.0f, 0.0f
 	};
 
+	m_bbox->SetBoundingBox(vec3(-1.0f, -1.0f, -0.001f), vec3(1.0f, 1.0f, 0.001f));
+
 	GLfloat normalBuffer[] = {
 		0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f,

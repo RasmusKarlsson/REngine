@@ -26,6 +26,9 @@ public:
 	void UpdateScene(double dt);
 	void RenderScene(double dt);
 
+	void RenderWireFrame();
+	void RenderBoundingBoxes();
+
 	Cube* m_cube;
 
 private:

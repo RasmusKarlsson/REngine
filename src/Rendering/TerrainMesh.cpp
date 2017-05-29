@@ -123,13 +123,15 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 		m_lodTriangleSize.resize(C_TERRAINLODS);
 	}
 
-
 	
 	vector<unsigned char> imageData = texture->GetImageData();
 
 	m_resolution = ivec2(width, depth);
 	m_heightScale = 1.0f;
 	m_size = 0.1f;
+
+
+	m_bbox->SetBoundingBox(vec3(0.0f), vec3(width, m_size*m_heightScale*256.0f, depth));
 
 	GLfloat vertexBuffer[64 * 3] = { 0.0f };
 

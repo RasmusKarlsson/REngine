@@ -10,6 +10,7 @@ Entity::Entity()
 {
 	m_name = "DefaultEntity";
 	m_renderStyle = 0;
+	m_bbox = new BBox();
 	UpdateMatrices();
 }
 
@@ -125,4 +126,18 @@ void Entity::SetRotation(float x, float y, float z)
 	m_LocalRotation.y = y;
 	m_LocalRotation.z = z;
 	SetDirty();
+}
+
+vec3 Entity::GetWorldScale()
+{
+	vec3 scale; quat rotation; vec3 translation; vec3 skew; vec4 perspective;
+	decompose(m_WorldMatrix, scale, rotation, translation, skew, perspective);
+	return scale;
+}
+
+vec3 Entity::GetWorldRotation()
+{
+	vec3 scale; quat rotation; vec3 translation; vec3 skew; vec4 perspective;
+	decompose(m_WorldMatrix, scale, rotation, translation, skew, perspective);
+	return eulerAngles(conjugate(rotation));
 }
