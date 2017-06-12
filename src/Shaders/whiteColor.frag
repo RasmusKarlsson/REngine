@@ -1,6 +1,8 @@
 #version 120
 
+uniform vec4 Color;
+
 void main()
 {
-	gl_FragData[0] = vec4(1.0);
+	gl_FragData[0] = Color;
 }

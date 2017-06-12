@@ -7,7 +7,7 @@
 //#include "Input.h"
 #include "windows.h"
 #include "Shellapi.h"
-#include <string>"
+#include <string>
 #include <atlstr.h>
 #include "Window.h"
 #include "gl/glew.h"

@@ -27,6 +27,7 @@ extern int SCREEN_HEIGHT;
 static bool m_bRenderWire = false; 
 static bool m_bRenderBBox = false;
 
+
 Scene::Scene()
 {
 	Renderer::CompileShaders();
@@ -35,7 +36,7 @@ Scene::Scene()
 	m_currentCamera->SetOrbitDistance(5.0f);
 	m_currentCamera->SetCameraPosition(vec3(0.0f, 5.0f, 5.0f));
 	m_currentCamera->SetCameraTarget(vec3(0.0f, 5.0f, 0.0f));
-	m_currentCamera->CreateProjectionMatrix(45.0f, (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 4000.0f);
+	m_currentCamera->CreateProjectionMatrix(45.0f, (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
 	
 	Texture* tex = new Texture();
 	tex->CreateFromFile("res/Textures/splatmap.png");
@@ -69,7 +70,7 @@ Scene::Scene()
 
 	m_terrain = new Terrain();
 	
-	m_terrain->SetHeightMap("res/Textures/heightmap257.png");
+	m_terrain->SetHeightMap("res/Textures/heightmap513.png");
 	m_terrain->SetSplatMap("res/Textures/splatmap257.png");
 	m_terrain->SetNormalMap("res/Textures/normalmap.png");
 	m_terrain->SetSplatMapTexture("res/Textures/sand.png",0);
@@ -78,6 +79,7 @@ Scene::Scene()
 	m_terrain->CreateTerrainMesh();
 	TerrainMesh* terrainEntity = m_terrain->GetTerrainEntity();
 	terrainEntity->SetPosition(-(float)terrainEntity->GetResolution().x / 2, -3.0f, -(float)terrainEntity->GetResolution().y / 2);
+
 	
 	Quad* textQuad = new Quad();
 	Quad* textQuad2 = new Quad();
@@ -164,12 +166,14 @@ void Scene::UpdateScene(double dt)
 	if (Input::IsPressedOnce('1')) {
 		lod--;
 		if (lod < 0) lod = 0;
-		m_terrain->GetTerrainEntity()->SetLod(lod);
+		m_terrain->SetAllLods(lod);
+	//	m_terrain->GetTerrainEntity()->SetLod(lod);
 	}
 	if (Input::IsPressedOnce('2')) {
 		lod++;
 		if (lod > 5) lod = 5;
-		m_terrain->GetTerrainEntity()->SetLod(lod);
+		m_terrain->SetAllLods(lod);
+	//	m_terrain->GetTerrainEntity()->SetLod(lod);
 	}
 
 	if (Input::IsPressedOnce('W')) {
@@ -231,7 +235,8 @@ void Scene::RenderScene(double dt)
 	m_terrain->BindTextures();
 	m_terrain->UpdateUniforms();
 	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD);
-	Renderer::Render(m_terrain->GetTerrainEntity(), SetModelViewProjectionMatrix(m_terrain->GetTerrainEntity()->GetWorldMatrix()));
+
+	m_terrain->Render(m_currentCamera->GetProjectionMatrix() * m_currentCamera->GetViewMatrix(), m_currentCamera);
 	
 	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
 		mat4 MVPmatrix = SetModelViewProjectionMatrix((*it)->GetWorldMatrix());
@@ -266,9 +271,11 @@ void Scene::RenderWireFrame()
 	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD);
 	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD_WIRE);
 	Renderer::SetShader(Renderer::m_whiteShader);
-	Renderer::Render(m_terrain->GetTerrainEntity(), SetModelViewProjectionMatrix(m_terrain->GetTerrainEntity()->GetWorldMatrix()));
+	m_terrain->Render(m_currentCamera->GetProjectionMatrix() * m_currentCamera->GetViewMatrix(), m_currentCamera);
 
 	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
+		vec4 white = vec4(1.0);
+		glUniform4fv(glGetUniformLocation(Renderer::m_currentShader, "Color"), 1, value_ptr(white));
 		mat4 MVPmatrix = SetModelViewProjectionMatrix((*it)->GetWorldMatrix());
 		Renderer::Render(*it, MVPmatrix);
 	}

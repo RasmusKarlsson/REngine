@@ -97,6 +97,10 @@ void OrbitCamera::UpdatePan(float dt)
 void OrbitCamera::UpdateZoom(float dt)
 {
 	int mouseWheel = Input::GetMouseWheel() / 120;
+	if (Input::IsPressed(VK_SHIFT))
+	{
+		mouseWheel *= 5;
+	}
 	m_mouseWheel = MathHelpers::Lerp(m_mouseWheel, (float)mouseWheel, 10.0*dt);
 
 	if (m_rho < 2.0f)

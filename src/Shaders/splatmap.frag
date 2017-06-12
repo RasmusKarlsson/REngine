@@ -6,6 +6,7 @@ varying float v_VertexID;
 varying vec3 v_Normal;
 
 varying float v_positionY;
+varying float v_fogAmount;
 
 uniform sampler2D Sampler0;
 uniform sampler2D Sampler1;
@@ -54,6 +55,16 @@ vec4 textureNoTile( sampler2D samp, in vec2 uv )
                      textureGrad( samp, uvd, ddxd, ddyd ), b.x), b.y );
 }
 
+float fogFactorExp( const float dist, const float density) {
+  return 1.0 - clamp(exp(-density * dist), 0.0, 1.0);
+}
+
+float fogFactorExp2( const float dist, const float density) {
+  const float LOG2 = -1.442695;
+  float d = density * dist;
+  return 1.0 - clamp(exp2(d * d * LOG2), 0.0, 1.0);
+}
+
 void main()
 {
 	vec3 color = v_Color.rgb;
@@ -65,7 +76,7 @@ void main()
 	vec4 tex3 = textureNoTile(Sampler3,2.0*v_Texcoord);
 	finalColor = mask.r * tex1 + mask.g * tex2 + mask.b * tex3;
 	vec4 waterColor = vec4(0.0,0.5,0.8,1.0);
-	finalColor = mix(waterColor,finalColor,v_positionY);
+	//finalColor = mix(waterColor,finalColor,v_positionY);
 	gl_FragColor = finalColor;
 	vec3 normal = v_Normal+4.0*(texture2D(Sampler4, 5.0*v_Texcoord).rgb-0.5);
     normal = normalize(normal);
@@ -73,5 +84,7 @@ void main()
 	vec3 lightDir = normalize(vec3(0.0,-1.0,0.0));
 	float light = max(0.0,0.5+0.5*dot(-lightDir,normal));
 	gl_FragColor.rgb *=light;
-	//gl_FragColor.rgb = 0.5+0.5*v_Normal;
+	vec3 fogColor = vec3(110.0f,125.0f,142.0f)/255.0f;
+	gl_FragColor.rgb = mix(gl_FragColor.rgb, fogColor, v_fogAmount);
+	//gl_FragColor.rgb = vec3(1.0/64.0*v_Texcoord,0.0);
 }

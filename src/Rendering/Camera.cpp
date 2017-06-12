@@ -40,6 +40,7 @@ mat4 Camera::GetProjectionMatrix()
 void Camera::CreateProjectionMatrix(float fov, float aspect, float fnear, float ffar)
 {
 	m_ProjectionMatrix = perspective(fov, aspect, fnear, ffar);
+	m_far = ffar;
 }
 
 void Camera::CreateLookAtMatrix()

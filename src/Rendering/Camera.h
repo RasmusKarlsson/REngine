@@ -21,6 +21,12 @@ public:
 	void SetCameraTarget(vec3 target) { m_CameraTarget = target; };
 	vec3 GetCameraTarget() { return m_CameraTarget; };
 
+	vec3 GetCameraDirection() { return normalize(m_CameraTarget - m_CameraPosition); };
+
+	void SetCameraFar(float ffar) { m_far = ffar; };
+	float GetCameraFar() { return m_far; };
+
+
 	void SetViewMatrix(mat4 matrix);
 	mat4 GetViewMatrix();
 
@@ -42,5 +48,6 @@ protected:
 	mat4 m_ViewMatrix;
 	mat4 m_ViewProjectionMatrix;
 
+	float m_far;
 
 };

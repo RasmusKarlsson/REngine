@@ -15,15 +15,22 @@ varying vec4 v_Color;
 varying float v_positionY;
 uniform float u_waterHeight;
 
+varying float v_fogAmount;
+
 uniform mat4 u_WorldViewProjection;
 
+#define FOG_START 80.0f
+#define FOG_END 150.0f
+
+float fogFactorLinear( const float dist, const float start, const float end ) {
+  return 1.0 - clamp((end - dist) / (end - start), 0.0, 1.0);
+}
+
 void main(){
-	mat4 rotmat = mat4(1.0);
-	rotmat[0][0] = cos(u_Time);
-	rotmat[0][2] = sin(u_Time);
-	rotmat[2][0] = -sin(u_Time);
-	rotmat[2][2] = cos(u_Time);
+
     gl_Position = u_WorldViewProjection * a_Position;
+	float fogDistance = length(gl_Position.xyz);
+	v_fogAmount = fogFactorLinear(fogDistance, FOG_START, FOG_END);
 	float st = smoothstep(a_Position.y,0.0,u_waterHeight);
 	v_positionY = st;
    // gl_Position.w = 1.0;
