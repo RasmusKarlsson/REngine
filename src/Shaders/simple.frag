@@ -9,10 +9,12 @@ uniform sampler2D NormalSampler;
 uniform sampler2D SpecularSampler;
 uniform float u_Time;
 
+
+
 void main()
 {
 	vec4 color = vec4(v_Color.rgb,1.0);
 	vec4 diffuse = color*texture2D(AlbedoSampler,v_Texcoord);
-	//gl_FragColor = color
-	gl_FragData[0] = vec4(diffuse);
+	gl_FragColor = vec4(diffuse);
+//	gl_FragColor = vec4(vec3(linearDepth(texture2D(AlbedoSampler,v_Texcoord).x)),1.0);
 }

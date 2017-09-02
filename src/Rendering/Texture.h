@@ -24,9 +24,13 @@ public:
 	vector<unsigned char> GetImageData() { return m_imageData; };
 
 	void SetParameter(GLuint param, GLuint value);
-	GLuint GetID() { return m_textureID; };
+	GLuint GetTextureID() { return m_textureID; };
+	GLuint GetDepthTextureID() { return m_depthID; };
 
 	void Bind(GLuint slot);
+
+	void RenderToTexture(bool clear);
+	void EndRenderToTexture();
 
 private:
 	unsigned int m_textureWidth;
@@ -37,4 +41,7 @@ private:
 	vector<unsigned char> m_imageData;
 
 	GLuint m_textureID;
+	GLuint m_depthID;
+	GLuint m_fbo;
+	GLuint m_renderBuffer;
 };

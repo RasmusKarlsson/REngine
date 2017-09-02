@@ -9,7 +9,7 @@
 Entity::Entity()
 {
 	m_name = "DefaultEntity";
-	m_renderStyle = 0;
+	m_renderStyle = RENDERSTYLE_STANDARD;
 	m_bbox = new BBox();
 	UpdateMatrices();
 }

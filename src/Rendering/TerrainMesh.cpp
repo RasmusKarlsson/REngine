@@ -382,6 +382,8 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, int xStart, int ySt
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 	vector<GLuint> lodIndices;
+
+	//Triangle types: [\]  [/]  [\/] -> 0, 1, 2
 	bool transpose = false;
 	for (int lodIndex = C_TERRAINLODS - 1; lodIndex >= 0; lodIndex--)
 	{
@@ -390,24 +392,49 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, int xStart, int ySt
 		lodIndices.resize((width - 1) / lod * (depth - 1) / lod * 6);
 		for (int j = 0; j < (depth - 1); j += lod)
 		{
+			int lodEdgeExtend = 1;
 			for (int i = 0; i < (width - 1); i += lod)
 			{
 				int idx = (j)*(width)+(i);
-				lodIndices[d++] = idx;
-				lodIndices[d++] = (idx + lod * width);
-				//Criss cross trangle binding
+
+				//Lod edges fix
+				bool wasLodExtend = false;
+				if (j == 0)
+				{
+					if (lodEdgeExtend == 2)
+					{
+						wasLodExtend = true;
+					}
+					lodEdgeExtend = 1;
+					if (i % 2*lod == 0)
+					{
+						lodEdgeExtend = 2;
+					}
+				}
+				else if (i == 0)
+				{
+					wasLodExtend = true;
+				}
+				if (!wasLodExtend)
+				{
+					lodIndices[d++] = idx;
+					lodIndices[d++] = (idx + lod * width);
+				}
+				//Criss cross trangle binding // transposed is [/]
 				if (!transpose)
 				{
+					if (!wasLodExtend)
 					lodIndices[d++] = (idx + lod * width + lod);
 					lodIndices[d++] = idx;
 				}
 				else
 				{
+					if (!wasLodExtend)
 					lodIndices[d++] = (idx + lod);
 					lodIndices[d++] = (idx + lod * width);
 				}
 				lodIndices[d++] = (idx + lod * width + lod);
-				lodIndices[d++] = (idx + lod);
+				lodIndices[d++] = (idx + lod * lodEdgeExtend);
 				transpose = !transpose;
 			}
 			transpose = !transpose;
@@ -419,7 +446,6 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, int xStart, int ySt
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_lodBufferObjects[lodIndex]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, (width - 1) / lod * (depth - 1) / lod * 6 * sizeof(GLint), lodIndices.data(), GL_STATIC_DRAW);
 	}
-
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	m_triangleSize = (width - 1) * (depth - 1) * 6;

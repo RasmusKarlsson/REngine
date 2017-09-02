@@ -20,6 +20,7 @@ using namespace std;
 #include "Shader.hpp"
 
 static const char * shadersPath = "src/shaders/";
+//static const char * shadersPath = "shaders/";
 
 GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path){
 

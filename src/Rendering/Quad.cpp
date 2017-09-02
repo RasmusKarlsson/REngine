@@ -21,9 +21,9 @@ void Quad::Create()
 {
 	GLfloat vertexBuffer[] = {
 		-1.0f, -1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
 		-1.0f,  1.0f, 0.0f,
-		1.0f,  1.0f, 0.0f
+		1.0f,  1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f
 	};
 
 	m_bbox->SetBoundingBox(vec3(-1.0f, -1.0f, -0.001f), vec3(1.0f, 1.0f, 0.001f));
@@ -51,7 +51,7 @@ void Quad::Create()
 
 	GLint indexBuffer[] = {
 		0,1,2,
-		1,3,2
+		0,2,3
 	};
 	GLuint normalBufferObject;
 	GLuint texcoordBufferObject;

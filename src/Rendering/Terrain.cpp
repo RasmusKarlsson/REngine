@@ -21,7 +21,7 @@ Terrain::Terrain()
 {
 	m_textureLayers.resize(4);
 	m_nrLods = 1;
-	m_lodDistances.push_back(20.0f);
+	m_lodDistances.push_back(2000.0f);
 	m_lodDistances.push_back(28.0f);
 	m_lodDistances.push_back(50.0f);
 	m_lodDistances.push_back(80.0f);
@@ -106,17 +106,17 @@ void Terrain::UpdateUniforms()
 void Terrain::BindTextures()
 {
 	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, m_splatMap->GetID());
+	glBindTexture(GL_TEXTURE_2D, m_splatMap->GetTextureID());
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_textureLayers[0]->GetID());
+	glBindTexture(GL_TEXTURE_2D, m_textureLayers[0]->GetTextureID());
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_textureLayers[1]->GetID());
+	glBindTexture(GL_TEXTURE_2D, m_textureLayers[1]->GetTextureID());
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, m_textureLayers[2]->GetID());
+	glBindTexture(GL_TEXTURE_2D, m_textureLayers[2]->GetTextureID());
 
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, m_normalMap->GetID());
+	glBindTexture(GL_TEXTURE_2D, m_normalMap->GetTextureID());
 }
 
 void Terrain::Render(mat4 vpMatrix, Camera* camera)

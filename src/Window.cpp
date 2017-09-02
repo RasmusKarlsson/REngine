@@ -229,7 +229,7 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow) {
 	DescribePixelFormat(DC, pixelFormatID, sizeof(PFD), &PFD);
 	SetPixelFormat(DC, pixelFormatID, &PFD);
 
-	const int major_min = 4, minor_min = 0;
+	const int major_min = 2, minor_min = 1;
 	int  contextAttribs[] = {
 		WGL_CONTEXT_MAJOR_VERSION_ARB, major_min,
 		WGL_CONTEXT_MINOR_VERSION_ARB, minor_min,

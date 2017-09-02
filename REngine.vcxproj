@@ -97,7 +97,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>deps\glm-0.9.8.4;deps\opengl;deps\lodepng;deps\HDRLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>deps\glm-0.9.8.4;deps\opengl;deps\lodepng;deps\HDRLoader;deps\loadobj;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -129,7 +129,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>deps\glm-0.9.8.4;deps\opengl;deps\lodepng;deps\HDRLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>deps\glm-0.9.8.4;deps\opengl;deps\lodepng;deps\HDRLoader;deps\loadobj;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -160,6 +160,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="deps\HDRLoader\hdrloader.cpp" />
+    <ClCompile Include="deps\loadobj\loadobj.cpp" />
+    <ClCompile Include="deps\loadobj\VectorUtils2.cpp" />
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MathHelpers.cpp" />
@@ -184,6 +186,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="deps\HDRLoader\hdrloader.h" />
+    <ClInclude Include="deps\loadobj\loadobj.h" />
+    <ClInclude Include="deps\loadobj\VectorUtils2.h" />
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\MathHelpers.h" />
@@ -210,6 +214,9 @@
     <None Include="ClassDiagram.cd" />
     <None Include="src\Shaders\2dUI.frag" />
     <None Include="src\Shaders\2dUI.vert" />
+    <None Include="src\Shaders\fullscreenPass.vert" />
+    <None Include="src\Shaders\gaussianBlur.frag" />
+    <None Include="src\Shaders\showDepth.frag" />
     <None Include="src\Shaders\simple.frag" />
     <None Include="src\Shaders\simple.vert" />
     <None Include="src\Shaders\skybox.frag" />

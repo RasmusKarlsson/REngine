@@ -37,4 +37,8 @@ private:
 	Terrain* m_terrain;
 	Quad* m_cursorMesh;
 	TextMesh* m_fpsMesh;
+
+	Texture* m_fbo1;
+	Texture* m_fbo2;
+	Quad* m_fullscreenQuad;
 };

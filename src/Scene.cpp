@@ -37,6 +37,17 @@ Scene::Scene()
 	m_currentCamera->SetCameraPosition(vec3(0.0f, 5.0f, 5.0f));
 	m_currentCamera->SetCameraTarget(vec3(0.0f, 5.0f, 0.0f));
 	m_currentCamera->CreateProjectionMatrix(45.0f, (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
+
+	m_fbo1 = new Texture();
+	m_fbo1->CreateFBO("framebuffer1", SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	m_fbo2 = new Texture();
+	m_fbo2->CreateFBO("framebuffer2", SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	//m_fbo1->RenderToTexture(false);
+
+	m_fullscreenQuad = new Quad();
+
 	
 	Texture* tex = new Texture();
 	tex->CreateFromFile("res/Textures/splatmap.png");
@@ -70,7 +81,7 @@ Scene::Scene()
 
 	m_terrain = new Terrain();
 	
-	m_terrain->SetHeightMap("res/Textures/heightmap513.png");
+	m_terrain->SetHeightMap("res/Textures/heightmap257.png");
 	m_terrain->SetSplatMap("res/Textures/splatmap257.png");
 	m_terrain->SetNormalMap("res/Textures/normalmap.png");
 	m_terrain->SetSplatMapTexture("res/Textures/sand.png",0);
@@ -103,7 +114,7 @@ Scene::Scene()
 
 	m_cursorMesh->SetRenderStyle(Entity::RENDERSTYLE_2D);
 	AddEntity(m_cursorMesh);
-
+	
 	m_fpsMesh = new TextMesh();
 	Material* fontMat = new Material();
 	Texture* fontTex = new Texture();
@@ -183,6 +194,12 @@ void Scene::UpdateScene(double dt)
 		m_bRenderBBox = !m_bRenderBBox;
 	}
 
+	if (Input::IsPressedOnce('M')) {
+		glEnable(GL_MULTISAMPLE);
+	}
+	if (Input::IsPressedOnce('N')) {
+		glDisable(GL_MULTISAMPLE);
+	}
 	if (Input::IsPressedOnce('C')) {
 		if (!m_cube->IsDead())
 		{
@@ -229,14 +246,15 @@ void Scene::UpdateScene(double dt)
 void Scene::RenderScene(double dt)
 {
 	Renderer::ClearBuffer();
-	Renderer::SetShader(Renderer::m_terrainShader);
+//	m_fbo1->RenderToTexture(true);
 
-	
+	Renderer::SetShader(Renderer::m_terrainShader);
 	m_terrain->BindTextures();
 	m_terrain->UpdateUniforms();
 	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD);
 
 	m_terrain->Render(m_currentCamera->GetProjectionMatrix() * m_currentCamera->GetViewMatrix(), m_currentCamera);
+
 	
 	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
 		mat4 MVPmatrix = SetModelViewProjectionMatrix((*it)->GetWorldMatrix());
@@ -244,7 +262,7 @@ void Scene::RenderScene(double dt)
 		(*it)->GetMaterial()->BindTextures();
 		GLuint shader = (*it)->GetMaterial()->GetShader();
 		Renderer::SetShader(shader);
-
+		
 		Renderer::SetRenderStyle((*it)->GetRenderStyle());
 
 		mat4 invView = glm::inverse(m_currentCamera->GetViewMatrix());
@@ -255,6 +273,72 @@ void Scene::RenderScene(double dt)
 		Renderer::Render(*it, MVPmatrix);
 	}
 
+//	m_fbo1->EndRenderToTexture();
+	Renderer::SetRenderStyle(Entity::RENDERSTYLE_2D);
+	Renderer::SetShader(Renderer::m_showDepthShader);
+	
+	/*
+	Renderer::SetRenderStyle(Entity::RENDERSTYLE_2D);
+	Renderer::SetShader(Renderer::m_fullscreenShader);
+	vec2 horizontal = vec2(1.0, 0.0);
+	vec2 vertical = vec2(0.0, 1.0);
+	vec2 direction;
+	/*
+	static int pingpong = 2;
+
+	if (Input::IsPressedOnce('U')) {
+		pingpong += 2;
+	}
+	
+	for (int i = 0; i < pingpong; i++)
+	{
+		direction = (i % 2 == 0) ? horizontal : vertical;
+		m_fbo2->RenderToTexture(true);
+		glBindTexture(GL_TEXTURE_2D, m_fbo1->GetTextureID());
+		glUniform2fv(glGetUniformLocation(Renderer::m_currentShader, "u_direction"), 1, value_ptr(direction));
+		Renderer::Render(m_fullscreenQuad, glm::mat4());
+		m_fbo2->EndRenderToTexture();
+		swap(m_fbo1, m_fbo2);
+	}
+	*/
+
+	/*
+	m_fbo2->RenderToTexture(true);
+	glBindTexture(GL_TEXTURE_2D, m_fbo1->GetTextureID());
+	glUniform2fv(glGetUniformLocation(Renderer::m_currentShader, "u_direction"), 1, value_ptr(horizontal));
+	Renderer::Render(m_fullscreenQuad, glm::mat4());
+	m_fbo2->EndRenderToTexture();
+
+	swap(m_fbo1, m_fbo2);
+
+	m_fbo2->RenderToTexture(true);
+	glBindTexture(GL_TEXTURE_2D, m_fbo1->GetTextureID());
+	glUniform2fv(glGetUniformLocation(Renderer::m_currentShader, "u_direction"), 1, value_ptr(horizontal));
+	Renderer::Render(m_fullscreenQuad, glm::mat4());
+	m_fbo2->EndRenderToTexture();
+	swap(m_fbo1, m_fbo2);
+	*/
+	/*
+	m_fbo1->RenderToTexture(true);
+	glBindTexture(GL_TEXTURE_2D, m_fbo2->GetTextureID());
+	glUniform2fv(glGetUniformLocation(Renderer::m_currentShader, "u_direction"), 1, value_ptr(vertical));
+	Renderer::Render(m_fullscreenQuad, glm::mat4());
+	m_fbo1->EndRenderToTexture();*/
+
+
+
+	/*
+	glBindTexture(GL_TEXTURE_2D, m_fbo1->GetTextureID());
+
+	//glUniform2fv(glGetUniformLocation(Renderer::m_currentShader, "u_direction"), 1, value_ptr(direction));
+	Renderer::Render(m_fullscreenQuad, glm::mat4());
+	glEnable(GL_DEPTH_TEST);
+
+	*/
+
+	Renderer::SetShader(Renderer::m_fullscreenShader);
+	//Renderer::RenderFullscreenQuad();
+	
 	if (m_bRenderWire)
 	{
 		Scene::RenderWireFrame();

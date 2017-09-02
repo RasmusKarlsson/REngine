@@ -34,6 +34,10 @@ GLuint Renderer::m_terrainShader = 0;
 GLuint Renderer::m_textShader = 0;
 GLuint Renderer::m_whiteShader = 0;
 GLuint Renderer::m_skyShader = 0;
+GLuint Renderer::m_gaussianShader = 0;
+GLuint Renderer::m_showDepthShader = 0;
+
+GLuint Renderer::m_fullscreenShader = 0;
 
 int Renderer::m_currentRenderStyle = Entity::RENDERSTYLE_STANDARD;
 
@@ -63,7 +67,12 @@ void Renderer::Render(Entity* entity, mat4 wvpMatrix)
 	glBindVertexArray(entity->GetVao());
 	glDrawElements(GL_TRIANGLES, entity->GetSize(), GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
+}
 
+void Renderer::RenderFullscreenQuad()
+{
+	glBindVertexArray(0);
+	glDrawArrays(GL_TRIANGLES, 0, 4);
 }
 
 void Renderer::CompileShaders()
@@ -73,6 +82,11 @@ void Renderer::CompileShaders()
 	Renderer::m_textShader = LoadShaders("2dUI.vert", "2dUI.frag");
 	Renderer::m_whiteShader = LoadShaders("simple.vert", "whiteColor.frag");
 	Renderer::m_skyShader = LoadShaders("skybox.vert", "skybox.frag");
+
+	Renderer::m_fullscreenShader = LoadShaders("fullscreenPass.vert", "simple.frag");
+	Renderer::m_gaussianShader = LoadShaders("fullscreenPass.vert", "gaussianBlur.frag");
+	Renderer::m_showDepthShader = LoadShaders("fullscreenPass.vert", "showDepth.frag");
+
 	vec2 screenSize((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT);
 	vec2 elementSize(8.0f, 8.0f);
 	glUseProgram(Renderer::m_textShader);
@@ -115,8 +129,7 @@ void Renderer::SetRenderStyle(int renderStyle)
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glPolygonOffset(4.0, 4.0);
-
-		glLineWidth(2.0f);
+		glLineWidth(1.0f);
 
 		break;
 	}

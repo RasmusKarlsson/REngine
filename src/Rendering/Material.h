@@ -61,4 +61,6 @@ private:
 	vec4 m_specularColor;
 
 	GLuint m_shaderID;
+
+	int m_renderStyle;
 };

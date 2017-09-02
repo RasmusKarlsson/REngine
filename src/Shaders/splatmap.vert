@@ -19,7 +19,7 @@ varying float v_fogAmount;
 
 uniform mat4 u_WorldViewProjection;
 
-#define FOG_START 80.0f
+#define FOG_START 120.0f
 #define FOG_END 150.0f
 
 float fogFactorLinear( const float dist, const float start, const float end ) {

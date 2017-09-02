@@ -4,7 +4,6 @@
 //
 ///////////////////////////////////////////////////////////
 
-#include <gl\glew.h>
 #include "Main.h"
 #include "Window.h"
 #include <chrono>
