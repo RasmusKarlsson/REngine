@@ -30,9 +30,6 @@
     <ClCompile Include="src\Input.cpp">
       <Filter>Window</Filter>
     </ClCompile>
-    <ClCompile Include="src\Rendering\Mesh.cpp">
-      <Filter>Geometries</Filter>
-    </ClCompile>
     <ClCompile Include="src\Rendering\Quad.cpp">
       <Filter>Geometries</Filter>
     </ClCompile>
@@ -84,12 +81,6 @@
     <ClCompile Include="deps\HDRLoader\hdrloader.cpp">
       <Filter>Libs</Filter>
     </ClCompile>
-    <ClCompile Include="deps\loadobj\loadobj.cpp">
-      <Filter>Libs</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\loadobj\VectorUtils2.cpp">
-      <Filter>Libs</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Window.h">
@@ -103,9 +94,6 @@
     </ClInclude>
     <ClInclude Include="src\Input.h">
       <Filter>Window</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Rendering\Mesh.h">
-      <Filter>Geometries</Filter>
     </ClInclude>
     <ClInclude Include="src\Rendering\Quad.h">
       <Filter>Geometries</Filter>
@@ -156,12 +144,6 @@
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="deps\HDRLoader\hdrloader.h">
-      <Filter>Libs</Filter>
-    </ClInclude>
-    <ClInclude Include="deps\loadobj\loadobj.h">
-      <Filter>Libs</Filter>
-    </ClInclude>
-    <ClInclude Include="deps\loadobj\VectorUtils2.h">
       <Filter>Libs</Filter>
     </ClInclude>
   </ItemGroup>
