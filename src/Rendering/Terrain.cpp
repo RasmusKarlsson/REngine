@@ -136,7 +136,7 @@ void Terrain::Render(mat4 vpMatrix, Camera* camera)
 			glUniform4fv(glGetUniformLocation(Renderer::m_currentShader, "Color"), 1, value_ptr(g_colorList[colorIndex]));
 
 			UpdatePatchLod(m_terrainPatches[y*m_nrPatchesWidth + x], camPos);
-			Renderer::Render(m_terrainPatches[y*m_nrPatchesWidth + x], vpMatrix * m_terrainPatches[y*m_nrPatchesWidth + x]->GetWorldMatrix());
+			Renderer::Render(*m_terrainPatches[y*m_nrPatchesWidth + x], vpMatrix * m_terrainPatches[y*m_nrPatchesWidth + x]->GetWorldMatrix());
 		}
 	}
 }

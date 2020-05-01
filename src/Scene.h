@@ -7,7 +7,6 @@
 #include "TextMesh.h"
 
 
-
 using namespace glm;
 using namespace std;
 

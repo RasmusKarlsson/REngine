@@ -22,7 +22,7 @@ public:
 
 	static int m_currentRenderStyle;
 
-	static void Render(Entity* entity, mat4 wvpMatrix);
+	static void Render(Entity& entity, mat4 wvpMatrix);
 	static void RenderFullscreenQuad();
 	static void CompileShaders();
 

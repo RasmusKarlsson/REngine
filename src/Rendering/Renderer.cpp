@@ -52,20 +52,20 @@ void Renderer::SetShader(GLuint shader)
 	}
 }
 
-void Renderer::Render(Entity* entity, mat4 wvpMatrix)
+void Renderer::Render(Entity& entity, mat4 wvpMatrix)
 {
 	//SetShader(shader);
 	glDisable(GL_CULL_FACE);
 	glUniformMatrix4fv(glGetUniformLocation(m_currentShader, "u_WorldViewProjection"), 1, GL_FALSE, value_ptr(wvpMatrix));
-	glUniformMatrix4fv(glGetUniformLocation(m_currentShader, "u_World"), 1, GL_FALSE, value_ptr(entity->GetWorldMatrix()));
+	glUniformMatrix4fv(glGetUniformLocation(m_currentShader, "u_World"), 1, GL_FALSE, value_ptr(entity.GetWorldMatrix()));
 	glUniform1f(glGetUniformLocation(m_currentShader, "u_Time"), timeElapsed);
 	glUniform1i(glGetUniformLocation(m_currentShader, "Sampler0"), 0);
 	glUniform1i(glGetUniformLocation(m_currentShader, "Sampler1"), 1);
 	glUniform1i(glGetUniformLocation(m_currentShader, "Sampler2"), 2);
 	glUniform1i(glGetUniformLocation(m_currentShader, "Sampler3"), 3);
 	glUniform1i(glGetUniformLocation(m_currentShader, "Sampler4"), 4);
-	glBindVertexArray(entity->GetVao());
-	glDrawElements(GL_TRIANGLES, entity->GetSize(), GL_UNSIGNED_INT, NULL);
+	glBindVertexArray(entity.GetVao());
+	glDrawElements(GL_TRIANGLES, entity.GetSize(), GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
 }
 

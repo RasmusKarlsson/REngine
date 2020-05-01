@@ -231,10 +231,10 @@ void Scene::UpdateScene(double dt)
 		}
 	}
 
-	for (auto it = begin(m_EntityList); it != end(m_EntityList);++it) {
-		if ((*it)->IsDirty())
+	for (auto entity : m_EntityList) {
+		if (entity->IsDirty())
 		{
-			(*it)->UpdateMatrices();
+			entity->UpdateMatrices();
 		}
 	}
 
@@ -246,7 +246,6 @@ void Scene::UpdateScene(double dt)
 void Scene::RenderScene(double dt)
 {
 	Renderer::ClearBuffer();
-//	m_fbo1->RenderToTexture(true);
 
 	Renderer::SetShader(Renderer::m_terrainShader);
 	m_terrain->BindTextures();
@@ -255,22 +254,21 @@ void Scene::RenderScene(double dt)
 
 	m_terrain->Render(m_currentCamera->GetProjectionMatrix() * m_currentCamera->GetViewMatrix(), m_currentCamera);
 
-	
-	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
-		mat4 MVPmatrix = SetModelViewProjectionMatrix((*it)->GetWorldMatrix());
+	for (auto entity : m_EntityList) {
+		mat4 MVPmatrix = SetModelViewProjectionMatrix(entity->GetWorldMatrix());
 
-		(*it)->GetMaterial()->BindTextures();
-		GLuint shader = (*it)->GetMaterial()->GetShader();
+		entity->GetMaterial()->BindTextures();
+		GLuint shader = entity->GetMaterial()->GetShader();
 		Renderer::SetShader(shader);
 		
-		Renderer::SetRenderStyle((*it)->GetRenderStyle());
+		Renderer::SetRenderStyle(entity->GetRenderStyle());
 
 		mat4 invView = glm::inverse(m_currentCamera->GetViewMatrix());
 		mat4 invProj = glm::inverse(m_currentCamera->GetProjectionMatrix());
 		glUniformMatrix4fv(glGetUniformLocation(Renderer::m_currentShader, "u_invView"), 1, GL_FALSE, value_ptr(invView));
 		glUniformMatrix4fv(glGetUniformLocation(Renderer::m_currentShader, "u_invProjection"), 1, GL_FALSE, value_ptr(invProj));
 
-		Renderer::Render(*it, MVPmatrix);
+		Renderer::Render(*entity, MVPmatrix);
 	}
 
 //	m_fbo1->EndRenderToTexture();
@@ -357,11 +355,11 @@ void Scene::RenderWireFrame()
 	Renderer::SetShader(Renderer::m_whiteShader);
 	m_terrain->Render(m_currentCamera->GetProjectionMatrix() * m_currentCamera->GetViewMatrix(), m_currentCamera);
 
-	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
+	for (auto entity : m_EntityList) {
 		vec4 white = vec4(1.0);
 		glUniform4fv(glGetUniformLocation(Renderer::m_currentShader, "Color"), 1, value_ptr(white));
-		mat4 MVPmatrix = SetModelViewProjectionMatrix((*it)->GetWorldMatrix());
-		Renderer::Render(*it, MVPmatrix);
+		mat4 MVPmatrix = SetModelViewProjectionMatrix(entity->GetWorldMatrix());
+		Renderer::Render(*entity, MVPmatrix);
 	}
 }
 
@@ -370,13 +368,15 @@ void Scene::RenderBoundingBoxes()
 	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD_WIRE);
 	Renderer::SetShader(Renderer::m_whiteShader);
 
-	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
+	static int cubeIndex = 0;
+	
+	Cube cube;
+	for (auto entity : m_EntityList) {
 
-		Cube cube = Cube();
-		cube.SetPosition((*it)->GetWorldPosition());
-		cube.SetScale((*it)->GetWorldScale() * (*it)->GetBoundingBox()->GetBoundingScale());
+		cube.SetPosition(entity->GetWorldPosition());
+		cube.SetScale(entity->GetWorldScale() * entity->GetBoundingBox().GetBoundingScale());
 		mat4 MVPmatrix = SetModelViewProjectionMatrix(cube.GetWorldMatrix());
 
-		Renderer::Render(&(Entity)cube, MVPmatrix);
+		Renderer::Render(cube, MVPmatrix);
 	}
 }

@@ -13,15 +13,9 @@ Cube::Cube()
 	Create();
 }
 
-Cube::~Cube()
-{
-	Delete();
-}
-
 void Cube::Create()
 {
-	
-	GLfloat vertexBuffer[] = {
+	static GLfloat vertexBuffer[] = {
 		-1.0*0.5, -1.0*0.5, -1.0*0.5, // 0
 		1.0*0.5, -1.0*0.5, -1.0*0.5, // 1
 		1.0*0.5,  1.0*0.5, -1.0*0.5, // 2
@@ -32,9 +26,9 @@ void Cube::Create()
 		-1.0*0.5,  1.0*0.5,  1.0*0.5 // 7
 	};
 	
-	m_bbox->SetBoundingBox(vec3(-0.5), vec3(0.5));
+	m_bbox.SetBoundingBox(vec3(-0.5), vec3(0.5));
 
-	GLfloat normalBuffer[] = {
+	static GLfloat normalBuffer[] = {
 		-1.0, -1.0, -1.0, // 0
 		1.0, -1.0, -1.0, // 1
 		1.0,  1.0, -1.0, // 2
@@ -44,8 +38,8 @@ void Cube::Create()
 		1.0,  1.0,  1.0, // 6
 		-1.0,  1.0,  1.0 // 7
 	};
-	
-	GLfloat texcoordBuffer[] = {
+
+	static GLfloat texcoordBuffer[] = {
 		0.75f, 1 / 3.0f,
 		0.75f, 2 / 3.0f,
 		0.5f,  2 / 3.0f,
@@ -56,7 +50,7 @@ void Cube::Create()
 		0.25f, 1 / 3.0f,
 	};
 	
-	GLfloat colorBuffer[] = {
+	static GLfloat colorBuffer[] = {
 		1.0f, 0.0f, 0.0f,
 		1.0f, 0.0f, 1.0f,
 		1.0f, 0.0f, 1.0f,
@@ -67,7 +61,7 @@ void Cube::Create()
 		0.0f, 0.0f, 1.0f
 	};
 	
-	GLint indexBuffer[] = {
+	static GLint indexBuffer[] = {
 		0,2,1, //Front
 		0,3,2,
 
@@ -87,40 +81,37 @@ void Cube::Create()
 		0,5,4
 	};
 	
-	GLuint normalBufferObject;
-	GLuint texcoordBufferObject;
-	GLuint colorBufferObject;
 
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 
 	//Vertex Buffer
-	glGenBuffers(1, &m_vboVertex);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vboVertex);
+	glGenBuffers(1, &m_vertexArrayBuffers.position);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.position);
 	glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(GLfloat), vertexBuffer, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	//Vertex Normal Buffer
-	glGenBuffers(1, &normalBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, normalBufferObject);
+	glGenBuffers(1, &m_vertexArrayBuffers.normal);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.normal);
 	glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(GLfloat), normalBuffer, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	//Vertex Texcoord Buffer
-	glGenBuffers(1, &texcoordBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, texcoordBufferObject);
+	glGenBuffers(1, &m_vertexArrayBuffers.texcoord);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
 	glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), texcoordBuffer, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 	//Vertex Color Buffer
-	glGenBuffers(1, &colorBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, colorBufferObject);
+	glGenBuffers(1, &m_vertexArrayBuffers.color);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.color);
 	glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(GLfloat), colorBuffer, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(3);

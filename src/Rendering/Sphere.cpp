@@ -10,20 +10,14 @@ Sphere::Sphere()
 {
 	isInited = false;
 	m_vao = 0;
-	m_vboVertex = 0;
 	m_vboIndex = 0;
 
 	lats = 40;
 	longs = 40;
-	Init();
+	Create();
 }
 
-Sphere::~Sphere()
-{
-
-}
-
-void Sphere::Init()
+void Sphere::Create()
 {
 	std::vector<GLfloat> sphere_vertices;
 	std::vector<GLfloat> sphere_normals;
@@ -72,8 +66,8 @@ void Sphere::Init()
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 
-	glGenBuffers(1, &m_vboVertex);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vboVertex);
+	glGenBuffers(1, &m_vertexArrayBuffers.position);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.position);
 	glBufferData(GL_ARRAY_BUFFER, sphere_vertices.size() * sizeof(GLfloat), sphere_vertices.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
@@ -88,27 +82,7 @@ void Sphere::Init()
 	isInited = true;
 }
 
-void Sphere::cleanup()
-{
-	if (!isInited) {
-		return;
-	}
-	if (m_vboVertex) {
-		glDeleteBuffers(1, &m_vboVertex);
-	}
-	if (m_vboIndex) {
-		glDeleteBuffers(1, &m_vboIndex);
-	}
-	if (m_vao) {
-		glDeleteVertexArrays(1, &m_vao);
-	}
-
-	isInited = false;
-	m_vao = 0;
-	m_vboVertex = 0;
-	m_vboIndex = 0;
-}
-
+/*
 void Sphere::draw()
 {
 	if (!isInited) {
@@ -122,3 +96,4 @@ void Sphere::draw()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vboIndex);
 	glDrawElements(GL_QUAD_STRIP, numsToDraw, GL_UNSIGNED_INT, NULL);
 }
+*/

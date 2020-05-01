@@ -27,7 +27,7 @@ void TextMesh::SetText(string text)
 	m_stringSize = m_textString.size();
 }
 
-void TextMesh::CreateMesh()
+void TextMesh::Create()
 {
 	int stringLength = m_textString.size();
 	vector<GLfloat> meshVertices;
@@ -98,31 +98,28 @@ void TextMesh::CreateMesh()
 		meshNormals.push_back(1.0f);
 	}
 
-	GLuint dataBufferObject;
-	GLuint normalBufferObject;
-
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 
 	//Vertex Buffer
-	glGenBuffers(1, &m_vboVertex);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vboVertex);
+	glGenBuffers(1, &m_vertexArrayBuffers.position);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.position);
 	glBufferData(GL_ARRAY_BUFFER, meshVertices.size() * sizeof(GLfloat), meshVertices.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	//Vertex Buffer
-	glGenBuffers(1, &normalBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, normalBufferObject);
+	glGenBuffers(1, &m_vertexArrayBuffers.normal);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.normal);
 	glBufferData(GL_ARRAY_BUFFER, meshNormals.size() * sizeof(GLfloat), meshNormals.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	//Vertex Texcoord Buffer
-	glGenBuffers(1, &m_texcoordBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, m_texcoordBufferObject);
+	glGenBuffers(1, &m_vertexArrayBuffers.texcoord);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
 	glBufferData(GL_ARRAY_BUFFER, meshTexcoords.size() * sizeof(GLfloat), meshTexcoords.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(2);
@@ -157,7 +154,7 @@ void TextMesh::UpdateText(string newText)
 
 	if (oldTextStringSize < m_stringSize)
 	{
-		CreateMesh();
+		Create();
 		printf("Redid text! Old size: %d new size: %d\n", oldTextStringSize, m_stringSize);
 		return;
 	}
@@ -193,7 +190,7 @@ void TextMesh::UpdateText(string newText)
 	GLuint dataBufferObject;
 	GLuint normalBufferObject;
 	
-	glBindBuffer(GL_ARRAY_BUFFER, m_texcoordBufferObject);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
 	glBufferData(GL_ARRAY_BUFFER, meshTexcoords.size() * sizeof(GLfloat), meshTexcoords.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

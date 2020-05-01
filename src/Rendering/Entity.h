@@ -10,6 +10,8 @@
 
 using namespace glm;
 
+typedef unsigned int uint32;
+
 class BBox
 {
 public:
@@ -47,6 +49,14 @@ public:
 	vec3 m_min = vec3(0.0);
 };
 
+struct VertexArrayBuffers
+{
+	uint32 position;
+	uint32 normal;
+	uint32 color;
+	uint32 texcoord;
+};
+
 class Entity
 {
 public:
@@ -81,7 +91,6 @@ public:
 
 
 	GLuint GetVao()				{ return m_vao; };
-	GLuint GetVboVertex()		{ return m_vboVertex; };
 	GLuint GetVboIndex()		{ return m_vboIndex; };
 	GLuint GetSize()			{ return m_triangleSize; };
 	GLuint GetShader()			{ return m_shader; };
@@ -120,10 +129,10 @@ public:
 	void SetRenderStyle(int renderStyle) { m_renderStyle = renderStyle; };
 	int GetRenderStyle() { return m_renderStyle; };
 
-	void SetBoundingBox(BBox* bbox) { m_bbox = bbox; };
-	BBox* GetBoundingBox() { return m_bbox; };
+	void SetBoundingBox(BBox bbox) { m_bbox = bbox; };
+	BBox GetBoundingBox() { return m_bbox; };
 
-	BBox* m_bbox;
+	BBox m_bbox;
 
 protected:
 
@@ -139,13 +148,14 @@ protected:
 	Entity* m_parent = NULL;
 	std::vector<Entity*> m_children;
 
-	GLuint 
+	uint32
 		m_vao, 
-		m_vboVertex, 
 		m_vboIndex, 
 		m_triangleSize,
 		m_shader;
-
+	
+	VertexArrayBuffers m_vertexArrayBuffers;
+	
 	Material* m_material;
 	int m_renderStyle = 0;
 };

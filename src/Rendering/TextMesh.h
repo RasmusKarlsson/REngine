@@ -1,7 +1,5 @@
 #pragma once
-#include <GL/glew.h>
 
-#include <vector>
 #include <iostream>
 #include "Entity.h"
 
@@ -19,13 +17,12 @@ public:
 
 	unsigned int GetStringSize() { return m_stringSize; };
 
-	void CreateMesh();
+	void Create();
 
 	void UpdateText(string newText);
 
 private:
 
-	GLuint m_texcoordBufferObject;
 	unsigned int m_stringSize;
 	string m_textString;
 };

@@ -6,29 +6,48 @@
 
 #include "Entity.h"
 
+#include <string>
+
 Entity::Entity()
 {
 	m_name = "DefaultEntity";
 	m_renderStyle = RENDERSTYLE_STANDARD;
-	m_bbox = new BBox();
+	m_bbox = BBox();
+
+	m_vao = 0;
+	m_vboIndex = 0;
+
+	m_triangleSize = 0;
+	m_shader = 0;
+	m_material = nullptr;
 	UpdateMatrices();
 }
 
 
 Entity::~Entity()
 {
+	Delete();
 }
 
 void Entity::Delete()
 {
-	for (auto it = begin(m_children); it != end(m_children); ++it) {
-		(*it)->Kill();
+	for (auto children : m_children) {
+		children->Kill();
 	}
 
 	m_children.clear();
 
-	if (m_vboVertex) {
-		glDeleteBuffers(1, &m_vboVertex);
+	if (m_vertexArrayBuffers.position) {
+		glDeleteBuffers(1, &m_vertexArrayBuffers.position);
+	}
+	if (m_vertexArrayBuffers.normal) {
+		glDeleteBuffers(1, &m_vertexArrayBuffers.normal);
+	}
+	if (m_vertexArrayBuffers.color) {
+		glDeleteBuffers(1, &m_vertexArrayBuffers.color);
+	}
+	if (m_vertexArrayBuffers.texcoord) {
+		glDeleteBuffers(1, &m_vertexArrayBuffers.texcoord);
 	}
 	if (m_vboIndex) {
 		glDeleteBuffers(1, &m_vboIndex);
@@ -38,8 +57,11 @@ void Entity::Delete()
 	}
 
 	m_vao = 0;
-	m_vboVertex = 0;
 	m_vboIndex = 0;
+	
+	m_triangleSize = 0;
+	m_shader = 0;
+	m_material = nullptr;
 
 	m_dead = true;
 }
@@ -71,8 +93,8 @@ void Entity::UpdateMatrices()
 void Entity::SetDirty()
 {
 	m_dirty = true;
-	for (auto it = begin(m_children); it != end(m_children); ++it) {
-		(*it)->SetDirty();
+	for(auto children : m_children) {
+		children->SetDirty();
 	}
 }
 
@@ -92,8 +114,8 @@ void Entity::SetParent(Entity* parent)
 void Entity::AddChild(Entity* child)
 {
 	//Dont add it twice
-	for (auto it = begin(m_children); it != end(m_children); ++it) {
-		if ((*it) == child) return;
+	for (auto children : m_children) {
+		if (children == child) return;
 	}
 
 	if (child->GetParent() == NULL)

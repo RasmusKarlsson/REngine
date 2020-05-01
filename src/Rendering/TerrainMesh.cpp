@@ -79,24 +79,22 @@ void TerrainMesh::Create(int width, int depth)
 
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
-	glGenBuffers(1, &m_vboVertex);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vboVertex);
+	glGenBuffers(1, &m_vertexArrayBuffers.position);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.position);
 	glBufferData(GL_ARRAY_BUFFER, width * depth * 3 * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	GLuint normalBufferObject;
-	glGenBuffers(1, &normalBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, normalBufferObject);
+	glGenBuffers(1, &m_vertexArrayBuffers.normal);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.normal);
 	glBufferData(GL_ARRAY_BUFFER, width * depth * 3 * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	GLuint texcoordBufferObject;
-	glGenBuffers(1, &texcoordBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, texcoordBufferObject);
+	glGenBuffers(1, &m_vertexArrayBuffers.texcoord);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
 	glBufferData(GL_ARRAY_BUFFER, width * depth * 2 * sizeof(GLfloat), texcoords.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(2);
@@ -133,7 +131,7 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 	m_size = 0.1f;
 
 
-	m_bbox->SetBoundingBox(vec3(0.0f), vec3(width, m_size*m_heightScale*256.0f, depth));
+	m_bbox.SetBoundingBox(vec3(0.0f), vec3(width, m_size*m_heightScale*256.0f, depth));
 
 	GLfloat vertexBuffer[64 * 3] = { 0.0f };
 
@@ -198,24 +196,22 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
-	glGenBuffers(1, &m_vboVertex);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vboVertex);
+	glGenBuffers(1, &m_vertexArrayBuffers.position);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.position);
 	glBufferData(GL_ARRAY_BUFFER, width * depth * 3 * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	GLuint normalBufferObject;
-	glGenBuffers(1, &normalBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, normalBufferObject);
+	glGenBuffers(1, &m_vertexArrayBuffers.normal);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.normal);
 	glBufferData(GL_ARRAY_BUFFER, width * depth * 3 * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	GLuint texcoordBufferObject;
-	glGenBuffers(1, &texcoordBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, texcoordBufferObject);
+	glGenBuffers(1, &m_vertexArrayBuffers.texcoord);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
 	glBufferData(GL_ARRAY_BUFFER, width * depth * 2 * sizeof(GLfloat), texcoords.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(2);
@@ -295,7 +291,7 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, int xStart, int ySt
 	m_heightScale = 1.0f;
 	m_size = 0.1f;
 
-	m_bbox->SetBoundingBox(vec3(0.0f), vec3(width, m_size*m_heightScale*256.0f, depth));
+	m_bbox.SetBoundingBox(vec3(0.0f), vec3(width, m_size*m_heightScale*256.0f, depth));
 
 	vector<GLfloat> vertices;
 	vector<GLfloat> normals;
@@ -358,24 +354,22 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, int xStart, int ySt
 
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
-	glGenBuffers(1, &m_vboVertex);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vboVertex);
+	glGenBuffers(1, &m_vertexArrayBuffers.position);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.position);
 	glBufferData(GL_ARRAY_BUFFER, width * depth * 3 * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	GLuint normalBufferObject;
-	glGenBuffers(1, &normalBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, normalBufferObject);
+	glGenBuffers(1, &m_vertexArrayBuffers.normal);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.normal);
 	glBufferData(GL_ARRAY_BUFFER, width * depth * 3 * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	GLuint texcoordBufferObject;
-	glGenBuffers(1, &texcoordBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, texcoordBufferObject);
+	glGenBuffers(1, &m_vertexArrayBuffers.texcoord);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
 	glBufferData(GL_ARRAY_BUFFER, width * depth * 2 * sizeof(GLfloat), texcoords.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(2);

@@ -5,6 +5,6 @@ class Quad : public Entity
 {
 public:
 	Quad();
-	~Quad();
+private:
 	void Create();
 };
