@@ -189,6 +189,7 @@
     <ClCompile Include="src\Rendering\Texture.cpp" />
     <ClCompile Include="src\Rendering\WASDCamera.cpp" />
     <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\Stats.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -212,6 +213,7 @@
     <ClInclude Include="src\Rendering\Texture.h" />
     <ClInclude Include="src\Rendering\WASDCamera.h" />
     <ClInclude Include="src\Scene.h" />
+    <ClInclude Include="src\Stats.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>

@@ -14,7 +14,7 @@ Quad::Quad()
 
 void Quad::Create()
 {
-	static GLfloat vertexBuffer[] = {
+	static vector<float> vertexBuffer = {
 		-1.0f, -1.0f, 0.0f,
 		-1.0f,  1.0f, 0.0f,
 		1.0f,  1.0f, 0.0f,
@@ -23,28 +23,28 @@ void Quad::Create()
 
 	m_bbox.SetBoundingBox(vec3(-1.0f, -1.0f, -0.001f), vec3(1.0f, 1.0f, 0.001f));
 
-	static GLfloat normalBuffer[] = {
+	static vector<float> normalBuffer = {
 		0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f
 	};	
 
-	static GLfloat texcoordBuffer[] = {
+	static vector<float> texcoordBuffer = {
 		0.0f, 1.0f,
 		0.0f, 0.0f,
 		1.0f, 0.0f,
 		1.0f, 1.0f
 	};
 
-	static GLfloat colorBuffer[] = {
+	static vector<float> colorBuffer = {
 		1.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 1.0f,
 		1.0f, 1.0f, 1.0f
 	};
 
-	static GLint indexBuffer[] = {
+	static vector<int> indexBuffer = {
 		0,2,1,
 		0,3,2
 	};
@@ -55,7 +55,7 @@ void Quad::Create()
 	//Vertex Buffer
 	glGenBuffers(1, &m_vertexArrayBuffers.position);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.position);
-	glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), vertexBuffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertexBuffer.size() * sizeof(GLfloat), vertexBuffer.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -63,7 +63,7 @@ void Quad::Create()
 	//Vertex Normal Buffer
 	glGenBuffers(1, &m_vertexArrayBuffers.normal);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.normal);
-	glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), normalBuffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, normalBuffer.size() * sizeof(GLfloat), normalBuffer.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -71,7 +71,7 @@ void Quad::Create()
 	//Vertex Texcoord Buffer
 	glGenBuffers(1, &m_vertexArrayBuffers.texcoord);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
-	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), texcoordBuffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, texcoordBuffer.size() * sizeof(GLfloat), texcoordBuffer.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
@@ -79,7 +79,7 @@ void Quad::Create()
 	//Vertex Color Buffer
 	glGenBuffers(1, &m_vertexArrayBuffers.color);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.color);
-	glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), colorBuffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, colorBuffer.size() * sizeof(GLfloat), colorBuffer.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(3);
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -87,10 +87,13 @@ void Quad::Create()
 	//Index Buffer Object
 	glGenBuffers(1, &m_vboIndex);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vboIndex);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(GLint), indexBuffer, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.size() * sizeof(GLint), indexBuffer.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	m_triangleSize = 6;
+	m_triangleCount = vertexBuffer.size();
+	m_indexSize = indexBuffer.size();
+	
+	m_created = true;
 }

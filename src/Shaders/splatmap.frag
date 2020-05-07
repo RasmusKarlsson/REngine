@@ -81,10 +81,11 @@ void main()
 	vec3 normal = v_Normal+4.0*(texture2D(Sampler4, 5.0*v_Texcoord).rgb-0.5);
     normal = normalize(normal);
    // normal = normalize(normal * 2.0 - 1.0);
-	vec3 lightDir = normalize(vec3(0.0,-1.0,0.0));
-	float light = max(0.0,0.5+0.5*dot(-lightDir,normal));
+	vec3 lightDir = normalize(vec3(-1.0,-1.0,0.0));
+	float light = max(0.0,0.25+0.5*dot(-lightDir,normal));
 	gl_FragColor.rgb *=light;
 	vec3 fogColor = vec3(110.0f,125.0f,142.0f)/255.0f;
-	gl_FragColor.rgb = mix(gl_FragColor.rgb, fogColor, v_fogAmount);
+	//gl_FragColor.rgb = mix(gl_FragColor.rgb, fogColor, v_fogAmount);
 	//gl_FragColor.rgb = vec3(1.0/64.0*v_Texcoord,0.0);
+	//gl_FragColor.rgb = vec3(0.5+0.5*normal);
 }

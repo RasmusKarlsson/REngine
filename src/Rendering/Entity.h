@@ -57,6 +57,11 @@ struct VertexArrayBuffers
 	uint32 texcoord;
 };
 
+struct Triangle
+{
+	glm::u32vec3 t;
+};
+
 class Entity
 {
 public:
@@ -79,21 +84,21 @@ public:
 	void SetName(string name) { m_name = name; };
 	string GetName() { return m_name; };
 
-	mat4 GetWorldMatrix()		{ if (IsDirty()) UpdateMatrices(); return m_WorldMatrix; };
-	mat4 GetInvModelMatrix()	{ return m_ModelMatrixInv; };
-	vec3 GetPosition()			{ return m_LocalPosition; };
-	vec3 GetScale()				{ return m_LocalScale; };
-	vec3 GetRotation()			{ return m_LocalRotation; };
+	mat4 GetWorldMatrix()			{ if (IsDirty()) UpdateMatrices(); return m_WorldMatrix; };
+	mat4 GetInvModelMatrix() const	{ return m_ModelMatrixInv; };
+	vec3 GetPosition() const		{ return m_LocalPosition; };
+	vec3 GetScale() const			{ return m_LocalScale; };
+	vec3 GetRotation() const 		{ return m_LocalRotation; };
+	vec3 GetWorldPosition()			{ return vec3(m_WorldMatrix[3]); };
+	vec3 GetWorldScale() const;
+	vec3 GetWorldRotation() const;
 
-	vec3 GetWorldPosition()		{ return vec3(m_WorldMatrix[3]); };
-	vec3 GetWorldScale();
-	vec3 GetWorldRotation();
 
-
-	GLuint GetVao()				{ return m_vao; };
-	GLuint GetVboIndex()		{ return m_vboIndex; };
-	GLuint GetSize()			{ return m_triangleSize; };
-	GLuint GetShader()			{ return m_shader; };
+	GLuint GetVao()	const			{ return m_vao; };
+	GLuint GetVboIndex() const		{ return m_vboIndex; };
+	GLuint GetTriangleCount() const	{ return m_triangleCount; };
+	GLuint GetIndexSize() const		{ return m_indexSize; };
+	GLuint GetShader() const		{ return m_shader; };
 
 	void SetPosition(vec3 position)		{ m_LocalPosition = position;	SetDirty(); };
 	void SetScale(vec3 scale)			{ m_LocalScale = scale;			SetDirty();	};
@@ -110,29 +115,29 @@ public:
 	void MulScale(vec3 scale) { m_LocalScale *= scale;			SetDirty(); };
 
 	void UpdateMatrices();
-	bool IsDirty() { return m_dirty; };
+	bool IsDirty() const { return m_dirty; };
 	void SetDirty();
-	bool m_dirty = true;
+	
+	bool IsCreated() const { return m_created; };
 
-	bool IsDead() { return m_dead; };
+	bool IsDead() const { return m_dead; };
 	void Kill() { m_dead = true; };
+	
 
-	bool m_dead = false;
 
 	void SetParent(Entity* parent);
-	Entity* GetParent() { return m_parent; };
+	Entity* GetParent() const { return m_parent; };
 	void AddChild(Entity* child);
 
 	void SetMaterial(Material* material) { m_material = material; };
-	Material* GetMaterial() { return m_material; };
+	Material* GetMaterial() const { return m_material; };
 
 	void SetRenderStyle(int renderStyle) { m_renderStyle = renderStyle; };
-	int GetRenderStyle() { return m_renderStyle; };
+	int GetRenderStyle() const { return m_renderStyle; };
 
 	void SetBoundingBox(BBox bbox) { m_bbox = bbox; };
-	BBox GetBoundingBox() { return m_bbox; };
+	BBox GetBoundingBox() const { return m_bbox; };
 
-	BBox m_bbox;
 
 protected:
 
@@ -151,12 +156,17 @@ protected:
 	uint32
 		m_vao, 
 		m_vboIndex, 
-		m_triangleSize,
+		m_triangleCount,
+		m_indexSize,
 		m_shader;
 	
 	VertexArrayBuffers m_vertexArrayBuffers;
-	
 	Material* m_material;
+	
+	BBox m_bbox;
 	int m_renderStyle = 0;
+	bool m_dirty = true;
+	bool m_dead = false;
+	bool m_created = false;
 };
 

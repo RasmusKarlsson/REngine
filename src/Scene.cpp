@@ -18,6 +18,7 @@
 #include "MathHelpers.h"
 
 #include "OrbitCamera.h"
+#include "Stats.h"
 #include "WASDCamera.h"
 
 extern double timeElapsed;
@@ -25,13 +26,15 @@ extern int SCREEN_WIDTH;
 extern int SCREEN_HEIGHT;
 
 static bool m_bRenderWire = false; 
-static bool m_bRenderBBox = false;
+static bool m_bRenderBBox = false; 
+static bool m_bShowStats  = false;
 
 
 Scene::Scene()
 {
 	Renderer::CompileShaders();
 
+	//Camera
 	m_currentCamera = new OrbitCamera();
 	m_currentCamera->SetOrbitDistance(5.0f);
 	m_currentCamera->SetCameraPosition(vec3(0.0f, 5.0f, 5.0f));
@@ -46,9 +49,14 @@ Scene::Scene()
 
 	//m_fbo1->RenderToTexture(false);
 
+	//Debug font
+	m_debugFontTexture = new Texture("res/Textures/font2.png");
+	m_debugFontMaterial = new Material();
+	m_debugFontMaterial->SetDiffuseTexture(m_debugFontTexture);
+	m_debugFontMaterial->SetShader(Renderer::m_textShader);
+
 	m_fullscreenQuad = new Quad();
 
-	
 	Texture* tex = new Texture();
 	tex->CreateFromFile("res/Textures/splatmap.png");
 
@@ -116,12 +124,9 @@ Scene::Scene()
 	AddEntity(m_cursorMesh);
 	
 	m_fpsMesh = new TextMesh();
-	Material* fontMat = new Material();
-	Texture* fontTex = new Texture();
-	fontMat->SetShader(Renderer::m_textShader);
-	fontTex->CreateFromFile("res/Textures/font2.png");
-	fontMat->SetDiffuseTexture(fontTex);
-	m_fpsMesh->SetMaterial(fontMat);
+	m_fpsMesh->SetText("FPS: 0.00");
+	m_fpsMesh->Create();
+	m_fpsMesh->SetMaterial(m_debugFontMaterial);
 	m_fpsMesh->SetScale(8.0f / SCREEN_WIDTH, 8.0f / SCREEN_HEIGHT, 1.0f);
 	m_fpsMesh->SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, 30.0f));
 	AddEntity(m_fpsMesh);
@@ -161,6 +166,8 @@ void Scene::AddEntity(Entity* entity)
 
 void Scene::UpdateScene(double dt)
 {
+	Stats::Reset();
+	
 	static double counter = 0.0;
 	counter = (1.0 / dt);
 	std::string intAsString = std::to_string(counter);
@@ -193,6 +200,9 @@ void Scene::UpdateScene(double dt)
 	if (Input::IsPressedOnce('B')) {
 		m_bRenderBBox = !m_bRenderBBox;
 	}
+	if (Input::IsPressedOnce('S')) {
+		m_bShowStats = !m_bShowStats;
+	}
 
 	if (Input::IsPressedOnce('M')) {
 		glEnable(GL_MULTISAMPLE);
@@ -218,7 +228,7 @@ void Scene::UpdateScene(double dt)
 		}
 	}
 
-	m_currentCamera->UpdateCameraState(dt);
+	m_currentCamera->UpdateCameraState(static_cast<float>(dt));
 	m_currentCamera->CreateLookAtMatrix();
 
 	for (auto it = begin(m_EntityList); it != end(m_EntityList);) {
@@ -339,12 +349,17 @@ void Scene::RenderScene(double dt)
 	
 	if (m_bRenderWire)
 	{
-		Scene::RenderWireFrame();
+		RenderWireFrame();
 	}
 	
 	if (m_bRenderBBox)
 	{
-		Scene::RenderBoundingBoxes();
+		RenderBoundingBoxes();
+	}
+
+	if(m_bShowStats)
+	{
+		RenderStats();
 	}
 }
 
@@ -368,8 +383,6 @@ void Scene::RenderBoundingBoxes()
 	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD_WIRE);
 	Renderer::SetShader(Renderer::m_whiteShader);
 
-	static int cubeIndex = 0;
-	
 	Cube cube;
 	for (auto entity : m_EntityList) {
 
@@ -379,4 +392,47 @@ void Scene::RenderBoundingBoxes()
 
 		Renderer::Render(cube, MVPmatrix);
 	}
+}
+
+void Scene::RenderStats()
+{
+	static TextMesh statsMesh;
+	if(!statsMesh.IsCreated())
+	{
+		statsMesh.Create();
+		statsMesh.SetMaterial(m_debugFontMaterial);
+		statsMesh.SetScale(8.0f / SCREEN_WIDTH, 8.0f / SCREEN_HEIGHT, 1.0f);
+	}
+
+	Renderer::SetRenderStyle(Entity::RENDERSTYLE_2D);
+	Renderer::SetShader(Renderer::m_textShader);
+
+	float height = 50.0f;
+
+	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
+	statsMesh.UpdateText("Entities:           " + std::to_string(m_EntityList.size())); statsMesh.UpdateMatrices();
+	Renderer::Render(statsMesh, statsMesh.GetWorldMatrix()); height += 10.0f;
+	
+	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
+	statsMesh.UpdateText("Shader Binds:       " + std::to_string(Stats::s_shaderBounds)); statsMesh.UpdateMatrices();
+	Renderer::Render(statsMesh, statsMesh.GetWorldMatrix()); height += 10.0f;
+
+	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
+	statsMesh.UpdateText("Texture Binds:      " + std::to_string(Stats::s_textureBounds)); statsMesh.UpdateMatrices();
+	Renderer::Render(statsMesh, statsMesh.GetWorldMatrix()); height += 10.0f;
+
+	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
+	statsMesh.UpdateText("Render Style Binds: " + std::to_string(Stats::s_renderStyleChanges)); statsMesh.UpdateMatrices();
+	Renderer::Render(statsMesh, statsMesh.GetWorldMatrix()); height += 10.0f;
+	
+	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
+	statsMesh.UpdateText("Vertex Count:       " + std::to_string(Stats::s_vertexCount)); statsMesh.UpdateMatrices();
+	Renderer::Render(statsMesh, statsMesh.GetWorldMatrix()); height += 10.0f;
+	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
+	
+	statsMesh.UpdateText("Index Count:        " + std::to_string(Stats::s_indexCount)); statsMesh.UpdateMatrices();
+	Renderer::Render(statsMesh, statsMesh.GetWorldMatrix()); height += 10.0f;
+
+
+	
 }

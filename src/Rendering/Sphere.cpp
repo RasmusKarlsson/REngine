@@ -77,7 +77,7 @@ void Sphere::Create()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vboIndex);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere_indices.size() * sizeof(GLint), sphere_indices.data(), GL_STATIC_DRAW);
 
-	m_triangleSize = sphere_indices.size();
+	m_triangleCount = sphere_indices.size();
 
 	isInited = true;
 }

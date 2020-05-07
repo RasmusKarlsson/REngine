@@ -1,10 +1,10 @@
 #pragma once
 #include <GL/glew.h>
-
 #include <vector>
-#include <iostream>
 
 using namespace std;
+
+static unsigned int s_boundTextures[32] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
 class Texture
 {

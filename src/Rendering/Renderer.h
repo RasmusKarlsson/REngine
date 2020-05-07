@@ -16,13 +16,14 @@ class Renderer
 public:
 
 	static void SetShader(GLuint shader);
+	static void BindTextures(Material* material);
 	static void ClearBuffer();
 	static void SetClearColor(vec4 color) { m_clearColor = color; };
 	static void SetRenderStyle(int renderStyle);
 
 	static int m_currentRenderStyle;
 
-	static void Render(Entity& entity, mat4 wvpMatrix);
+	static void Render(Entity& entity, mat4 wvpMatrix = mat4(1.0));
 	static void RenderFullscreenQuad();
 	static void CompileShaders();
 

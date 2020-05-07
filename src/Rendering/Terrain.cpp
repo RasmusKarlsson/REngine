@@ -65,12 +65,13 @@ void Terrain::CreateTerrainMesh()
 		for (int y = 0; y < m_nrPatchesHeight; y++)
 		{
 			m_terrainPatches[y*m_nrPatchesWidth + x] = new TerrainMesh();
-			m_terrainPatches[y*m_nrPatchesWidth +x]->CreatePatchFromHeightmap(m_heightMap, x*PATCHSIZE, y*PATCHSIZE, PATCHSIZE+1);
+			m_terrainPatches[y*m_nrPatchesWidth + x]->CreatePatchFromHeightmap(m_heightMap, x*PATCHSIZE, y*PATCHSIZE, PATCHSIZE+1);
 			m_terrainPatches[y*m_nrPatchesWidth + x]->SetPosition(vec3(x*PATCHSIZE - PATCHSIZE / 2, 0.0, y*PATCHSIZE - PATCHSIZE / 2));
+
+			m_terrainPatches[y*m_nrPatchesWidth + x]->SetLod(x);
 		}
 	}
 	m_nrLods = m_terrainPatches[0]->GetNrLods();
-	//m_terrainMesh->CreatePatchFromHeightmap(m_heightMap, 0, 0, 33);
 }
 
 void Terrain::SetHeightMap(string filename)
@@ -135,7 +136,7 @@ void Terrain::Render(mat4 vpMatrix, Camera* camera)
 			int colorIndex = (x+y) % 13;
 			glUniform4fv(glGetUniformLocation(Renderer::m_currentShader, "Color"), 1, value_ptr(g_colorList[colorIndex]));
 
-			UpdatePatchLod(m_terrainPatches[y*m_nrPatchesWidth + x], camPos);
+//			UpdatePatchLod(m_terrainPatches[y*m_nrPatchesWidth + x], camPos);
 			Renderer::Render(*m_terrainPatches[y*m_nrPatchesWidth + x], vpMatrix * m_terrainPatches[y*m_nrPatchesWidth + x]->GetWorldMatrix());
 		}
 	}

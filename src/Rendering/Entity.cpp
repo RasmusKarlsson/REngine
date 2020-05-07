@@ -17,7 +17,8 @@ Entity::Entity()
 	m_vao = 0;
 	m_vboIndex = 0;
 
-	m_triangleSize = 0;
+	m_triangleCount = 0;
+	m_indexSize = 0;
 	m_shader = 0;
 	m_material = nullptr;
 	UpdateMatrices();
@@ -59,24 +60,25 @@ void Entity::Delete()
 	m_vao = 0;
 	m_vboIndex = 0;
 	
-	m_triangleSize = 0;
+	m_triangleCount = 0;
 	m_shader = 0;
 	m_material = nullptr;
+	m_created = false;
 
 	m_dead = true;
 }
 
 void Entity::UpdateMatrices()
 {
-	m_ModelMatrix = translate(mat4(1.0f), m_LocalPosition);
-
-	m_ModelMatrix = rotate(m_ModelMatrix, m_LocalRotation.x, vec3(1, 0, 0));
-	m_ModelMatrix = rotate(m_ModelMatrix, m_LocalRotation.y, vec3(0, 1, 0));
-	m_ModelMatrix = rotate(m_ModelMatrix, m_LocalRotation.z, vec3(0, 0, 1));
-
-	m_ModelMatrix = scale(m_ModelMatrix, m_LocalScale);
-
-	m_ModelMatrixInv = inverse(m_ModelMatrix);
+	if(m_dirty)
+	{
+		m_ModelMatrix = translate(mat4(1.0f), m_LocalPosition);
+		m_ModelMatrix = rotate(m_ModelMatrix, m_LocalRotation.x, vec3(1, 0, 0));
+		m_ModelMatrix = rotate(m_ModelMatrix, m_LocalRotation.y, vec3(0, 1, 0));
+		m_ModelMatrix = rotate(m_ModelMatrix, m_LocalRotation.z, vec3(0, 0, 1));
+		m_ModelMatrix = scale(m_ModelMatrix, m_LocalScale);
+		m_ModelMatrixInv = inverse(m_ModelMatrix);
+	}
 
 	if (m_parent != NULL)
 	{
@@ -119,8 +121,11 @@ void Entity::AddChild(Entity* child)
 	}
 
 	if (child->GetParent() == NULL)
+	{
 		child->SetParent(this);
-	else{
+	}
+	else
+	{
 		m_children.push_back(child);
 	}
 	
@@ -150,14 +155,14 @@ void Entity::SetRotation(float x, float y, float z)
 	SetDirty();
 }
 
-vec3 Entity::GetWorldScale()
+vec3 Entity::GetWorldScale() const
 {
 	vec3 scale; quat rotation; vec3 translation; vec3 skew; vec4 perspective;
 	decompose(m_WorldMatrix, scale, rotation, translation, skew, perspective);
 	return scale;
 }
 
-vec3 Entity::GetWorldRotation()
+vec3 Entity::GetWorldRotation() const
 {
 	vec3 scale; quat rotation; vec3 translation; vec3 skew; vec4 perspective;
 	decompose(m_WorldMatrix, scale, rotation, translation, skew, perspective);

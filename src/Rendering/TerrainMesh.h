@@ -13,7 +13,7 @@ public:
 	void Create(int width, int depth);
 
 	void CreateFromHeightmap(Texture* texture);
-	void CreatePatchFromHeightmap(Texture* texture, int xStart, int yStart, int patchSize);
+	void CreatePatchFromHeightmap(Texture* texture, uint32 xStart, uint32 yStart, uint32 patchSize);
 
 	ivec2 GetResolution() { return m_resolution; }
 
@@ -32,6 +32,7 @@ private:
 
 	vector<GLuint> m_lodBufferObjects;
 	vector<GLuint> m_lodTriangleSize;
+	vector<GLuint> m_lodIndexSize;
 	int m_currentLod;
 	int m_nrLods;
 };

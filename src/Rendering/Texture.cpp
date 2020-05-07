@@ -8,6 +8,9 @@
 #include <lodepng.cpp>
 #include "hdrloader.h"
 #include "Texture.h"
+#include "Stats.h"
+
+#include <iostream>
 
 Texture::Texture()
 {
@@ -174,7 +177,13 @@ void Texture::SetParameter(GLuint param, GLuint value)
 void Texture::Bind(GLuint slot)
 {
 	glActiveTexture(GL_TEXTURE0+ slot);
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
+
+	if(s_boundTextures[slot] != m_textureID)
+	{
+		glBindTexture(GL_TEXTURE_2D, m_textureID);
+		s_boundTextures[slot] = m_textureID;
+		Stats::s_textureBounds++;
+	}
 }
 
 void Texture::RenderToTexture(bool clear)

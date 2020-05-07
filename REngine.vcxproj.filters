@@ -81,6 +81,9 @@
     <ClCompile Include="deps\HDRLoader\hdrloader.cpp">
       <Filter>Libs</Filter>
     </ClCompile>
+    <ClCompile Include="src\Stats.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Window.h">
@@ -145,6 +148,9 @@
     </ClInclude>
     <ClInclude Include="deps\HDRLoader\hdrloader.h">
       <Filter>Libs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Stats.h">
+      <Filter>Window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

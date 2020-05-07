@@ -6,7 +6,6 @@
 #include "Cube.h"
 #include "TextMesh.h"
 
-
 using namespace glm;
 using namespace std;
 
@@ -27,8 +26,11 @@ public:
 
 	void RenderWireFrame();
 	void RenderBoundingBoxes();
+	void RenderStats();
 
 	Cube* m_cube;
+	Material* m_debugFontMaterial;
+	Texture* m_debugFontTexture;
 
 private:
 	vector<Entity*> m_EntityList;

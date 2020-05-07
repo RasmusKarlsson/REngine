@@ -23,6 +23,7 @@ public:
 
 private:
 
-	unsigned int m_stringSize;
+	uint32 m_stringSize;
+	uint32 m_stringCapacity;
 	string m_textString;
 };

@@ -7,7 +7,6 @@
 #pragma once
 
 #include <windows.h>
-#include <iostream>
 #include <string>
 #include "Scene.h"
 
@@ -44,8 +43,4 @@ public:
 	static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	Scene* scene;
-private:
-
-	GLuint shader;
-
 };

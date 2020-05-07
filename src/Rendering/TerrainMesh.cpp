@@ -1,5 +1,7 @@
 #pragma once
+
 //#include <lodepng.cpp>
+
 #include "Entity.h"
 #include "TerrainMesh.h"
 #include "MathHelpers.h"
@@ -12,15 +14,10 @@ float ReadHeightValue(vector<unsigned char> &imageData, int textureSize, int x, 
 
 TerrainMesh::TerrainMesh()
 {
-	//Create(64,64);
 	m_lodBufferObjects.resize(C_TERRAINLODS);
 	m_lodTriangleSize.resize(C_TERRAINLODS);
+	m_lodIndexSize.resize(C_TERRAINLODS);
 	m_currentLod = 0;
-}
-
-TerrainMesh::~TerrainMesh()
-{
-	Delete();
 }
 
 void TerrainMesh::Create(int width, int depth)
@@ -29,12 +26,10 @@ void TerrainMesh::Create(int width, int depth)
 	m_heightScale = 1.0f;
 	m_size = 10.0f;
 
-	GLfloat vertexBuffer[64*3] = {0.0f};
-
-	vector<GLfloat> vertices;
-	vector<GLfloat> normals;
-	vector<GLfloat> texcoords;
-	vector<GLuint> indices;
+	vector<float> vertices;
+	vector<float> normals;
+	vector<float> texcoords;
+	vector<int> indices;
 
 	vertices.resize(width * depth * 3);
 	normals.resize(width * depth * 3);
@@ -81,39 +76,40 @@ void TerrainMesh::Create(int width, int depth)
 	glBindVertexArray(m_vao);
 	glGenBuffers(1, &m_vertexArrayBuffers.position);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.position);
-	glBufferData(GL_ARRAY_BUFFER, width * depth * 3 * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	glGenBuffers(1, &m_vertexArrayBuffers.normal);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.normal);
-	glBufferData(GL_ARRAY_BUFFER, width * depth * 3 * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	glGenBuffers(1, &m_vertexArrayBuffers.texcoord);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
-	glBufferData(GL_ARRAY_BUFFER, width * depth * 2 * sizeof(GLfloat), texcoords.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, texcoords.size() * sizeof(GLfloat), texcoords.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	glGenBuffers(1, &m_vboIndex);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vboIndex);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (width - 1) * (depth - 1) * 6 * sizeof(GLint), indices.data() , GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLint), indices.data() , GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	m_triangleSize = (width - 1) * (depth - 1) * 6;
+	m_triangleCount = vertices.size();
+	m_indexSize = indices.size();
 }
 
 
 void TerrainMesh::CreateFromHeightmap(Texture* texture)
 {
-	unsigned int width = texture->GetWidth();
-	unsigned int depth = texture->GetHeight();
+	uint32 width = texture->GetWidth();
+	uint32 depth = texture->GetHeight();
 
 	//Heightmap too small for C_TERRAINLODS amount of lods?
 	if ((int)log2((float)(width - 1)) < C_TERRAINLODS)
@@ -121,6 +117,7 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 		C_TERRAINLODS = (int)log2((float)(width - 1));
 		m_lodBufferObjects.resize(C_TERRAINLODS);
 		m_lodTriangleSize.resize(C_TERRAINLODS);
+		m_lodIndexSize.resize(C_TERRAINLODS);
 	}
 
 	
@@ -130,15 +127,12 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 	m_heightScale = 1.0f;
 	m_size = 0.1f;
 
-
 	m_bbox.SetBoundingBox(vec3(0.0f), vec3(width, m_size*m_heightScale*256.0f, depth));
 
-	GLfloat vertexBuffer[64 * 3] = { 0.0f };
-
-	vector<GLfloat> vertices;
-	vector<GLfloat> normals;
-	vector<GLfloat> texcoords;
-	vector<GLuint> indices;
+	vector<float> vertices;
+	vector<float> normals;
+	vector<float> texcoords;
+	vector<int> indices;
 
 	vertices.resize(width * depth * 3);
 	normals.resize(width * depth * 3);
@@ -147,9 +141,9 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 
 	int v = 0;
 	int tc = 0;
-	for (int x = 0; x < width; x++)
+	for (uint32 x = 0; x < width; x++)
 	{
-		for (int z = 0; z < depth; z++)
+		for (uint32 z = 0; z < depth; z++)
 		{
 			float height = m_size*ReadHeightValue(imageData, width, x, z, 0, 0);
 			vec3 normal = vec3(0.0f,0.0f,1.0f);
@@ -179,9 +173,9 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 
 	int d = 0;
 	
-	for (int j = 0; j < (depth - 1); j++)
+	for (uint32 j = 0; j < (depth - 1); j++)
 	{
-		for (int i = 0; i < (width - 1); i++)
+		for (uint32 i = 0; i < (width - 1); i++)
 		{
 			int idx = j*(width)+i;
 			indices[d++] = idx;
@@ -224,9 +218,9 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 		d = 0;
 		int lod = MathHelpers::CounterToPowerOfTwo(lodIndex);
 		lodIndices.resize((width - 1) /lod * (depth - 1)/lod * 6);
-		for (int j = 0; j < (depth - 1); j += lod)
+		for (uint32 j = 0; j < (depth - 1); j += lod)
 		{
-			for (int i = 0; i < (width - 1); i += lod)
+			for (uint32 i = 0; i < (width - 1); i += lod)
 			{
 				int idx = j*(width)+i;
 				lodIndices[d++] = idx;
@@ -258,7 +252,10 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	m_triangleSize = (width - 1) * (depth - 1) * 6;
+	m_triangleCount = (width - 1) * (depth - 1) * 6;
+	m_indexSize = (width - 1) * (depth - 1) * 6;
+
+	m_created = true;
 }
 
 float ReadHeightValue(vector<unsigned char> &imageData, int textureSize ,int x, int y, int offsetX, int offsetY)
@@ -269,7 +266,7 @@ float ReadHeightValue(vector<unsigned char> &imageData, int textureSize ,int x, 
 	return static_cast<float>(imageData[index]);
 }
 
-void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, int xStart, int yStart, int patchSize)
+void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, uint32 xStart, uint32 yStart, uint32 patchSize)
 {
 	unsigned int width = patchSize;
 	unsigned int depth = patchSize;
@@ -280,15 +277,16 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, int xStart, int ySt
 		C_TERRAINLODS = (int)log2((float)(patchSize - 1));
 		m_lodBufferObjects.resize(C_TERRAINLODS);
 		m_lodTriangleSize.resize(C_TERRAINLODS);
+		m_lodIndexSize.resize(C_TERRAINLODS);
 		SetNrLods(C_TERRAINLODS);
 	}
 
 	vector<unsigned char> imageData = texture->GetImageData();
 
-	int realSize = texture->GetWidth();
+	uint32 realSize = texture->GetWidth();
 
 	m_resolution = ivec2(width, depth);
-	m_heightScale = 1.0f;
+	m_heightScale = 0.75f;
 	m_size = 0.1f;
 
 	m_bbox.SetBoundingBox(vec3(0.0f), vec3(width, m_size*m_heightScale*256.0f, depth));
@@ -305,9 +303,9 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, int xStart, int ySt
 
 	int v = 0;
 	int tc = 0;
-	for (int x = 0; x < width; x++)
+	for (uint32 x = 0; x < width; x++)
 	{
-		for (int z = 0; z < depth; z++)
+		for (uint32 z = 0; z < depth; z++)
 		{
 			float height = m_size*ReadHeightValue(imageData, realSize, x, z, xStart, yStart);
 			vec3 normal = vec3(0.0f, 0.0f, 1.0f);
@@ -375,81 +373,82 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, int xStart, int ySt
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-	vector<GLuint> lodIndices;
+	vector<uint32> lodIndices;
 
 	//Triangle types: [\]  [/]  [\/] -> 0, 1, 2
 	bool transpose = false;
+	bool isEdge = false;
 	for (int lodIndex = C_TERRAINLODS - 1; lodIndex >= 0; lodIndex--)
 	{
+		if(lodIndex == 0)
+		{
+			printf("");
+		}
 		d = 0;
 		int lod = MathHelpers::CounterToPowerOfTwo(lodIndex);
 		lodIndices.resize((width - 1) / lod * (depth - 1) / lod * 6);
-		for (int j = 0; j < (depth - 1); j += lod)
-		{
-			int lodEdgeExtend = 1;
-			for (int i = 0; i < (width - 1); i += lod)
-			{
-				int idx = (j)*(width)+(i);
 
-				//Lod edges fix
-				bool wasLodExtend = false;
-				if (j == 0)
-				{
-					if (lodEdgeExtend == 2)
-					{
-						wasLodExtend = true;
-					}
-					lodEdgeExtend = 1;
-					if (i % 2*lod == 0)
-					{
-						lodEdgeExtend = 2;
-					}
-				}
-				else if (i == 0)
-				{
-					wasLodExtend = true;
-				}
-				if (!wasLodExtend)
-				{
-					lodIndices[d++] = idx;
-					lodIndices[d++] = (idx + lod * width);
-				}
+		//vector<ivec2> spiralCoordiates;
+		//spiralCoordiates.resize((width) * (depth ));
+		//MathHelpers::GetReverseSpiralCoordinates(spiralCoordiates, width, depth);
+		
+		for (uint32 y = 0; y < (depth - 1); y += lod)
+		{
+			for (uint32 x = 0; x < (width - 1); x += lod)
+			{
+				//ivec2 coord = spiralCoordiates[(y)*(width)+(x)];
+				
+				int idx = (y)*(width)+(x);
+				//idx = (coord.x)*(width)+(coord.y);
+				//if (lodIndex == 0)
+
+				isEdge = false;
+				if (x == 0 || x == (width - 1) || y == 0 || y == (depth - 1))  isEdge = true;
+
+				//First Triangle
+				lodIndices[d++] = idx;
+				lodIndices[d++] = (idx + lod * width);
+			
 				//Criss cross trangle binding // transposed is [/]
 				if (!transpose)
 				{
-					if (!wasLodExtend)
 					lodIndices[d++] = (idx + lod * width + lod);
+					//Second Triangle
 					lodIndices[d++] = idx;
 				}
 				else
 				{
-					if (!wasLodExtend)
 					lodIndices[d++] = (idx + lod);
 					lodIndices[d++] = (idx + lod * width);
 				}
 				lodIndices[d++] = (idx + lod * width + lod);
-				lodIndices[d++] = (idx + lod * lodEdgeExtend);
+				lodIndices[d++] = (idx + lod );
 				transpose = !transpose;
 			}
 			transpose = !transpose;
 		}
 
-		m_lodTriangleSize[lodIndex] = (width - 1) / lod * (depth - 1) / lod * 6;
+		m_lodTriangleSize[lodIndex] = lodIndices.size();
+		m_lodIndexSize[lodIndex] = lodIndices.size();
 
 		glGenBuffers(1, &m_lodBufferObjects[lodIndex]);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_lodBufferObjects[lodIndex]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, (width - 1) / lod * (depth - 1) / lod * 6 * sizeof(GLint), lodIndices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_lodTriangleSize[lodIndex] * sizeof(GLint), lodIndices.data(), GL_STATIC_DRAW);
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	m_triangleSize = (width - 1) * (depth - 1) * 6;
+	m_triangleCount = (width - 1) * (depth - 1) * 6;
+	m_indexSize = (width - 1) * (depth - 1) * 6;
+
+	m_created = true;
 }
 
 void TerrainMesh::SetLod(int lod)
 {
 	if (m_currentLod == lod) return;
 	m_currentLod = lod;
-	m_triangleSize = m_lodTriangleSize[lod];
+	m_triangleCount = m_lodTriangleSize[lod];
+	m_indexSize = m_lodIndexSize[lod];
 	glBindVertexArray(m_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_lodBufferObjects[m_currentLod]);
 }
