@@ -42,7 +42,7 @@ public:
 	void UpdateLODSFromCameraDistance(vec3 cameraPos);
 	void UpdatePatchLod(TerrainMesh* mesh, vec3 camPos);
 
-	void Render(mat4 wvpMatrix, Camera* camera);
+	void Render(Camera* camera);
 
 private:
 

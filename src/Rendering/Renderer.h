@@ -1,13 +1,12 @@
 #pragma once
 
-#include <gl\glew.h>
+//#include <gl\glew.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Shader.hpp"
 #include "Entity.h"
 
+#include "RenderingAPI/RenderingResource.h"
 
 using namespace glm;
 
@@ -15,18 +14,20 @@ class Renderer
 {
 public:
 
-	static void SetShader(GLuint shader);
-	static void BindTextures(Material* material);
+	static void SetShader(uint32 shader);
+	static void SetTextures(Material& material);
+	static void BindTexture(uint32 textureID, uint32 slot);
 	static void ClearBuffer();
 	static void SetClearColor(vec4 color) { m_clearColor = color; };
-	static void SetRenderStyle(int renderStyle);
+	static void SetRenderMode(RENGINE_RENDER_MODE renderMode);
+	static void SetViewMatrix(mat4 viewMatrix);
+	static void SetProjectionMatrix(mat4 projectionMatrix);
 
-	static int m_currentRenderStyle;
-
-	static void Render(Entity& entity, mat4 wvpMatrix = mat4(1.0));
+	static void Render(Entity& entity);
 	static void RenderFullscreenQuad();
 	static void CompileShaders();
 
+	static int m_currentRenderMode;
 	static GLuint m_currentShader;
 	static GLuint m_fullscreenShader;
 	static GLuint m_simpleShader;
@@ -40,9 +41,7 @@ public:
 
 	static vector<GLuint>m_shaders;
 
-private:
-
+	static mat4 m_viewMatrix;
+	static mat4 m_projectionMatrix;
+	static mat4 m_viewProjectionMatrix;
 };
-
-//Global shader state
-

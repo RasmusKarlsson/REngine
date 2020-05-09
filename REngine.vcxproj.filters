@@ -16,6 +16,9 @@
     <Filter Include="Libs">
       <UniqueIdentifier>{d07ae6df-d5a5-468f-ac56-36b87848af86}</UniqueIdentifier>
     </Filter>
+    <Filter Include="RenderingAPI">
+      <UniqueIdentifier>{a9f9ae1b-1b23-4f62-ac53-27118880ebdf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Window.cpp">
@@ -84,6 +87,9 @@
     <ClCompile Include="src\Stats.cpp">
       <Filter>Window</Filter>
     </ClCompile>
+    <ClCompile Include="src\RenderingAPI\RendererGL.cpp">
+      <Filter>RenderingAPI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Window.h">
@@ -151,6 +157,12 @@
     </ClInclude>
     <ClInclude Include="src\Stats.h">
       <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RenderingAPI\RendererContext.h">
+      <Filter>RenderingAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RenderingAPI\RenderingResource.h">
+      <Filter>RenderingAPI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

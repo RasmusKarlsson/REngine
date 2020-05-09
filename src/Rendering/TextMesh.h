@@ -11,7 +11,6 @@ class TextMesh : public Entity
 {
 public:
 	TextMesh();
-	~TextMesh();
 
 	void SetText(string text);
 
@@ -19,7 +18,7 @@ public:
 
 	void Create();
 
-	void UpdateText(string newText);
+	void UpdateTextBuffer(string newText);
 
 private:
 

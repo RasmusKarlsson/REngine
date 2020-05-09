@@ -15,8 +15,6 @@ public:
 	Scene();
 	~Scene();
 
-	mat4 SetModelViewProjectionMatrix(mat4 worldMatrix = mat4());
-
 	Camera* GetCurrentCamera() { return m_currentCamera; };
 
 	void AddEntity(Entity* entity);

@@ -3,7 +3,6 @@
 //layout(location = 0) in vec3 vertexPosition_modelspace;
 attribute vec2 a_Position;
 attribute vec2 a_Texcoord;
-attribute float a_DataIndex;
 uniform float u_Time;
 
 varying vec2 v_Texcoord;

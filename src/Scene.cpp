@@ -120,17 +120,16 @@ Scene::Scene()
 	m_cursorMesh->SetScale((float)cursorTex->GetWidth() / SCREEN_WIDTH, (float)cursorTex->GetHeight() / SCREEN_HEIGHT, 1.0f);
 	m_cursorMesh->SetMaterial(cursorMat);
 
-	m_cursorMesh->SetRenderStyle(Entity::RENDERSTYLE_2D);
+	m_cursorMesh->SetRenderStyle(UI);
 	AddEntity(m_cursorMesh);
 	
 	m_fpsMesh = new TextMesh();
 	m_fpsMesh->SetText("FPS: 0.00");
-	m_fpsMesh->Create();
 	m_fpsMesh->SetMaterial(m_debugFontMaterial);
 	m_fpsMesh->SetScale(8.0f / SCREEN_WIDTH, 8.0f / SCREEN_HEIGHT, 1.0f);
 	m_fpsMesh->SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, 30.0f));
 	AddEntity(m_fpsMesh);
-
+	
 
 
 	Skybox* sky = new Skybox();
@@ -142,11 +141,6 @@ Scene::Scene()
 
 Scene::~Scene()
 {
-}
-
-mat4 Scene::SetModelViewProjectionMatrix(mat4 worldMatrix)
-{
-	return m_currentCamera->GetProjectionMatrix() * m_currentCamera->GetViewMatrix() * worldMatrix;
 }
 
 void Scene::AddEntity(Entity* entity)
@@ -172,7 +166,7 @@ void Scene::UpdateScene(double dt)
 	counter = (1.0 / dt);
 	std::string intAsString = std::to_string(counter);
 	intAsString = intAsString.substr(0, 5);
-	m_fpsMesh->UpdateText(intAsString);
+	m_fpsMesh->UpdateTextBuffer(intAsString);
 	if (Input::IsPressed('A')) {
 		m_EntityList[2]->SetScale(vec3(1.0f, 2.0f, 1.0f));
 	}
@@ -257,32 +251,29 @@ void Scene::RenderScene(double dt)
 {
 	Renderer::ClearBuffer();
 
+	Renderer::SetViewMatrix(m_currentCamera->GetViewMatrix());
+	Renderer::SetProjectionMatrix(m_currentCamera->GetProjectionMatrix());
+
 	Renderer::SetShader(Renderer::m_terrainShader);
 	m_terrain->BindTextures();
 	m_terrain->UpdateUniforms();
-	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD);
+	Renderer::SetRenderMode(SOLID);
 
-	m_terrain->Render(m_currentCamera->GetProjectionMatrix() * m_currentCamera->GetViewMatrix(), m_currentCamera);
+	m_terrain->Render(m_currentCamera);
 
 	for (auto entity : m_EntityList) {
-		mat4 MVPmatrix = SetModelViewProjectionMatrix(entity->GetWorldMatrix());
 
-		entity->GetMaterial()->BindTextures();
-		GLuint shader = entity->GetMaterial()->GetShader();
-		Renderer::SetShader(shader);
-		
-		Renderer::SetRenderStyle(entity->GetRenderStyle());
 
 		mat4 invView = glm::inverse(m_currentCamera->GetViewMatrix());
 		mat4 invProj = glm::inverse(m_currentCamera->GetProjectionMatrix());
 		glUniformMatrix4fv(glGetUniformLocation(Renderer::m_currentShader, "u_invView"), 1, GL_FALSE, value_ptr(invView));
 		glUniformMatrix4fv(glGetUniformLocation(Renderer::m_currentShader, "u_invProjection"), 1, GL_FALSE, value_ptr(invProj));
 
-		Renderer::Render(*entity, MVPmatrix);
+		Renderer::Render(*entity);
 	}
 
 //	m_fbo1->EndRenderToTexture();
-	Renderer::SetRenderStyle(Entity::RENDERSTYLE_2D);
+	Renderer::SetRenderMode(UI);
 	Renderer::SetShader(Renderer::m_showDepthShader);
 	
 	/*
@@ -365,22 +356,21 @@ void Scene::RenderScene(double dt)
 
 void Scene::RenderWireFrame()
 {
-	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD);
-	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD_WIRE);
+	Renderer::SetRenderMode(SOLID);
+	Renderer::SetRenderMode(WIREFRAME);
 	Renderer::SetShader(Renderer::m_whiteShader);
-	m_terrain->Render(m_currentCamera->GetProjectionMatrix() * m_currentCamera->GetViewMatrix(), m_currentCamera);
+	m_terrain->Render(m_currentCamera);
 
 	for (auto entity : m_EntityList) {
 		vec4 white = vec4(1.0);
 		glUniform4fv(glGetUniformLocation(Renderer::m_currentShader, "Color"), 1, value_ptr(white));
-		mat4 MVPmatrix = SetModelViewProjectionMatrix(entity->GetWorldMatrix());
-		Renderer::Render(*entity, MVPmatrix);
+		Renderer::Render(*entity);
 	}
 }
 
 void Scene::RenderBoundingBoxes()
 {
-	Renderer::SetRenderStyle(Entity::RENDERSTYLE_STANDARD_WIRE);
+	Renderer::SetRenderMode(WIREFRAME);
 	Renderer::SetShader(Renderer::m_whiteShader);
 
 	Cube cube;
@@ -388,50 +378,45 @@ void Scene::RenderBoundingBoxes()
 
 		cube.SetPosition(entity->GetWorldPosition());
 		cube.SetScale(entity->GetWorldScale() * entity->GetBoundingBox().GetBoundingScale());
-		mat4 MVPmatrix = SetModelViewProjectionMatrix(cube.GetWorldMatrix());
 
-		Renderer::Render(cube, MVPmatrix);
+		Renderer::Render(cube);
 	}
 }
 
 void Scene::RenderStats()
 {
 	static TextMesh statsMesh;
-	if(!statsMesh.IsCreated())
-	{
-		statsMesh.Create();
-		statsMesh.SetMaterial(m_debugFontMaterial);
-		statsMesh.SetScale(8.0f / SCREEN_WIDTH, 8.0f / SCREEN_HEIGHT, 1.0f);
-	}
+	statsMesh.SetMaterial(m_debugFontMaterial);
+	statsMesh.SetScale(8.0f / SCREEN_WIDTH, 8.0f / SCREEN_HEIGHT, 1.0f);
 
-	Renderer::SetRenderStyle(Entity::RENDERSTYLE_2D);
+	Renderer::SetRenderMode(UI);
 	Renderer::SetShader(Renderer::m_textShader);
 
 	float height = 50.0f;
 
 	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
-	statsMesh.UpdateText("Entities:           " + std::to_string(m_EntityList.size())); statsMesh.UpdateMatrices();
-	Renderer::Render(statsMesh, statsMesh.GetWorldMatrix()); height += 10.0f;
+	statsMesh.UpdateTextBuffer("Entities:        " + std::to_string(m_EntityList.size())); statsMesh.UpdateMatrices();
+	Renderer::Render(statsMesh); height += 10.0f;
 	
 	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
-	statsMesh.UpdateText("Shader Binds:       " + std::to_string(Stats::s_shaderBounds)); statsMesh.UpdateMatrices();
-	Renderer::Render(statsMesh, statsMesh.GetWorldMatrix()); height += 10.0f;
+	statsMesh.UpdateTextBuffer("Shader Binds:    " + std::to_string(Stats::s_shaderBounds)); statsMesh.UpdateMatrices();
+	Renderer::Render(statsMesh); height += 10.0f;
 
 	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
-	statsMesh.UpdateText("Texture Binds:      " + std::to_string(Stats::s_textureBounds)); statsMesh.UpdateMatrices();
-	Renderer::Render(statsMesh, statsMesh.GetWorldMatrix()); height += 10.0f;
+	statsMesh.UpdateTextBuffer("Texture Binds:   " + std::to_string(Stats::s_textureBounds)); statsMesh.UpdateMatrices();
+	Renderer::Render(statsMesh); height += 10.0f;
 
 	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
-	statsMesh.UpdateText("Render Style Binds: " + std::to_string(Stats::s_renderStyleChanges)); statsMesh.UpdateMatrices();
-	Renderer::Render(statsMesh, statsMesh.GetWorldMatrix()); height += 10.0f;
+	statsMesh.UpdateTextBuffer("Render Styles:   " + std::to_string(Stats::s_renderStyleChanges)); statsMesh.UpdateMatrices();
+	Renderer::Render(statsMesh); height += 10.0f;
 	
 	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
-	statsMesh.UpdateText("Vertex Count:       " + std::to_string(Stats::s_vertexCount)); statsMesh.UpdateMatrices();
-	Renderer::Render(statsMesh, statsMesh.GetWorldMatrix()); height += 10.0f;
+	statsMesh.UpdateTextBuffer("Vertex Count:    " + std::to_string(Stats::s_vertexCount)); statsMesh.UpdateMatrices();
+	Renderer::Render(statsMesh); height += 10.0f;
 	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
 	
-	statsMesh.UpdateText("Index Count:        " + std::to_string(Stats::s_indexCount)); statsMesh.UpdateMatrices();
-	Renderer::Render(statsMesh, statsMesh.GetWorldMatrix()); height += 10.0f;
+	statsMesh.UpdateTextBuffer("Index Count:     " + std::to_string(Stats::s_indexCount)); statsMesh.UpdateMatrices();
+	Renderer::Render(statsMesh); height += 10.0f;
 
 
 	

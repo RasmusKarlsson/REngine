@@ -3,6 +3,7 @@
 #include <vector>
 
 using namespace std;
+typedef unsigned int uint32;
 
 static unsigned int s_boundTextures[32] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
@@ -23,11 +24,11 @@ public:
 
 	vector<unsigned char> GetImageData() { return m_imageData; };
 
-	void SetParameter(GLuint param, GLuint value);
-	GLuint GetTextureID() { return m_textureID; };
-	GLuint GetDepthTextureID() { return m_depthID; };
+	void SetParameter(uint32 param, uint32 value);
+	uint32 GetTextureID() { return m_textureID; };
+	uint32 GetDepthTextureID() { return m_depthID; };
 
-	void Bind(GLuint slot);
+	void Bind(uint32 slot);
 
 	void RenderToTexture(bool clear);
 	void EndRenderToTexture();
@@ -40,8 +41,8 @@ private:
 
 	vector<unsigned char> m_imageData;
 
-	GLuint m_textureID;
-	GLuint m_depthID;
-	GLuint m_fbo;
-	GLuint m_renderBuffer;
+	uint32 m_textureID;
+	uint32 m_depthID;
+	uint32 m_fbo;
+	uint32 m_renderBuffer;
 };

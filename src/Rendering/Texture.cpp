@@ -12,6 +12,8 @@
 
 #include <iostream>
 
+#include "RenderingAPI/RendererContext.h"
+
 Texture::Texture()
 {
 	
@@ -39,15 +41,12 @@ void Texture::CreateFromFile(string filename)
 		return;
 	}
 
-	glGenTextures(1, &m_textureID);
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_textureWidth, m_textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, &m_imageData[0]);
+	RENGINE_PIXEL_FORMAT pixelFormat = RENGINE_PIXEL_FORMAT_RGB;
+		
+	if (m_imageData.size() == m_textureWidth* m_textureHeight*4) pixelFormat = RENGINE_PIXEL_FORMAT_RGBA;
+	
+	m_textureID = RendererContext::CreateTexture(m_textureWidth, m_textureHeight, pixelFormat, RENGINE_PIXEL_FORMAT_RGBA, RENGINE_PIXEL_TYPE_UNSIGNED_BYTE, &m_imageData[0]);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-	glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void Texture::CreateHDRFromFile(string filename)
@@ -55,6 +54,11 @@ void Texture::CreateHDRFromFile(string filename)
 	m_fileName = filename;
 	HDRLoaderResult hdrTexture;
 	bool result = HDRLoader::load(m_fileName.c_str(), hdrTexture);
+
+	m_textureWidth = hdrTexture.width;
+	m_textureHeight = hdrTexture.height;
+	m_textureID = RendererContext::CreateTexture(m_textureWidth, m_textureHeight, RENGINE_PIXEL_FORMAT_RGBA32F, RENGINE_PIXEL_FORMAT_RGB, RENGINE_PIXEL_TYPE_FLOAT, (uint8*)hdrTexture.cols);
+	/*
 
 	m_textureWidth = hdrTexture.width;
 	m_textureHeight = hdrTexture.height;
@@ -69,7 +73,7 @@ void Texture::CreateHDRFromFile(string filename)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);*/
 }
 
 void Texture::CreateFBO(string name, int width, int height)
@@ -169,12 +173,12 @@ void Texture::CreateMultipleRenderTargetFrameBuffer(int width, int height)
 	glDrawBuffers(3, attachments);
 }
 
-void Texture::SetParameter(GLuint param, GLuint value)
+void Texture::SetParameter(uint32 param, uint32 value)
 {
 	glTexParameterf(GL_TEXTURE_2D, param, value);
 }
 
-void Texture::Bind(GLuint slot)
+void Texture::Bind(uint32 slot)
 {
 	glActiveTexture(GL_TEXTURE0+ slot);
 

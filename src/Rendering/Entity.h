@@ -1,12 +1,15 @@
 #pragma once
 
-#include <gl\glew.h>
+//#include <gl\glew.h>
+#include <gl/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "Material.h"
 #include <vector>
+
+#include "RenderingAPI/RenderingResource.h"
 
 using namespace glm;
 
@@ -94,11 +97,11 @@ public:
 	vec3 GetWorldRotation() const;
 
 
-	GLuint GetVao()	const			{ return m_vao; };
-	GLuint GetVboIndex() const		{ return m_vboIndex; };
-	GLuint GetTriangleCount() const	{ return m_triangleCount; };
-	GLuint GetIndexSize() const		{ return m_indexSize; };
-	GLuint GetShader() const		{ return m_shader; };
+	uint32 GetVao()	const			{ return m_vao; };
+	uint32 GetVboIndex() const		{ return m_vboIndex; };
+	uint32 GetTriangleCount() const	{ return m_triangleCount; };
+	uint32 GetIndexSize() const		{ return m_indexSize; };
+	uint32 GetShader() const		{ return m_shader; };
 
 	void SetPosition(vec3 position)		{ m_LocalPosition = position;	SetDirty(); };
 	void SetScale(vec3 scale)			{ m_LocalScale = scale;			SetDirty();	};
@@ -132,8 +135,8 @@ public:
 	void SetMaterial(Material* material) { m_material = material; };
 	Material* GetMaterial() const { return m_material; };
 
-	void SetRenderStyle(int renderStyle) { m_renderStyle = renderStyle; };
-	int GetRenderStyle() const { return m_renderStyle; };
+	void SetRenderStyle(RENGINE_RENDER_MODE renderStyle) { m_renderStyle = renderStyle; };
+	RENGINE_RENDER_MODE GetRenderStyle() const { return m_renderStyle; };
 
 	void SetBoundingBox(BBox bbox) { m_bbox = bbox; };
 	BBox GetBoundingBox() const { return m_bbox; };
@@ -164,7 +167,7 @@ protected:
 	Material* m_material;
 	
 	BBox m_bbox;
-	int m_renderStyle = 0;
+	RENGINE_RENDER_MODE m_renderStyle = DISABLED;
 	bool m_dirty = true;
 	bool m_dead = false;
 	bool m_created = false;

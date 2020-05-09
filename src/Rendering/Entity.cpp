@@ -11,7 +11,7 @@
 Entity::Entity()
 {
 	m_name = "DefaultEntity";
-	m_renderStyle = RENDERSTYLE_STANDARD;
+	m_renderStyle = SOLID;
 	m_bbox = BBox();
 
 	m_vao = 0;

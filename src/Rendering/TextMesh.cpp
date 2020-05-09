@@ -8,64 +8,53 @@
 #include "TextMesh.h"
 #include <algorithm>
 
+#include "MathHelpers.h"
+
 TextMesh::TextMesh()
 {
-	SetRenderStyle(RENDERSTYLE_2D);
-}
+	m_stringSize = 0;
+	m_stringCapacity = 32;
 
-TextMesh::~TextMesh()
-{
-
+	Create();
 }
 
 void TextMesh::SetText(string text)
 {
 	m_textString = text;
-
 	std::transform(m_textString.begin(), m_textString.end(), m_textString.begin(), ::tolower);
-
 	m_stringSize = m_textString.size();
 
-	m_indexSize = text.size() * 6;
+	if (m_stringSize > m_stringCapacity)
+	{
+		m_stringCapacity = MathHelpers::GetNextPowerOfTwo(m_textString.size());
+		Delete();
+		Create();
+	}
+
 }
 
 void TextMesh::Create()
 {
-	//const uint32 stringLength = static_cast<uint32>(m_textString.size());
-	const uint32 stringLength = 256;
-
-	m_stringCapacity = stringLength;
-	
 	vector<float> meshVertices;
 	vector<float> meshTexcoords;
 	vector<int> meshIndices;
 
-	for (uint32 i = 0; i < stringLength; ++i) {
+	for (uint32 i = 0; i < m_stringCapacity; ++i) {
 		float fI = static_cast<float>(i);
 		meshVertices.push_back(2.0f*fI);
 		meshVertices.push_back(1.0f);
-		//meshVertices.push_back(0.0f);
 
 		meshVertices.push_back(2.0f*fI);
 		meshVertices.push_back(-1.0f);
-		//meshVertices.push_back(0.0f);
 
 		meshVertices.push_back(2.0f*(fI + 1.0f));
 		meshVertices.push_back(-1.0f);
-		//meshVertices.push_back(0.0f);
 
 		meshVertices.push_back(2.0f*(fI + 1.0f));
 		meshVertices.push_back(1.0f);
-		//meshVertices.push_back(0.0f);
 
-		uint32 found = 0;// s_charMap.find_first_of(m_textString[i]);
-		//if (found == string::npos)
-		{
-			found = 0;
-		}
-
-		float leftUV = static_cast<float>(found) / 64.0f;
-		float rightUV = (static_cast<float>(found) + 1.0f) / 64.0f;
+		float leftUV = static_cast<float>(0) / 64.0f;
+		float rightUV = (static_cast<float>(0) + 1.0f) / 64.0f;
 
 		meshTexcoords.push_back(leftUV);
 		meshTexcoords.push_back(0.0f);
@@ -124,25 +113,18 @@ void TextMesh::Create()
 	m_created = true;
 }
 
-void TextMesh::UpdateText(string newText)
+void TextMesh::UpdateTextBuffer(string newText)
 {
-	const uint32 oldTextStringSize = static_cast<uint32>(m_textString.size());
-
+	//SetText(std::move(newText));
 	SetText(newText);
-	/*
-	if (m_textString.capacity() < m_stringSize)
-	{
-		Create();
-		printf("Redid text! Old size: %d new size: %d\n", oldTextStringSize, m_stringSize);
-		return;
-	}
-	*/
+	
 	const int stringLength = m_textString.size();
 	vector<float> meshTexcoords;
 
-	for (int i = 0; i < stringLength; ++i) {
+	for (uint32 i = 0; i < m_stringCapacity; ++i) {
 		
-		int found = s_charMap.find_first_of(m_textString[i]);
+		uint32 found = 0;
+		if(i < stringLength) found = s_charMap.find_first_of(m_textString[i]);
 		if (found == string::npos)
 		{
 			found = 0;
@@ -163,9 +145,12 @@ void TextMesh::UpdateText(string newText)
 		meshTexcoords.push_back(rightUV);
 		meshTexcoords.push_back(0.0f);
 	}
-
+	
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, meshTexcoords.size() * sizeof(GLfloat), meshTexcoords.data());
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	
+	m_indexSize = m_textString.size() * 6;
+	
 }

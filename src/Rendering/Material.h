@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Texture.h"
-#include <GL/glew.h>
+//#include <GL/glew.h>
 #include <glm\glm.hpp>
 
 #include <iostream>
@@ -25,10 +25,10 @@ public:
 	void SetAmbientTexture(Texture* texture) { m_ambientTexture = texture;   m_enabledAmbient = true; }
 	void SetSpecularTexture(Texture* texture)		{ m_specularTexture = texture;   m_enabledSpecular = true;};
 
-	Texture GetDiffuseTexture()		{ return *m_diffuseTexture; };
-	Texture GetNormalTexture()		{ return *m_normalTexture; };
-	Texture GetAmbientTexture()		{ return *m_ambientTexture; };
-	Texture GetSpecularTexture()	{ return *m_specularTexture; };
+	Texture* GetDiffuseTexture()		{ return m_diffuseTexture; }
+	Texture* GetNormalTexture()			{ return m_normalTexture; }
+	Texture* GetAmbientTexture()		{ return m_ambientTexture; }
+	Texture* GetSpecularTexture()		{ return m_specularTexture; }
 
 	void SetDiffuseColor(vec4 color) { m_diffuseColor = color; };
 	vec4 GetDiffuseColor() { return m_diffuseColor; };
@@ -46,10 +46,10 @@ private:
 
 	string m_name;
 
-	Texture* m_diffuseTexture = NULL;
-	Texture* m_normalTexture = NULL;
-	Texture* m_ambientTexture = NULL;
-	Texture* m_specularTexture = NULL;
+	Texture* m_diffuseTexture = nullptr;
+	Texture* m_normalTexture = nullptr;
+	Texture* m_ambientTexture = nullptr;
+	Texture* m_specularTexture = nullptr;
 
 	bool m_enabledDiffuse = false;
 	bool m_enabledNormal = false;
