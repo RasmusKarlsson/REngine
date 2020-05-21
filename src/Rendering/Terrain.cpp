@@ -77,25 +77,25 @@ void Terrain::CreateTerrainMesh()
 void Terrain::SetHeightMap(string filename)
 {
 	m_heightMap = new Texture();
-	m_heightMap->CreateFromFile(filename);
+	m_heightMap->CreateFromPNG(filename);
 }
 
 void Terrain::SetSplatMap(string filename)
 {
 	m_splatMap = new Texture();
-	m_splatMap->CreateFromFile(filename);
+	m_splatMap->CreateFromPNG(filename);
 }
 
 void Terrain::SetNormalMap(string filename)
 {
 	m_normalMap = new Texture();
-	m_normalMap->CreateFromFile(filename);
+	m_normalMap->CreateFromPNG(filename);
 }
 
 void Terrain::SetSplatMapTexture(string filename, int layer)
 {
 	m_textureLayers[layer] = new Texture();
-	m_textureLayers[layer]->CreateFromFile(filename);
+	m_textureLayers[layer]->CreateFromPNG(filename);
 }
 void Terrain::UpdateUniforms()
 {
@@ -134,7 +134,7 @@ void Terrain::Render(Camera* camera)
 			vec3 patchDir = normalize(camPos - m_terrainPatches[y*m_nrPatchesWidth + x]->GetPosition());
 		//	if (dot(patchDir, camDir) > 0.2) continue;
 			int colorIndex = (x+y) % 13;
-			glUniform4fv(glGetUniformLocation(Renderer::m_currentShader, "Color"), 1, value_ptr(g_colorList[colorIndex]));
+			glUniform4fv(glGetUniformLocation(Renderer::m_currentShader, "u_WireColor"), 1, value_ptr(g_colorList[colorIndex]));
 
 //			UpdatePatchLod(m_terrainPatches[y*m_nrPatchesWidth + x], camPos);
 			Renderer::Render(*m_terrainPatches[y*m_nrPatchesWidth + x]);

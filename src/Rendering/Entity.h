@@ -135,8 +135,8 @@ public:
 	void SetMaterial(Material* material) { m_material = material; };
 	Material* GetMaterial() const { return m_material; };
 
-	void SetRenderStyle(RENGINE_RENDER_MODE renderStyle) { m_renderStyle = renderStyle; };
-	RENGINE_RENDER_MODE GetRenderStyle() const { return m_renderStyle; };
+	void SetRenderStyle(RENGINE::RENDER_MODE renderStyle) { m_renderStyle = renderStyle; };
+	RENGINE::RENDER_MODE GetRenderStyle() const { return m_renderStyle; };
 
 	void SetBoundingBox(BBox bbox) { m_bbox = bbox; };
 	BBox GetBoundingBox() const { return m_bbox; };
@@ -167,7 +167,7 @@ protected:
 	Material* m_material;
 	
 	BBox m_bbox;
-	RENGINE_RENDER_MODE m_renderStyle = DISABLED;
+	RENGINE::RENDER_MODE m_renderStyle = RENGINE::DISABLED;
 	bool m_dirty = true;
 	bool m_dead = false;
 	bool m_created = false;

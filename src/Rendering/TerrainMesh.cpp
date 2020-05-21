@@ -274,6 +274,7 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, uint32 xStart, uint
 	//Heightmap too small for C_TERRAINLODS amount of lods?
 	if ((int)log2((float)(patchSize - 1)) < C_TERRAINLODS)
 	{
+		//TODO: This is wrong
 		C_TERRAINLODS = (int)log2((float)(patchSize - 1));
 		m_lodBufferObjects.resize(C_TERRAINLODS);
 		m_lodTriangleSize.resize(C_TERRAINLODS);
@@ -291,17 +292,33 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, uint32 xStart, uint
 
 	m_bbox.SetBoundingBox(vec3(0.0f), vec3(width, m_size*m_heightScale*256.0f, depth));
 
-	vector<GLfloat> vertices;
-	vector<GLfloat> normals;
-	vector<GLfloat> texcoords;
-	vector<GLuint> indices;
+	vector<float> vertices;
+	vector<float> normals;
+	vector<float> texcoords;
+	vector<int> indices;
 
+	uint32 extraSeam = 4 * patchSize - 4;
+	/*
+	vertices.resize(width * depth * 3 + 3 * extraSeam);
+	normals.resize(width * depth * 3 + 3 * extraSeam);
+	texcoords.resize(width * depth * 2 + 2 * extraSeam);
+	indices.resize((width - 1) * (depth - 1) * 6 + (extraSeam - 1) * 6);
+	*/
 	vertices.resize(width * depth * 3);
 	normals.resize(width * depth * 3);
 	texcoords.resize(width * depth * 2);
 	indices.resize((width - 1) * (depth - 1) * 6);
 
+
+	vector<float> extraVertices;
+	vector<float> extraNormals;
+	vector<float> extraTexcoords;
+	extraVertices.resize(3 * extraSeam);
+	extraNormals.resize(3 * extraSeam);
+	extraTexcoords.resize(2 * extraSeam);
+
 	int v = 0;
+	int n = 0;
 	int tc = 0;
 	for (uint32 x = 0; x < width; x++)
 	{
@@ -319,19 +336,47 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, uint32 xStart, uint
 				normal = normalize(vx);
 			}
 
-			vertices[v] = (float)x - patchSize / 2.0f; //Center the patch position
-			normals[v++] = normal.x;
+			vertices[v++] = (float)x - patchSize / 2.0f; //Center the patch position
+			vertices[v++] = m_heightScale * height;
+			vertices[v++] = (float)z - patchSize / 2.0f;
 
-			vertices[v] = m_heightScale * height;
-			normals[v++] = normal.z;
-
-			vertices[v] = (float)z - patchSize / 2.0f;
-			normals[v++] = normal.y;
+			normals[n++] = normal.x;
+			normals[n++] = normal.z;
+			normals[n++] = normal.y;
 
 			texcoords[tc++] = (float)x + (float)xStart;
 			texcoords[tc++] = (float)z + (float)yStart;
+/*
+			if(x == 0 || x == (width-1) || z == 0 || z == (depth-1))
+			{
+				extraVertices.push_back((float)x - patchSize / 2.0f);
+				extraVertices.push_back(m_heightScale * height - 2.0f);
+				extraVertices.push_back((float)z - patchSize / 2.0f);
+
+				extraNormals.push_back(normal.x);
+				extraNormals.push_back(normal.z);
+				extraNormals.push_back(normal.y);
+
+				extraTexcoords.push_back((float)x + (float)xStart);
+				extraTexcoords.push_back((float)z + (float)yStart);
+			}*/
 		}
 	}
+	/*
+	for(uint32 i = 0; i < extraSeam;i++)
+	{
+		vertices[v++] = extraVertices[3 * i + 0];
+		vertices[v++] = extraVertices[3 * i + 1];
+		vertices[v++] = extraVertices[3 * i + 2];
+
+		normals[n++] = extraNormals[3 * i + 0];
+		normals[n++] = extraNormals[3 * i + 1];
+		normals[n++] = extraNormals[3 * i + 2];
+
+		texcoords[tc++] = extraTexcoords[2 * i + 0];
+		texcoords[tc++] = extraTexcoords[2 * i + 1];
+	}
+	*/
 
 	int d = 0;
 	/*
@@ -349,26 +394,26 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, uint32 xStart, uint
 			indices[d++] = (idx + 1);
 		}
 	}*/
-
+	/**/
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 	glGenBuffers(1, &m_vertexArrayBuffers.position);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.position);
-	glBufferData(GL_ARRAY_BUFFER, width * depth * 3 * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glGenBuffers(1, &m_vertexArrayBuffers.normal);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.normal);
-	glBufferData(GL_ARRAY_BUFFER, width * depth * 3 * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glGenBuffers(1, &m_vertexArrayBuffers.texcoord);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
-	glBufferData(GL_ARRAY_BUFFER, width * depth * 2 * sizeof(GLfloat), texcoords.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, texcoords.size() * sizeof(GLfloat), texcoords.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);

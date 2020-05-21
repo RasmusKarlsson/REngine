@@ -4,6 +4,7 @@
 #include "Terrain.h"
 #include "Quad.h"
 #include "Cube.h"
+#include "RenderTarget.h"
 #include "TextMesh.h"
 
 using namespace glm;
@@ -37,7 +38,7 @@ private:
 	Quad* m_cursorMesh;
 	TextMesh* m_fpsMesh;
 
-	Texture* m_fbo1;
-	Texture* m_fbo2;
+	RenderTarget* m_fbo1;
+	RenderTarget* m_fbo2;
 	Quad* m_fullscreenQuad;
 };

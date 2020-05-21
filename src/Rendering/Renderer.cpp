@@ -30,9 +30,11 @@ uint32 Renderer::m_showDepthShader = 0;
 
 uint32 Renderer::m_fullscreenShader = 0;
 
-int Renderer::m_currentRenderMode = Entity::RENDERSTYLE_STANDARD;
+uint32 Renderer::m_currentRenderMode = Entity::RENDERSTYLE_STANDARD;
+bool Renderer::m_overrideRenderMode = false;
 
 vec4 Renderer::m_clearColor = vec4();
+vec4 Renderer::m_wireColor = vec4(1.0,1.0,1.0,1.0);
 
 mat4 Renderer::m_viewMatrix = mat4();
 mat4 Renderer::m_projectionMatrix = mat4();
@@ -71,6 +73,17 @@ void Renderer::SetTextures(Material& material)
 	}
 }
 
+void Renderer::UploadMaterialProperties(Material& material)
+{
+	SetTextures(material);
+	RendererContext::UploadUniform4fv("u_DiffuseColor", value_ptr(material.GetDiffuseColor()));
+
+	if(m_currentRenderMode == RENGINE::WIREFRAME)
+	{
+		RendererContext::UploadUniform4fv("u_WireColor", value_ptr(m_wireColor));
+	}
+}
+
 void Renderer::BindTexture(uint32 textureID, GLuint slot)
 {
 	if (s_boundTextures[slot] != textureID)
@@ -87,7 +100,7 @@ void Renderer::Render(Entity& entity)
 	{
 		SetRenderMode(entity.GetRenderStyle());
 		SetShader(entity.GetMaterial()->GetShader());
-		entity.GetMaterial()->BindTextures();
+		UploadMaterialProperties(*entity.GetMaterial());
 	}
 
 	mat4 wvpMatrix = m_viewProjectionMatrix * entity.GetWorldMatrix();
@@ -96,6 +109,8 @@ void Renderer::Render(Entity& entity)
 	RendererContext::UploadUniformMatrix4fv("u_World", value_ptr(entity.GetWorldMatrix()));
 
 	RendererContext::UploadUniform1f("u_Time", static_cast<GLfloat>(timeElapsed));
+
+	//TODO: Move these
 	RendererContext::UploadUniform1i("Sampler0", 0);
 	RendererContext::UploadUniform1i("Sampler1", 1);
 	RendererContext::UploadUniform1i("Sampler2", 2);
@@ -104,7 +119,7 @@ void Renderer::Render(Entity& entity)
 	
 	RendererContext::BindVertexArrayObject(entity.GetVao());
 	const GLuint indexSize = entity.GetIndexSize();
-	RendererContext::DrawElements(indexSize, RENGINE_POLYGON_TYPE_TRIANGLES, RENGINE_INDEX_TYPE_UNSIGNED_INT);
+	RendererContext::DrawElements(indexSize, RENGINE::POLYGON_TYPE_TRIANGLES, RENGINE::INDEX_TYPE_UNSIGNED_INT);
 
 	Stats::s_vertexCount += entity.GetTriangleCount();
 	Stats::s_indexCount += indexSize;
@@ -112,8 +127,8 @@ void Renderer::Render(Entity& entity)
 
 void Renderer::RenderFullscreenQuad()
 {
-	//glBindVertexArray(0);
-	//glDrawArrays(GL_TRIANGLES, 0, 4);
+	glBindVertexArray(0);
+	glDrawArrays(GL_TRIANGLES, 0, 4);
 }
 
 void Renderer::CompileShaders()
@@ -135,19 +150,40 @@ void Renderer::CompileShaders()
 	glUniform2fv(glGetUniformLocation(m_textShader, "u_ElementSize"), 1, value_ptr(elementSize));
 }
 
+void Renderer::Enable(RENGINE::RENDER_FEATURE feature)
+{
+	RendererContext::Enable(feature);
+}
+
+void Renderer::Disable(RENGINE::RENDER_FEATURE feature)
+{
+	RendererContext::Disable(feature);
+}
+
+void Renderer::SetDepthFunction(RENGINE::DEPTH_TEST function)
+{
+	RendererContext::SetDepthFunction(function);
+}
+
 void Renderer::ClearBuffer()
 {
 	RendererContext::ClearBuffer(m_clearColor);
 }
 
-void Renderer::SetRenderMode(RENGINE_RENDER_MODE renderMode)
+void Renderer::SetRenderMode(RENGINE::RENDER_MODE renderMode)
 {
+	if (m_overrideRenderMode) return;
 	if (m_currentRenderMode == renderMode) return;
 
 	RendererContext::SetRenderMode(renderMode);
 
 	m_currentRenderMode = renderMode;
 	Stats::s_renderStyleChanges++;
+}
+
+void Renderer::SetOverrideRenderMode(bool value)
+{
+	m_overrideRenderMode = value;
 }
 
 void Renderer::SetViewMatrix(mat4 viewMatrix)

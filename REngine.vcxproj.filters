@@ -90,6 +90,12 @@
     <ClCompile Include="src\RenderingAPI\RendererGL.cpp">
       <Filter>RenderingAPI</Filter>
     </ClCompile>
+    <ClCompile Include="src\Rendering\RenderTarget.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Log.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Window.h">
@@ -163,6 +169,12 @@
     </ClInclude>
     <ClInclude Include="src\RenderingAPI\RenderingResource.h">
       <Filter>RenderingAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\RenderTarget.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Log.h">
+      <Filter>Window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

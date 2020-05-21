@@ -12,12 +12,14 @@
 #include "Quad.h"
 #include "Input.h"
 #include "Cube.h"
+#include "Log.h"
 #include "Sphere.h"
 #include "SkyBox.h"
 #include "TerrainMesh.h"
 #include "MathHelpers.h"
 
 #include "OrbitCamera.h"
+#include "RenderTarget.h"
 #include "Stats.h"
 #include "WASDCamera.h"
 
@@ -34,6 +36,10 @@ Scene::Scene()
 {
 	Renderer::CompileShaders();
 
+	Renderer::Enable(RENGINE::RENDER_FEATURE_DEPTH_TEST);
+
+	Renderer::SetDepthFunction(RENGINE::DEPTH_TEST_LEQUAL);
+
 	//Camera
 	m_currentCamera = new OrbitCamera();
 	m_currentCamera->SetOrbitDistance(5.0f);
@@ -41,13 +47,12 @@ Scene::Scene()
 	m_currentCamera->SetCameraTarget(vec3(0.0f, 5.0f, 0.0f));
 	m_currentCamera->CreateProjectionMatrix(45.0f, (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
 
-	m_fbo1 = new Texture();
+	m_fbo1 = new RenderTarget();
 	m_fbo1->CreateFBO("framebuffer1", SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	m_fbo2 = new Texture();
+	m_fbo2 = new RenderTarget();
 	m_fbo2->CreateFBO("framebuffer2", SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	//m_fbo1->RenderToTexture(false);
 
 	//Debug font
 	m_debugFontTexture = new Texture("res/Textures/font2.png");
@@ -58,7 +63,7 @@ Scene::Scene()
 	m_fullscreenQuad = new Quad();
 
 	Texture* tex = new Texture();
-	tex->CreateFromFile("res/Textures/splatmap.png");
+	tex->CreateFromPNG("res/Textures/splatmap.png");
 
 	Material* mat = new Material();
 	mat->SetDiffuseTexture(tex);
@@ -115,12 +120,12 @@ Scene::Scene()
 	Material* cursorMat = new Material();
 	cursorMat->SetShader(Renderer::m_textShader);
 	Texture* cursorTex = new Texture();
-	cursorTex->CreateFromFile("res/Textures/cursor.png");
+	cursorTex->CreateFromPNG("res/Textures/cursor.png");
 	cursorMat->SetDiffuseTexture(cursorTex);
 	m_cursorMesh->SetScale((float)cursorTex->GetWidth() / SCREEN_WIDTH, (float)cursorTex->GetHeight() / SCREEN_HEIGHT, 1.0f);
 	m_cursorMesh->SetMaterial(cursorMat);
 
-	m_cursorMesh->SetRenderStyle(UI);
+	m_cursorMesh->SetRenderStyle(RENGINE::UI);
 	AddEntity(m_cursorMesh);
 	
 	m_fpsMesh = new TextMesh();
@@ -145,6 +150,9 @@ Scene::~Scene()
 
 void Scene::AddEntity(Entity* entity)
 {
+	char buffer[100];
+	snprintf(buffer, 100, " %s \n", (entity->GetName()));
+	Log::nlog(buffer);
 	int newRenderStyle = entity->GetRenderStyle();
 	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
 		//Insert the entity sorted by render style
@@ -215,7 +223,7 @@ void Scene::UpdateScene(double dt)
 			m_cube->SetPosition(0.0f, 2.0f, 0.0f);
 			Material* mat = new Material();
 			Texture* tex = new Texture();
-			tex->CreateFromFile("res/Textures/splatmap.png");
+			tex->CreateFromPNG("res/Textures/splatmap.png");
 			mat->SetDiffuseTexture(tex);
 			m_cube->SetMaterial(mat);
 			AddEntity(m_cube);
@@ -251,19 +259,20 @@ void Scene::RenderScene(double dt)
 {
 	Renderer::ClearBuffer();
 
+	//m_fbo1->RenderToTexture(true);
+
 	Renderer::SetViewMatrix(m_currentCamera->GetViewMatrix());
 	Renderer::SetProjectionMatrix(m_currentCamera->GetProjectionMatrix());
 
 	Renderer::SetShader(Renderer::m_terrainShader);
 	m_terrain->BindTextures();
 	m_terrain->UpdateUniforms();
-	Renderer::SetRenderMode(SOLID);
+	Renderer::SetRenderMode(RENGINE::SOLID);
 
 	m_terrain->Render(m_currentCamera);
 
-	for (auto entity : m_EntityList) {
-
-
+	for (auto entity : m_EntityList) 
+	{
 		mat4 invView = glm::inverse(m_currentCamera->GetViewMatrix());
 		mat4 invProj = glm::inverse(m_currentCamera->GetProjectionMatrix());
 		glUniformMatrix4fv(glGetUniformLocation(Renderer::m_currentShader, "u_invView"), 1, GL_FALSE, value_ptr(invView));
@@ -272,9 +281,9 @@ void Scene::RenderScene(double dt)
 		Renderer::Render(*entity);
 	}
 
-//	m_fbo1->EndRenderToTexture();
-	Renderer::SetRenderMode(UI);
-	Renderer::SetShader(Renderer::m_showDepthShader);
+	//m_fbo1->EndRenderToTexture();
+	//Renderer::SetRenderMode(RENGINE::UI);
+	//Renderer::SetShader(Renderer::m_showDepthShader);
 	
 	/*
 	Renderer::SetRenderStyle(Entity::RENDERSTYLE_2D);
@@ -335,7 +344,8 @@ void Scene::RenderScene(double dt)
 
 	*/
 
-	Renderer::SetShader(Renderer::m_fullscreenShader);
+	//glBindTexture(GL_TEXTURE_2D, m_fbo1->GetTextureID());
+	//Renderer::SetShader(Renderer::m_fullscreenShader);
 	//Renderer::RenderFullscreenQuad();
 	
 	if (m_bRenderWire)
@@ -356,21 +366,22 @@ void Scene::RenderScene(double dt)
 
 void Scene::RenderWireFrame()
 {
-	Renderer::SetRenderMode(SOLID);
-	Renderer::SetRenderMode(WIREFRAME);
+	Renderer::SetRenderMode(RENGINE::WIREFRAME);
+	Renderer::SetOverrideRenderMode(true);
 	Renderer::SetShader(Renderer::m_whiteShader);
 	m_terrain->Render(m_currentCamera);
 
 	for (auto entity : m_EntityList) {
 		vec4 white = vec4(1.0);
-		glUniform4fv(glGetUniformLocation(Renderer::m_currentShader, "Color"), 1, value_ptr(white));
+		//glUniform4fv(glGetUniformLocation(Renderer::m_currentShader, "Color"), 1, value_ptr(white));
 		Renderer::Render(*entity);
 	}
+	Renderer::SetOverrideRenderMode(false);
 }
 
 void Scene::RenderBoundingBoxes()
 {
-	Renderer::SetRenderMode(WIREFRAME);
+	Renderer::SetRenderMode(RENGINE::WIREFRAME);
 	Renderer::SetShader(Renderer::m_whiteShader);
 
 	Cube cube;
@@ -389,7 +400,7 @@ void Scene::RenderStats()
 	statsMesh.SetMaterial(m_debugFontMaterial);
 	statsMesh.SetScale(8.0f / SCREEN_WIDTH, 8.0f / SCREEN_HEIGHT, 1.0f);
 
-	Renderer::SetRenderMode(UI);
+	Renderer::SetRenderMode(RENGINE::UI);
 	Renderer::SetShader(Renderer::m_textShader);
 
 	float height = 50.0f;

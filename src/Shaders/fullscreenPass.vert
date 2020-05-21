@@ -1,5 +1,4 @@
-#version 120
-#extension GL_EXT_gpu_shader4 : enable
+#version 130
 varying vec2 v_Texcoord;
 varying vec3 v_Color;
 

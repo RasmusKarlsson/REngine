@@ -20,6 +20,8 @@
 #include "Sphere.h"
 #include "Input.h"
 
+#include "Log.h"
+
 extern "C"
 {
 	//Forces computers with 2 Gpus to use the performant one.
@@ -290,11 +292,6 @@ void Window::Init() {
 	ShowCursor(FALSE);
 	DragAcceptFiles(g_hwnd,TRUE);
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-//	Renderer::SetClearColor(vec4(0.2f, 0.4f, 0.6f, 1.0f));
-
-
 	scene = new Scene();
 }
 
@@ -313,11 +310,12 @@ void Window::Render(double dt) {
 		if (frames > 100)
 		{
 			fps = 100.0 / frametimes;
+			char buffer[100];
+			snprintf(buffer, 100, "%s %s - [FPS: %3.2f] [MS: %3.2f] \n", "REngine", "0.0.1", static_cast<float>(fps), static_cast<float>(10.0*frametimes));
+			Log::nlog(buffer);
+			SetWindowText(WND, buffer);
 			frames = 1;
 			frametimes = 0.0;
-			char buffer[100];
-			snprintf(buffer, 255, "%s %s - [FPS: %3.2f]", "REngine", "0.0.1", (float)fps);
-			SetWindowText(WND, buffer);
 		}
 		
 	}

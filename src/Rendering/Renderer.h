@@ -19,15 +19,21 @@ public:
 	static void BindTexture(uint32 textureID, uint32 slot);
 	static void ClearBuffer();
 	static void SetClearColor(vec4 color) { m_clearColor = color; };
-	static void SetRenderMode(RENGINE_RENDER_MODE renderMode);
+	static void SetRenderMode(RENGINE::RENDER_MODE renderMode);
+	static void SetOverrideRenderMode(bool value);
 	static void SetViewMatrix(mat4 viewMatrix);
 	static void SetProjectionMatrix(mat4 projectionMatrix);
+	static void UploadMaterialProperties(Material& material);
 
 	static void Render(Entity& entity);
 	static void RenderFullscreenQuad();
 	static void CompileShaders();
 
-	static int m_currentRenderMode;
+	static void Enable(RENGINE::RENDER_FEATURE feature);
+	static void Disable(RENGINE::RENDER_FEATURE feature);
+	static void SetDepthFunction(RENGINE::DEPTH_TEST function);
+
+	static uint32 m_currentRenderMode;
 	static GLuint m_currentShader;
 	static GLuint m_fullscreenShader;
 	static GLuint m_simpleShader;
@@ -38,10 +44,13 @@ public:
 	static GLuint m_gaussianShader;
 	static GLuint m_showDepthShader;
 	static vec4 m_clearColor;
+	static vec4 m_wireColor;
 
 	static vector<GLuint>m_shaders;
 
 	static mat4 m_viewMatrix;
 	static mat4 m_projectionMatrix;
 	static mat4 m_viewProjectionMatrix;
+
+	static bool m_overrideRenderMode;
 };
