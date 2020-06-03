@@ -147,6 +147,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>opengl32.lib;glew32.lib;Dwmapi.lib;Shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)deps\opengl\gl;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -211,7 +212,7 @@
     <ClInclude Include="src\Rendering\Quad.h" />
     <ClInclude Include="src\Rendering\Renderer.h" />
     <ClInclude Include="src\Rendering\RenderTarget.h" />
-    <ClInclude Include="src\Rendering\Shader.hpp" />
+    <ClInclude Include="src\Rendering\Shader.h" />
     <ClInclude Include="src\Rendering\Skybox.h" />
     <ClInclude Include="src\Rendering\Sphere.h" />
     <ClInclude Include="src\Rendering\Terrain.h" />

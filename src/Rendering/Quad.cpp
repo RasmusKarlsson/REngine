@@ -7,6 +7,8 @@
 #include "Entity.h"
 #include "Quad.h"
 
+#include "Renderer.h"
+
 Quad::Quad()
 {
 	Create();
@@ -14,34 +16,34 @@ Quad::Quad()
 
 void Quad::Create()
 {
-	static vector<float> vertexBuffer = {
-		-1.0f, -1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		1.0f,  1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f
+	static vector<vec3> positionBuffer = {
+		vec3(-1.0f, -1.0f, 0.0f),
+		vec3(-1.0f,  1.0f, 0.0f),
+		vec3(1.0f,  1.0f, 0.0f),
+		vec3(1.0f, -1.0f, 0.0f)
 	};
 
 	m_bbox.SetBoundingBox(vec3(-1.0f, -1.0f, -0.001f), vec3(1.0f, 1.0f, 0.001f));
 
-	static vector<float> normalBuffer = {
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f
+	static vector<vec3> normalBuffer = {
+		vec3(0.0f, 0.0f, 1.0f),
+		vec3(0.0f, 0.0f, 1.0f),
+		vec3(0.0f, 0.0f, 1.0f),
+		vec3(0.0f, 0.0f, 1.0f)
 	};	
 
-	static vector<float> texcoordBuffer = {
-		0.0f, 1.0f,
-		0.0f, 0.0f,
-		1.0f, 0.0f,
-		1.0f, 1.0f
+	static vector<vec2> texcoordBuffer = {
+		vec2(0.0f, 1.0f),
+		vec2(0.0f, 0.0f),
+		vec2(1.0f, 0.0f),
+		vec2(1.0f, 1.0f)
 	};
 
-	static vector<float> colorBuffer = {
-		1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 1.0f
+	static vector<vec3> colorBuffer = {
+		vec3(1.0f, 0.0f, 0.0f),
+		vec3(0.0f, 1.0f, 0.0f),
+		vec3(0.0f, 0.0f, 1.0f),
+		vec3(1.0f, 1.0f, 1.0f)
 	};
 
 	static vector<int> indexBuffer = {
@@ -49,48 +51,31 @@ void Quad::Create()
 		0,3,2
 	};
 
-	glGenVertexArrays(1, &m_vao);
-	glBindVertexArray(m_vao);
 
-	//Vertex Buffer
-	glGenBuffers(1, &m_vertexArrayBuffers.position);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.position);
-	glBufferData(GL_ARRAY_BUFFER, vertexBuffer.size() * sizeof(GLfloat), vertexBuffer.data(), GL_STATIC_DRAW);
+	vector<RENGINE::SVF_PNTC> vertexBuffer;
+	for (uint32 i = 0; i < positionBuffer.size(); i++)
+	{
+		RENGINE::SVF_PNTC vertex;
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		vertex.position = positionBuffer[i];
+		vertex.normal = normalBuffer[i];
+		vertex.texcoord = texcoordBuffer[i];
+		vertex.color = colorBuffer[i];
+		vertexBuffer.push_back(vertex);
+	}
 
-	//Vertex Normal Buffer
-	glGenBuffers(1, &m_vertexArrayBuffers.normal);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.normal);
-	glBufferData(GL_ARRAY_BUFFER, normalBuffer.size() * sizeof(GLfloat), normalBuffer.data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	//Vertex Texcoord Buffer
-	glGenBuffers(1, &m_vertexArrayBuffers.texcoord);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
-	glBufferData(GL_ARRAY_BUFFER, texcoordBuffer.size() * sizeof(GLfloat), texcoordBuffer.data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-	//Vertex Color Buffer
-	glGenBuffers(1, &m_vertexArrayBuffers.color);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.color);
-	glBufferData(GL_ARRAY_BUFFER, colorBuffer.size() * sizeof(GLfloat), colorBuffer.data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	//Index Buffer Object
-	glGenBuffers(1, &m_vboIndex);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vboIndex);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.size() * sizeof(GLint), indexBuffer.data(), GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	Renderer::CreateMesh(
+		"Quad",
+		RENGINE::VF_PNTC,
+		RENGINE::VF_PNTC_SIZE,
+		vertexBuffer.size(),
+		vertexBuffer.data(),
+		m_combinedVBO,
+		m_vao,
+		m_vboIndex,
+		indexBuffer.size(),
+		indexBuffer.data()
+	);
 
 	m_triangleCount = vertexBuffer.size();
 	m_indexSize = indexBuffer.size();

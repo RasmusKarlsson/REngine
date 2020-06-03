@@ -1,15 +1,13 @@
 #pragma once
 
-//#include <gl\glew.h>
-#include <gl/glew.h>
+#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
-#include "Material.h"
-#include <vector>
-
 #include "RenderingAPI/RenderingResource.h"
+#include "Material.h"
+
 
 using namespace glm;
 
@@ -112,10 +110,10 @@ public:
 	void SetRotation(float x, float y, float z);
 
 	void AddPosition(vec3 position) { m_LocalPosition += position;	SetDirty(); };
-	void AddScale(vec3 scale) { m_LocalScale += scale;			SetDirty(); };
+	void AddScale(vec3 scale)		{ m_LocalScale += scale;		SetDirty(); };
 	void AddRotation(vec3 rotation) { m_LocalRotation += rotation;	SetDirty(); };
 
-	void MulScale(vec3 scale) { m_LocalScale *= scale;			SetDirty(); };
+	void MulScale(vec3 scale)		{ m_LocalScale *= scale;		SetDirty(); };
 
 	void UpdateMatrices();
 	bool IsDirty() const { return m_dirty; };
@@ -163,7 +161,8 @@ protected:
 		m_indexSize,
 		m_shader;
 	
-	VertexArrayBuffers m_vertexArrayBuffers;
+	VertexArrayBuffers m_vertexArrayBuffers; //Remove
+	uint32 m_combinedVBO;
 	Material* m_material;
 	
 	BBox m_bbox;

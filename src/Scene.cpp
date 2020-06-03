@@ -137,10 +137,9 @@ Scene::Scene()
 	
 
 
-	Skybox* sky = new Skybox();
-	AddEntity(sky->GetSkyEntity());
+	m_skybox = new Skybox();
+	//AddEntity(sky->GetSkyEntity());
 
-	Renderer::SetShader(Renderer::m_simpleShader);
 }
 
 
@@ -154,16 +153,32 @@ void Scene::AddEntity(Entity* entity)
 	snprintf(buffer, 100, " %s \n", (entity->GetName()));
 	Log::nlog(buffer);
 	int newRenderStyle = entity->GetRenderStyle();
-	for (auto it = begin(m_EntityList); it != end(m_EntityList); ++it) {
-		//Insert the entity sorted by render style
-		if ((*it)->GetRenderStyle() >= newRenderStyle)
-		{
-			m_EntityList.insert(it, entity);
-			return;
+	if(newRenderStyle == RENGINE::RENDER_MODE::UI)
+	{
+		for (auto it = begin(m_EntityList3D); it != end(m_EntityList3D); ++it) {
+			//Insert the entity sorted by render style
+			if ((*it)->GetRenderStyle() >= newRenderStyle)
+			{
+				m_EntityListUI.insert(it, entity);
+				return;
+			}
 		}
+		m_EntityListUI.push_back(entity);
 	}
+	else
+	{
+		for (auto it = begin(m_EntityList3D); it != end(m_EntityList3D); ++it) {
+			//Insert the entity sorted by render style
+			if ((*it)->GetRenderStyle() >= newRenderStyle)
+			{
+				m_EntityList3D.insert(it, entity);
+				return;
+			}
+		}
 
-	m_EntityList.push_back(entity);
+		m_EntityList3D.push_back(entity);
+	}
+	
 }
 
 void Scene::UpdateScene(double dt)
@@ -176,10 +191,10 @@ void Scene::UpdateScene(double dt)
 	intAsString = intAsString.substr(0, 5);
 	m_fpsMesh->UpdateTextBuffer(intAsString);
 	if (Input::IsPressed('A')) {
-		m_EntityList[2]->SetScale(vec3(1.0f, 2.0f, 1.0f));
+		m_EntityList3D[2]->SetScale(vec3(1.0f, 2.0f, 1.0f));
 	}
 	if (Input::IsPressed('D'))
-		m_EntityList[2]->AddRotation(vec3(0.01f)*vec3(1.0f, 1.0f, 2.0f));
+		m_EntityList3D[2]->AddRotation(vec3(0.01f)*vec3(1.0f, 1.0f, 2.0f));
 
 	static int lod = 0;
 
@@ -207,10 +222,10 @@ void Scene::UpdateScene(double dt)
 	}
 
 	if (Input::IsPressedOnce('M')) {
-		glEnable(GL_MULTISAMPLE);
+		Renderer::Enable(RENGINE::RENDER_FEATURE_MULTISAMPLE);
 	}
 	if (Input::IsPressedOnce('N')) {
-		glDisable(GL_MULTISAMPLE);
+		Renderer::Disable(RENGINE::RENDER_FEATURE_MULTISAMPLE);
 	}
 	if (Input::IsPressedOnce('C')) {
 		if (!m_cube->IsDead())
@@ -233,17 +248,17 @@ void Scene::UpdateScene(double dt)
 	m_currentCamera->UpdateCameraState(static_cast<float>(dt));
 	m_currentCamera->CreateLookAtMatrix();
 
-	for (auto it = begin(m_EntityList); it != end(m_EntityList);) {
+	for (auto it = begin(m_EntityList3D); it != end(m_EntityList3D);) {
 		if ((*it)->IsDead()) {
 			delete (*it);
-			it = m_EntityList.erase(it);
+			it = m_EntityList3D.erase(it);
 		}
 		else {
 			++it;
 		}
 	}
 
-	for (auto entity : m_EntityList) {
+	for (auto entity : m_EntityList3D) {
 		if (entity->IsDirty())
 		{
 			entity->UpdateMatrices();
@@ -271,13 +286,16 @@ void Scene::RenderScene(double dt)
 
 	m_terrain->Render(m_currentCamera);
 
-	for (auto entity : m_EntityList) 
+	for (auto entity : m_EntityList3D) 
 	{
-		mat4 invView = glm::inverse(m_currentCamera->GetViewMatrix());
-		mat4 invProj = glm::inverse(m_currentCamera->GetProjectionMatrix());
-		glUniformMatrix4fv(glGetUniformLocation(Renderer::m_currentShader, "u_invView"), 1, GL_FALSE, value_ptr(invView));
-		glUniformMatrix4fv(glGetUniformLocation(Renderer::m_currentShader, "u_invProjection"), 1, GL_FALSE, value_ptr(invProj));
+		Renderer::Render(*entity);
+	}
 
+	Renderer::SetShader(Renderer::m_skyShader);
+	Renderer::Render(*m_skybox->GetSkyEntity());
+
+	for (auto entity : m_EntityListUI)
+	{
 		Renderer::Render(*entity);
 	}
 
@@ -371,7 +389,7 @@ void Scene::RenderWireFrame()
 	Renderer::SetShader(Renderer::m_whiteShader);
 	m_terrain->Render(m_currentCamera);
 
-	for (auto entity : m_EntityList) {
+	for (auto entity : m_EntityList3D) {
 		vec4 white = vec4(1.0);
 		//glUniform4fv(glGetUniformLocation(Renderer::m_currentShader, "Color"), 1, value_ptr(white));
 		Renderer::Render(*entity);
@@ -385,7 +403,7 @@ void Scene::RenderBoundingBoxes()
 	Renderer::SetShader(Renderer::m_whiteShader);
 
 	Cube cube;
-	for (auto entity : m_EntityList) {
+	for (auto entity : m_EntityList3D) {
 
 		cube.SetPosition(entity->GetWorldPosition());
 		cube.SetScale(entity->GetWorldScale() * entity->GetBoundingBox().GetBoundingScale());
@@ -406,7 +424,7 @@ void Scene::RenderStats()
 	float height = 50.0f;
 
 	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));
-	statsMesh.UpdateTextBuffer("Entities:        " + std::to_string(m_EntityList.size())); statsMesh.UpdateMatrices();
+	statsMesh.UpdateTextBuffer("Entities:        " + std::to_string(m_EntityList3D.size())); statsMesh.UpdateMatrices();
 	Renderer::Render(statsMesh); height += 10.0f;
 	
 	statsMesh.SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, height));

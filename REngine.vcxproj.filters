@@ -125,9 +125,6 @@
     <ClInclude Include="src\Rendering\Renderer.h">
       <Filter>Render</Filter>
     </ClInclude>
-    <ClInclude Include="src\Rendering\Shader.hpp">
-      <Filter>Render</Filter>
-    </ClInclude>
     <ClInclude Include="src\Rendering\Texture.h">
       <Filter>Render</Filter>
     </ClInclude>
@@ -175,6 +172,9 @@
     </ClInclude>
     <ClInclude Include="src\Log.h">
       <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Shader.h">
+      <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

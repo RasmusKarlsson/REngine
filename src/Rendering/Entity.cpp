@@ -16,7 +16,7 @@ Entity::Entity()
 
 	m_vao = 0;
 	m_vboIndex = 0;
-
+	m_combinedVBO = 0;
 	m_triangleCount = 0;
 	m_indexSize = 0;
 	m_shader = 0;

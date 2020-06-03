@@ -1,8 +1,9 @@
 #pragma once
 
-//#include <gl\glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <map>
+
 
 #include "Entity.h"
 
@@ -14,43 +15,61 @@ class Renderer
 {
 public:
 
-	static void SetShader(uint32 shader);
-	static void SetTextures(Material& material);
-	static void BindTexture(uint32 textureID, uint32 slot);
-	static void ClearBuffer();
-	static void SetClearColor(vec4 color) { m_clearColor = color; };
-	static void SetRenderMode(RENGINE::RENDER_MODE renderMode);
+	//Init
+	static void Initialize();
+	static void PrintError(uint32 line);
+
+	//Render States
 	static void SetOverrideRenderMode(bool value);
-	static void SetViewMatrix(mat4 viewMatrix);
-	static void SetProjectionMatrix(mat4 projectionMatrix);
-	static void UploadMaterialProperties(Material& material);
-
-	static void Render(Entity& entity);
-	static void RenderFullscreenQuad();
-	static void CompileShaders();
-
+	static void SetRenderMode(RENGINE::RENDER_MODE renderMode);
+	static void SetClearColor(vec4 color) { m_clearColor = color; };
+	static void ClearBuffer();
 	static void Enable(RENGINE::RENDER_FEATURE feature);
 	static void Disable(RENGINE::RENDER_FEATURE feature);
 	static void SetDepthFunction(RENGINE::DEPTH_TEST function);
+	static void SetViewport(uint32 x, uint32 y, uint32 width, uint32 height);
+
+	//Shaders
+	static void SetShader(uint32 shader);
+	static std::string LoadShaderFile(std::string shaderPath);
+	static void CompileShaders();
+
+	//Textures
+	static void SetTextures(Material& material);
+	static void BindTexture(uint32 textureID, uint32 slot);
+	static void UploadMaterialProperties(Material& material);
+
+	//Meshes
+	static void CreateMesh(string name, uint32 vFormat, uint32 vSize, uint32 vCount, void* vData, uint32 &vBO, uint32 &vAO, uint32 &indexBuffer, uint32 iCount, int* iData);
+
+	//Drawings
+	static void SetViewMatrix(mat4 viewMatrix);
+	static void SetProjectionMatrix(mat4 projectionMatrix);
+	static void Render(Entity& entity);
+	static void RenderFullscreenQuad();
+	
+
+	static map<string, uint32> sm_ShaderMap;
 
 	static uint32 m_currentRenderMode;
-	static GLuint m_currentShader;
-	static GLuint m_fullscreenShader;
-	static GLuint m_simpleShader;
-	static GLuint m_terrainShader;
-	static GLuint m_textShader;
-	static GLuint m_whiteShader;
-	static GLuint m_skyShader;
-	static GLuint m_gaussianShader;
-	static GLuint m_showDepthShader;
+	static uint32 m_currentShader;
+	static uint32 m_fullscreenShader;
+	static uint32 m_simpleShader;
+	static uint32 m_terrainShader;
+	static uint32 m_textShader;
+	static uint32 m_whiteShader;
+	static uint32 m_skyShader;
+	static uint32 m_gaussianShader;
+	static uint32 m_showDepthShader;
 	static vec4 m_clearColor;
 	static vec4 m_wireColor;
-
-	static vector<GLuint>m_shaders;
 
 	static mat4 m_viewMatrix;
 	static mat4 m_projectionMatrix;
 	static mat4 m_viewProjectionMatrix;
+	
+	static mat4 m_invViewMatrix;
+	static mat4 m_invProjectionMatrix;
 
 	static bool m_overrideRenderMode;
 };

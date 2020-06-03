@@ -1,7 +1,5 @@
 #pragma once
 
-//#include <lodepng.cpp>
-
 #include "Entity.h"
 #include "TerrainMesh.h"
 #include "MathHelpers.h"
@@ -20,92 +18,6 @@ TerrainMesh::TerrainMesh()
 	m_currentLod = 0;
 }
 
-void TerrainMesh::Create(int width, int depth)
-{
-	m_resolution = ivec2(8, 8);
-	m_heightScale = 1.0f;
-	m_size = 10.0f;
-
-	vector<float> vertices;
-	vector<float> normals;
-	vector<float> texcoords;
-	vector<int> indices;
-
-	vertices.resize(width * depth * 3);
-	normals.resize(width * depth * 3);
-	texcoords.resize(width * depth * 2);
-	indices.resize((width-1) * (depth-1) * 6);
-
-	int v = 0;
-	int tc = 0;
-	for (int x = 0; x < width; x++)
-	{
-		for (int z = 0; z < depth; z++)
-		{
-			vertices[v] = (float)x;
-			normals[v++] = 0.0f;
-
-			vertices[v] = 0.0f;
-			normals[v++] = 1.0f;
-
-			vertices[v] = (float)z;
-			normals[v++] = 0.0f;
-
-			texcoords[tc++] = (float)x;
-			texcoords[tc++] = (float)z;
-		}
-	}
-
-	int d = 0;
-	for (int j = 0; j < (depth - 1); j++)
-	{
-		for (int i = 0; i < (width - 1); i++)
-		{
-			int idx = j*(width)+i;
-			indices[d++] = idx;
-			indices[d++] = (idx + width);
-			indices[d++] = (idx + width + 1);
-
-			indices[d++] = idx;
-			indices[d++] = (idx + width + 1);
-			indices[d++] = (idx + 1);
-		}
-	}
-
-	glGenVertexArrays(1, &m_vao);
-	glBindVertexArray(m_vao);
-	glGenBuffers(1, &m_vertexArrayBuffers.position);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.position);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	glGenBuffers(1, &m_vertexArrayBuffers.normal);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.normal);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	glGenBuffers(1, &m_vertexArrayBuffers.texcoord);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
-	glBufferData(GL_ARRAY_BUFFER, texcoords.size() * sizeof(GLfloat), texcoords.data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	glGenBuffers(1, &m_vboIndex);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vboIndex);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLint), indices.data() , GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	m_triangleCount = vertices.size();
-	m_indexSize = indices.size();
-}
-
-
 void TerrainMesh::CreateFromHeightmap(Texture* texture)
 {
 	uint32 width = texture->GetWidth();
@@ -119,7 +31,6 @@ void TerrainMesh::CreateFromHeightmap(Texture* texture)
 		m_lodTriangleSize.resize(C_TERRAINLODS);
 		m_lodIndexSize.resize(C_TERRAINLODS);
 	}
-
 	
 	vector<unsigned char> imageData = texture->GetImageData();
 
@@ -297,25 +208,11 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, uint32 xStart, uint
 	vector<float> texcoords;
 	vector<int> indices;
 
-	uint32 extraSeam = 4 * patchSize - 4;
-	/*
-	vertices.resize(width * depth * 3 + 3 * extraSeam);
-	normals.resize(width * depth * 3 + 3 * extraSeam);
-	texcoords.resize(width * depth * 2 + 2 * extraSeam);
-	indices.resize((width - 1) * (depth - 1) * 6 + (extraSeam - 1) * 6);
-	*/
+
 	vertices.resize(width * depth * 3);
 	normals.resize(width * depth * 3);
 	texcoords.resize(width * depth * 2);
 	indices.resize((width - 1) * (depth - 1) * 6);
-
-
-	vector<float> extraVertices;
-	vector<float> extraNormals;
-	vector<float> extraTexcoords;
-	extraVertices.resize(3 * extraSeam);
-	extraNormals.resize(3 * extraSeam);
-	extraTexcoords.resize(2 * extraSeam);
 
 	int v = 0;
 	int n = 0;
@@ -346,55 +243,11 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, uint32 xStart, uint
 
 			texcoords[tc++] = (float)x + (float)xStart;
 			texcoords[tc++] = (float)z + (float)yStart;
-/*
-			if(x == 0 || x == (width-1) || z == 0 || z == (depth-1))
-			{
-				extraVertices.push_back((float)x - patchSize / 2.0f);
-				extraVertices.push_back(m_heightScale * height - 2.0f);
-				extraVertices.push_back((float)z - patchSize / 2.0f);
-
-				extraNormals.push_back(normal.x);
-				extraNormals.push_back(normal.z);
-				extraNormals.push_back(normal.y);
-
-				extraTexcoords.push_back((float)x + (float)xStart);
-				extraTexcoords.push_back((float)z + (float)yStart);
-			}*/
 		}
 	}
-	/*
-	for(uint32 i = 0; i < extraSeam;i++)
-	{
-		vertices[v++] = extraVertices[3 * i + 0];
-		vertices[v++] = extraVertices[3 * i + 1];
-		vertices[v++] = extraVertices[3 * i + 2];
-
-		normals[n++] = extraNormals[3 * i + 0];
-		normals[n++] = extraNormals[3 * i + 1];
-		normals[n++] = extraNormals[3 * i + 2];
-
-		texcoords[tc++] = extraTexcoords[2 * i + 0];
-		texcoords[tc++] = extraTexcoords[2 * i + 1];
-	}
-	*/
 
 	int d = 0;
-	/*
-	for (int j = 0; j < (depth - 1); j++)
-	{
-		for (int i = 0; i < (width - 1); i++)
-		{
-			int idx = j*(width)+i;
-			indices[d++] = idx;
-			indices[d++] = (idx + width);
-			indices[d++] = (idx + width + 1);
-
-			indices[d++] = idx;
-			indices[d++] = (idx + width + 1);
-			indices[d++] = (idx + 1);
-		}
-	}*/
-	/**/
+	
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 	glGenBuffers(1, &m_vertexArrayBuffers.position);

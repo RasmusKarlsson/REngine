@@ -10,6 +10,7 @@ typedef unsigned int uint32;
 class RendererContext
 {
 public:
+	static void Initialize();
 	
 	static void SetShader(uint32 shader);
 	static void BindTexture(uint32 textureID, uint32 slot);
@@ -42,10 +43,28 @@ public:
 	static void Disable(RENGINE::RENDER_FEATURE feature);
 
 	static void SetDepthFunction(RENGINE::DEPTH_TEST function);
+	static void SetViewport(uint32 x, uint32 y, uint32 width, uint32 height);
+	static void PrintError(uint32 line);
 
+	//Meshes
+	static uint32 GenerateVertexArray();
+	static uint32 GenerateVertexBuffer(uint32 vertexCount, uint32 vertexSize, uint32 vertexFormat, void* vertexData);
+	static uint32 GenerateIndexBuffer(uint32 indexCount, int* indexData);
+	//static void CreateMesh(string name, uint32 vFormat, uint32 vCount, void* vData, uint32 &vBO, uint32 &vAO, uint32 &indexBuffer);
+	static void RenderFullscreenQuad();
+
+	//Shader
+	static uint32 CreateVertexShader(std::string shaderString);
+	static uint32 CreateFragmentShader(std::string shaderString);
+	static uint32 CreateShaderProgram(uint32 vertexShader, uint32 fragmentShader);
+
+private:
+	static void SetVertexAttributePointers(uint32 vertexFormat, uint32 vertexSize);
+	
 	//static vec4 m_clearColor;
 	static uint32 sm_currentShader;
 };
+
 
 /*
 vec4 RendererContext::m_clearColor = vec4(0.0, 0.0, 0.0, 0.0);

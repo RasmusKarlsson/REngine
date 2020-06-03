@@ -9,7 +9,8 @@
 #include "Stats.h"
 #include <iostream>
 
-#include "Shader.hpp"
+#include <stdio.h>
+#include <fstream>
 
 #include "RenderingAPI/RendererContext.h"
 
@@ -40,6 +41,16 @@ mat4 Renderer::m_viewMatrix = mat4();
 mat4 Renderer::m_projectionMatrix = mat4();
 mat4 Renderer::m_viewProjectionMatrix = mat4();
 
+mat4 Renderer::m_invViewMatrix = mat4();
+mat4 Renderer::m_invProjectionMatrix = mat4();
+
+map<string, uint32> Renderer::sm_ShaderMap;
+
+void Renderer::Initialize()
+{
+	RendererContext::Initialize();
+}
+
 void Renderer::SetShader(uint32 shader)
 {
 	if (shader >= 0 && shader != m_currentShader)
@@ -48,6 +59,22 @@ void Renderer::SetShader(uint32 shader)
 		RendererContext::SetShader(m_currentShader);
 		Stats::s_shaderBounds++;
 	}
+}
+
+std::string Renderer::LoadShaderFile(std::string shaderPath)
+{
+	std::string shaderCode;
+	std::ifstream shaderStream(shaderPath.c_str() , std::ios::in);
+	if (shaderStream.is_open()) {
+		std::string Line = "";
+		while (std::getline(shaderStream, Line))
+			shaderCode += "\n" + Line;
+		shaderStream.close();
+	}
+	else {
+		printf("Impossible to open %s. Are you in the right directory?\n", shaderPath.c_str());
+	}
+	return shaderCode;
 }
 
 void Renderer::SetTextures(Material& material)
@@ -84,6 +111,13 @@ void Renderer::UploadMaterialProperties(Material& material)
 	}
 }
 
+void Renderer::CreateMesh(string name, uint32 vFormat, uint32 vSize, uint32 vCount, void* vData, uint32 &vBO, uint32 &vAO, uint32 &indexBuffer, uint32 iCount, int* iData)
+{
+	vAO = RendererContext::GenerateVertexArray();
+	vBO = RendererContext::GenerateVertexBuffer(vCount, vSize, vFormat, vData);
+	indexBuffer = RendererContext::GenerateIndexBuffer(iCount, iData);
+}
+
 void Renderer::BindTexture(uint32 textureID, GLuint slot)
 {
 	if (s_boundTextures[slot] != textureID)
@@ -108,6 +142,9 @@ void Renderer::Render(Entity& entity)
 	RendererContext::UploadUniformMatrix4fv("u_WorldViewProjection", value_ptr(wvpMatrix));
 	RendererContext::UploadUniformMatrix4fv("u_World", value_ptr(entity.GetWorldMatrix()));
 
+	RendererContext::UploadUniformMatrix4fv("u_invView", value_ptr(m_invViewMatrix));
+	RendererContext::UploadUniformMatrix4fv("u_invProjection", value_ptr(m_invProjectionMatrix));
+
 	RendererContext::UploadUniform1f("u_Time", static_cast<GLfloat>(timeElapsed));
 
 	//TODO: Move these
@@ -127,27 +164,43 @@ void Renderer::Render(Entity& entity)
 
 void Renderer::RenderFullscreenQuad()
 {
-	glBindVertexArray(0);
-	glDrawArrays(GL_TRIANGLES, 0, 4);
+	RendererContext::RenderFullscreenQuad();
 }
 
 void Renderer::CompileShaders()
 {
-	m_simpleShader = LoadShaders("simple.vert", "simple.frag");
-	m_terrainShader = LoadShaders("splatmap.vert", "splatmap.frag");
-	m_textShader = LoadShaders("2dUI.vert", "2dUI.frag");
-	m_whiteShader = LoadShaders("simple.vert", "whiteColor.frag");
-	m_skyShader = LoadShaders("skybox.vert", "skybox.frag");
+	uint32 simpleVertexShader = RendererContext::CreateVertexShader(LoadShaderFile("src/shaders/simple.vert"));
+	uint32 simpleFragmentShader = RendererContext::CreateFragmentShader(LoadShaderFile("src/shaders/simple.frag"));
 
-	m_fullscreenShader = LoadShaders("fullscreenPass.vert", "simple.frag");
-	m_gaussianShader = LoadShaders("fullscreenPass.vert", "gaussianBlur.frag");
-	m_showDepthShader = LoadShaders("fullscreenPass.vert", "showDepth.frag");
+	uint32 fullscreenVertex = RendererContext::CreateVertexShader(LoadShaderFile("src/shaders/fullscreenPass.vert"));
 
-	vec2 screenSize((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT);
-	vec2 elementSize(8.0f, 8.0f);
-	glUseProgram(m_textShader);
-	glUniform2fv(glGetUniformLocation(m_textShader, "u_ScreenSize"), 1, value_ptr(screenSize));
-	glUniform2fv(glGetUniformLocation(m_textShader, "u_ElementSize"), 1, value_ptr(elementSize));
+	m_simpleShader = RendererContext::CreateShaderProgram(
+		simpleVertexShader,
+		simpleFragmentShader);
+	m_terrainShader = RendererContext::CreateShaderProgram(
+		RendererContext::CreateVertexShader(LoadShaderFile("src/shaders/splatmap.vert")),
+		RendererContext::CreateFragmentShader(LoadShaderFile("src/shaders/splatmap.frag")));
+	m_textShader = RendererContext::CreateShaderProgram(
+		RendererContext::CreateVertexShader(LoadShaderFile("src/shaders/2dUI.vert")),
+		RendererContext::CreateFragmentShader(LoadShaderFile("src/shaders/2dUI.frag")));
+	m_whiteShader = RendererContext::CreateShaderProgram(
+		simpleVertexShader,
+		RendererContext::CreateFragmentShader(LoadShaderFile("src/shaders/whiteColor.frag")));
+	m_skyShader = RendererContext::CreateShaderProgram(
+		RendererContext::CreateVertexShader(LoadShaderFile("src/shaders/skybox.vert")),
+		RendererContext::CreateFragmentShader(LoadShaderFile("src/shaders/skybox.frag")));
+	m_fullscreenShader = RendererContext::CreateShaderProgram(
+		fullscreenVertex,
+		simpleFragmentShader);
+	m_gaussianShader = RendererContext::CreateShaderProgram(
+		fullscreenVertex,
+		RendererContext::CreateFragmentShader(LoadShaderFile("src/shaders/gaussianBlur.frag")));
+	m_showDepthShader = RendererContext::CreateShaderProgram(
+		fullscreenVertex,
+		RendererContext::CreateFragmentShader(LoadShaderFile("src/shaders/showDepth.frag")));
+	
+
+	//sm_ShaderMap["Standard"] = LoadShaders("simple.vert", "simple.frag");
 }
 
 void Renderer::Enable(RENGINE::RENDER_FEATURE feature)
@@ -163,6 +216,16 @@ void Renderer::Disable(RENGINE::RENDER_FEATURE feature)
 void Renderer::SetDepthFunction(RENGINE::DEPTH_TEST function)
 {
 	RendererContext::SetDepthFunction(function);
+}
+
+void Renderer::SetViewport(uint32 x, uint32 y, uint32 width, uint32 height)
+{
+	RendererContext::SetViewport(x, y, width, height);
+}
+
+void Renderer::PrintError(uint32 line)
+{
+	RendererContext::PrintError(line);
 }
 
 void Renderer::ClearBuffer()
@@ -190,10 +253,14 @@ void Renderer::SetViewMatrix(mat4 viewMatrix)
 {
 	m_viewMatrix = viewMatrix;
 	m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
+
+	m_invViewMatrix = inverse(m_viewMatrix);
 }
 
 void Renderer::SetProjectionMatrix(mat4 projectionMatrix)
 {
 	m_projectionMatrix = projectionMatrix;
 	m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
+	
+	m_invProjectionMatrix = inverse(m_projectionMatrix);
 }

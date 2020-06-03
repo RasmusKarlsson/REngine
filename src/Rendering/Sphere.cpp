@@ -8,12 +8,12 @@
 
 Sphere::Sphere()
 {
-	isInited = false;
+	m_isInited = false;
 	m_vao = 0;
 	m_vboIndex = 0;
 
-	lats = 40;
-	longs = 40;
+	m_lats = 40;
+	m_longs = 40;
 	Create();
 }
 
@@ -24,16 +24,16 @@ void Sphere::Create()
 	std::vector<GLfloat> sphere_texcoords;
 	std::vector<GLushort> sphere_indices;
 	int sectors = 40;
-	double radius = 1;
-	double M_PI = 3.141592;
-	double M_PI_2 = 2.0*3.141592;
-	float const R = 1. / (float)(lats - 1);
-	float const S = 1. / (float)(longs - 1);
+	float radius = 1.0f;
+	float M_PI = 3.141592f;
+	float M_PI_2 = 2.0f*M_PI;
+	float const R = 1.0f / static_cast<float>(m_lats - 1);
+	float const S = 1.0f / static_cast<float>(m_longs - 1);
 	int r, s;
 
-	sphere_vertices.resize(lats * sectors * 3);
-	sphere_normals.resize(lats * sectors * 3);
-	sphere_texcoords.resize(lats * sectors * 2);
+	sphere_vertices.resize(m_lats * sectors * 3);
+	sphere_normals.resize(m_lats * sectors * 3);
+	sphere_texcoords.resize(m_lats * sectors * 2);
 	std::vector<GLfloat>::iterator v = sphere_vertices.begin();
 	std::vector<GLfloat>::iterator n = sphere_normals.begin();
 	std::vector<GLfloat>::iterator t = sphere_texcoords.begin();
@@ -54,9 +54,9 @@ void Sphere::Create()
 		*n++ = z;
 	}
 
-	sphere_indices.resize(lats * sectors * 4);
+	sphere_indices.resize(m_lats * sectors * 4);
 	std::vector<GLushort>::iterator i = sphere_indices.begin();
-	for (r = 0; r < lats; r++) for (s = 0; s < sectors; s++) {
+	for (r = 0; r < m_lats; r++) for (s = 0; s < sectors; s++) {
 		*i++ = r * sectors + s;
 		*i++ = r * sectors + (s + 1);
 		*i++ = (r + 1) * sectors + (s + 1);
@@ -79,7 +79,7 @@ void Sphere::Create()
 
 	m_triangleCount = sphere_indices.size();
 
-	isInited = true;
+	m_isInited = true;
 }
 
 /*

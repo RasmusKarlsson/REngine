@@ -6,22 +6,23 @@
 #include <GL/glew.h>
 #include <cstdio>
 
-inline int printOglError(int line)
-{
-	GLenum glErr;
-	int    retCode = 0;
+//Static variables
+uint32 RendererContext::sm_currentShader = 0;
 
-	glErr = glGetError();
+void RendererContext::Initialize()
+{
+	glewExperimental = GL_TRUE;
+	glewInit();
+}
+
+void RendererContext::PrintError(uint32 line)
+{
+	GLenum glErr = glGetError();
 	if (glErr != GL_NO_ERROR)
 	{
 		printf("glError in file %d @ %d\n", line, glErr);
-		retCode = 1;
 	}
-	return retCode;
 }
-
-//Static variables
-uint32 RendererContext::sm_currentShader = 0;
 
 void RendererContext::SetShader(uint32 shader)
 {
@@ -331,6 +332,165 @@ void RendererContext::SetDepthFunction(RENGINE::DEPTH_TEST function)
 	glDepthFunc(glFunction);
 }
 
+void RendererContext::SetViewport(uint32 x, uint32 y, uint32 width, uint32 height)
+{
+	glViewport(x, y, width, height);
+}
+
+uint32 RendererContext::GenerateVertexArray()
+{
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	return vao;
+}
+
+uint32 RendererContext::GenerateVertexBuffer(uint32 vertexCount, uint32 vertexSize, uint32 vertexFormat, void* vertexData)
+{
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, vertexCount * vertexSize, vertexData, GL_STATIC_DRAW);
+
+	SetVertexAttributePointers(vertexFormat, vertexSize);
+	
+	return vbo;
+}
+
+uint32 RendererContext::GenerateIndexBuffer(uint32 indexCount, int* indexData)
+{
+	GLuint indexBuffer;
+	glGenBuffers(1, &indexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(GLint), indexData, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	return indexBuffer;
+}
+
+void RendererContext::SetVertexAttributePointers(uint32 vertexFormat, uint32 vertexSize)
+{
+	uint32 vertexOffset = 0;
+	uint32 attributeIndex = 0;
+	if(vertexFormat & RENGINE::VA::POSITION)
+	{
+		glVertexAttribPointer(attributeIndex, 3, GL_FLOAT, GL_FALSE, vertexSize, reinterpret_cast<char *>(vertexOffset));
+		vertexOffset += 3 * sizeof(GLfloat);
+		glEnableVertexAttribArray(attributeIndex);
+		attributeIndex++;
+	}
+	
+	if (vertexFormat & RENGINE::VA::NORMAL)
+	{
+		glVertexAttribPointer(attributeIndex, 3, GL_FLOAT, GL_FALSE, vertexSize, reinterpret_cast<char *>(vertexOffset));
+		vertexOffset += 3 * sizeof(GLfloat);
+		glEnableVertexAttribArray(attributeIndex);
+		attributeIndex++;
+	}
+	
+	if (vertexFormat & RENGINE::VA::TEXCOORD)
+	{
+		glVertexAttribPointer(attributeIndex, 2, GL_FLOAT, GL_FALSE, vertexSize, reinterpret_cast<char *>(vertexOffset));
+		vertexOffset += 2 * sizeof(GLfloat);
+		glEnableVertexAttribArray(attributeIndex);
+		attributeIndex++;
+	}
+	
+	if (vertexFormat & RENGINE::VA::COLOR)
+	{
+		glVertexAttribPointer(attributeIndex, 3, GL_FLOAT, GL_FALSE, vertexSize, reinterpret_cast<char *>(vertexOffset));
+		vertexOffset += 3 * sizeof(GLfloat);
+		glEnableVertexAttribArray(attributeIndex);
+		attributeIndex++;
+	}
+}
+
+void RendererContext::RenderFullscreenQuad()
+{
+	glBindVertexArray(0);
+	glDrawArrays(GL_TRIANGLES, 0, 4);
+}
 
 
+uint32 RendererContext::CreateVertexShader(std::string shaderString)
+{
+	const uint32 vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+	const GLchar *sz = shaderString.c_str();
+
+	glShaderSource(vertexShaderID, 1, (const GLchar**)&sz, NULL);
+	glCompileShader(vertexShaderID);
+
+	int iResult = 0;
+	glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, &iResult);
+
+	if (!iResult)
+	{
+		int iLogSize = 0;
+		glGetShaderiv(vertexShaderID, GL_INFO_LOG_LENGTH, &iLogSize);
+		if (iLogSize)
+		{
+			char infoLogChar[4096];
+			int infologLength = 0;
+			glGetShaderInfoLog(vertexShaderID, 4096, &infologLength, infoLogChar);
+			printf("%s", infoLogChar);
+		}
+	}
+	return vertexShaderID;
+}
+
+uint32 RendererContext::CreateFragmentShader(std::string shaderString)
+{
+	const uint32 fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+	const GLchar *sz = shaderString.c_str();
+
+	glShaderSource(fragmentShaderID, 1, (const GLchar**)&sz, NULL);
+	glCompileShader(fragmentShaderID);
+
+	int iResult = 0;
+	glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &iResult);
+
+	if (!iResult)
+	{
+		int iLogSize = 0;
+		glGetShaderiv(fragmentShaderID, GL_INFO_LOG_LENGTH, &iLogSize);
+		if (iLogSize)
+		{
+			char infoLogChar[4096];
+			int infologLength = 0;
+			glGetShaderInfoLog(fragmentShaderID, 4096, &infologLength, infoLogChar);
+			printf("%s", infoLogChar);
+		}
+	}
+	return fragmentShaderID;
+}
+
+uint32 RendererContext::CreateShaderProgram(uint32 vertexShader, uint32 fragmentShader)
+{
+	uint32 programID = glCreateProgram();
+	glAttachShader(programID, vertexShader);
+	glAttachShader(programID, fragmentShader);
+
+	//Bind Vertex Attibute locations
+	glBindAttribLocation(programID, 0, "a_Position");
+	glBindAttribLocation(programID, 1, "a_Normal");
+	glBindAttribLocation(programID, 2, "a_Texcoord");
+	glBindAttribLocation(programID, 3, "a_Color");
+	glBindAttribLocation(programID, 4, "a_DataIndex");
+
+	glLinkProgram(programID);
+
+	// Check the program
+	int iResult = 0;
+	glGetProgramiv(programID, GL_LINK_STATUS, &iResult);
+	int iLogSize = 0;
+	glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &iLogSize);
+	if(iLogSize)
+	{
+		char infoLogChar[4096];
+		int infologLength = 0;
+		glGetShaderInfoLog(programID, 4096, &infologLength, infoLogChar);
+		printf("%s", infoLogChar);
+	}
+	
+	return programID;
+}
 #endif

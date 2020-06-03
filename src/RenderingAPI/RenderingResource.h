@@ -1,7 +1,39 @@
 #pragma once
 
+typedef unsigned int uint32;
+
 namespace RENGINE
 {
+	//vertex formats
+	struct SVF_PNTC
+	{
+		glm::vec3 position;
+		glm::vec3 normal;
+		glm::vec2 texcoord;
+		glm::vec3 color;
+	};
+
+	struct SVF_PT
+	{
+		glm::vec3 position;
+		glm::vec2 texcoord;
+	};
+
+	enum VA //Vertex Attribute
+	{
+		POSITION = 1,
+		NORMAL	= 2,
+		TEXCOORD = 4,
+		COLOR	= 8
+	};
+	
+	const uint32 VF_PNTC = VA::POSITION | VA::NORMAL | VA::TEXCOORD | VA::COLOR;
+	const uint32 VF_PNTC_SIZE = sizeof(SVF_PNTC);
+	
+	const uint32 VF_PT = VA::POSITION | VA::TEXCOORD;
+	const uint32 VF_PT_SIZE = sizeof(SVF_PT);
+
+	
 	enum POLYGON_TYPE
 	{
 		POLYGON_TYPE_POINTS,

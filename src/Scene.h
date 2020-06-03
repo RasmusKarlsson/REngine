@@ -5,6 +5,7 @@
 #include "Quad.h"
 #include "Cube.h"
 #include "RenderTarget.h"
+#include "SkyBox.h"
 #include "TextMesh.h"
 
 using namespace glm;
@@ -32,7 +33,8 @@ public:
 	Texture* m_debugFontTexture;
 
 private:
-	vector<Entity*> m_EntityList;
+	vector<Entity*> m_EntityList3D;
+	vector<Entity*> m_EntityListUI;
 	Camera* m_currentCamera;
 	Terrain* m_terrain;
 	Quad* m_cursorMesh;
@@ -41,4 +43,6 @@ private:
 	RenderTarget* m_fbo1;
 	RenderTarget* m_fbo2;
 	Quad* m_fullscreenQuad;
+
+	Skybox* m_skybox;
 };

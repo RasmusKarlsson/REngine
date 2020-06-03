@@ -9,11 +9,14 @@
 #include <algorithm>
 
 #include "MathHelpers.h"
+#include "Renderer.h"
 
 TextMesh::TextMesh()
 {
 	m_stringSize = 0;
 	m_stringCapacity = 32;
+
+	SetRenderStyle(RENGINE::UI);
 
 	Create();
 }
@@ -77,6 +80,31 @@ void TextMesh::Create()
 		meshIndices.push_back(4 * i + 0);
 	}
 
+	/*
+	vector<RENGINE::SVF_PT> vertexBuffer;
+	for (uint32 i = 0; i < positionBuffer.size(); i++)
+	{
+		RENGINE::SVF_PT vertex;
+
+		vertex.position = positionBuffer[i];
+		vertex.texcoord = texcoordBuffer[i];
+		vertexBuffer.push_back(vertex);
+	}
+
+	Renderer::CreateMesh(
+		"Quad",
+		RENGINE::VF_PNTC,
+		RENGINE::VF_PNTC_SIZE,
+		vertexBuffer.size(),
+		vertexBuffer.data(),
+		m_combinedVBO,
+		m_vao,
+		m_vboIndex,
+		indexBuffer.size(),
+		indexBuffer.data()
+	);
+	*/
+	
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 
@@ -118,7 +146,7 @@ void TextMesh::UpdateTextBuffer(string newText)
 	//SetText(std::move(newText));
 	SetText(newText);
 	
-	const int stringLength = m_textString.size();
+	const uint32 stringLength = m_textString.size();
 	vector<float> meshTexcoords;
 
 	for (uint32 i = 0; i < m_stringCapacity; ++i) {

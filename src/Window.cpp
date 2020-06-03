@@ -10,17 +10,13 @@
 #include <string>
 #include <atlstr.h>
 #include "Window.h"
-#include "gl/glew.h"
-#include "gl/glext.h"
+
 #include "gl/wglext.h"
 
-//#include "Renderer.h"
-#include "Quad.h"
-#include "Cube.h"
-#include "Sphere.h"
 #include "Input.h"
 
 #include "Log.h"
+#include "Renderer.h"
 
 extern "C"
 {
@@ -49,8 +45,8 @@ static int g_glwin_fullscreen = 0;
 
 Window *staticWindow;
 
-bool glwin_enter_fullscreen(int width, int height);
-bool glwin_leave_fullscreen(int width, int height);
+bool EnterFullscreen(int width, int height);
+bool LeaveFullscreen(int width, int height);
 
 Window::Window() {
 	config.width = SCREEN_WIDTH;
@@ -91,20 +87,6 @@ void Window::SetWindowSize(HWND hWnd, int width, int height)
 
 ///////////////////////////////////////////////////////////
 
-inline int printOglError(int line)
-{
-
-	GLenum glErr;
-	int    retCode = 0;
-
-	glErr = glGetError();
-	if (glErr != GL_NO_ERROR)
-	{
-		printf("glError in file %d @ %d\n", line, glErr);
-		retCode = 1;
-	}
-	return retCode;
-}
 int Window::Create(HINSTANCE hInstance, int nCmdShow) {
 
 	AllocConsole();
@@ -258,10 +240,9 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow) {
 	}
 
 	// init opengl loader here (extra safe version)
-	glewExperimental = GL_TRUE;
-	glewInit();
-
-	printOglError(0);
+	Renderer::Initialize();
+	
+	Renderer::PrintError(0);
 	SetWindowText(WND, (LPCSTR)glGetString(GL_VERSION));
 	ShowWindow(WND, nCmdShow);
 	
@@ -356,14 +337,12 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam,
 		Input::KeyDown(wParam);
 		if (wParam == VK_F1)
 		{
-			glwin_enter_fullscreen(1920, 1200);
-			//staticWindow->SetWindowSize(hWnd,staticWindow->config.width, staticWindow->config.height);
+			EnterFullscreen(1920, 1200);
 			break;
 		}
 		if (wParam == VK_F2)
 		{
-			//staticWindow->SetWindowSize(hWnd,staticWindow->config.width*2, staticWindow->config.height*2);
-			glwin_leave_fullscreen(1280, 720);
+			LeaveFullscreen(1280, 720);
 			break;
 		}
 		if (wParam == VK_F3)
@@ -428,16 +407,16 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam,
 	case WM_DROPFILES:
 	{
 		HDROP hDropInfo = (HDROP)wParam;
-		UINT nNumOfFiles = DragQueryFile(hDropInfo, 0xFFFFFFFF, NULL, NULL);
+		uint32 nNumOfFiles = DragQueryFile(hDropInfo, 0xFFFFFFFF, NULL, NULL);
 		if (nNumOfFiles > 0)
 		{
-			for (int i = 0; i < nNumOfFiles; ++i)
+			for (uint32 i = 0; i < nNumOfFiles; ++i)
 			{
 				CString strFile;
 				UINT nFilenameSize = DragQueryFile(hDropInfo, i, NULL, NULL);
 				DragQueryFile(hDropInfo, i, strFile.GetBuffer(nFilenameSize + 1), nFilenameSize + 1);
 				strFile.ReleaseBuffer();
-				printf("FilePath: %s \n", strFile);
+				printf("FilePath: %s \n", (const char *)strFile);
 				// strFile contains the full path...
 			}
 		}
@@ -450,7 +429,7 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam,
 	return 0;		// message handled
 }
 
-bool glwin_enter_fullscreen(int width, int height)
+bool EnterFullscreen(int width, int height)
 {
 	DEVMODE screen;
 	DWORD style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
@@ -474,9 +453,8 @@ bool glwin_enter_fullscreen(int width, int height)
 	return true;
 }
 
-bool glwin_leave_fullscreen(int width, int height)
+bool LeaveFullscreen(int width, int height)
 {
-	DEVMODE screen;
 	DWORD exstyle = WS_EX_STATICEDGE;
 	DWORD style = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
@@ -510,7 +488,9 @@ bool glwin_leave_fullscreen(int width, int height)
 //	SetWindowLong(g_hwnd, GWL_EXSTYLE, exstyle);
 //	SetWindowLong(g_hwnd, GWL_STYLE, style);
 	SetWindowPos(g_hwnd, HWND_TOP, posX, posY, width, height, SWP_SHOWWINDOW);
-	glViewport(0, 0, width, height);
+
+	Renderer::SetViewport(0, 0, width, height);
+	
 	g_glwin_fullscreen = 0;
 	return true;
 }

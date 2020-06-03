@@ -11,8 +11,8 @@ public:
 	//void draw();
 
 private:
-	int lats, longs;
-	bool isInited;
+	int m_lats, m_longs;
+	bool m_isInited;
 	
-	int numsToDraw;
+	int m_numsToDraw;
 };
