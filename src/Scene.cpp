@@ -73,6 +73,12 @@ Scene::Scene()
 	quad->SetMaterial(mat);
 	quad->SetPosition(0.0f, 2.0f, 0.0f);
 	AddEntity(quad);
+	
+	Sphere* sphere = new Sphere();
+	sphere->SetName("sphere");
+	sphere->SetMaterial(mat);
+	sphere->SetPosition(0.0f, 5.0f, 0.0f);
+	AddEntity(sphere);
 
 	Quad* quad3 = new Quad();
 	quad3->SetName("quad3");
@@ -90,7 +96,7 @@ Scene::Scene()
 	skyMat->SetDiffuseTexture(new Texture("res/Textures/skyboxTest.png"));
 	cube->SetMaterial(skyMat);
 	cube->SetPosition(0.0f, 5.0f, 0.0f);
-	AddEntity(cube);
+	//AddEntity(cube);
 
 	m_terrain = new Terrain();
 	
