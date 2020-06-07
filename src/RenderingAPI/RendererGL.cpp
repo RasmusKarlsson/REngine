@@ -367,6 +367,12 @@ uint32 RendererContext::GenerateIndexBuffer(uint32 indexCount, int* indexData)
 	return indexBuffer;
 }
 
+void RendererContext::SetIndexBufferOnVertexArray(uint32 vao, uint32 index)
+{
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
+}
+
 void RendererContext::SetVertexAttributePointers(uint32 vertexFormat, uint32 vertexSize)
 {
 	uint32 vertexOffset = 0;

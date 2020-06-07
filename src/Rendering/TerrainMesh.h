@@ -10,7 +10,6 @@ public:
 	TerrainMesh();
 	~TerrainMesh();
 
-	void CreateFromHeightmap(Texture* texture);
 	void CreatePatchFromHeightmap(Texture* texture, uint32 xStart, uint32 yStart, uint32 patchSize);
 
 	ivec2 GetResolution() { return m_resolution; }

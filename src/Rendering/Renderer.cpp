@@ -118,6 +118,26 @@ void Renderer::CreateMesh(string name, uint32 vFormat, uint32 vSize, uint32 vCou
 	indexBuffer = RendererContext::GenerateIndexBuffer(iCount, iData);
 }
 
+uint32 Renderer::GenerateVertexArray()
+{
+	return RendererContext::GenerateVertexArray();
+}
+
+uint32 Renderer::GenerateVertexBuffer(uint32 vCount, uint32 vSize, uint32 vFormat, void* vData)
+{
+	return RendererContext::GenerateVertexBuffer(vCount, vSize, vFormat, vData);
+}
+
+uint32 Renderer::GenerateIndexBuffer(uint32 iCount, int* iData)
+{
+	return RendererContext::GenerateIndexBuffer(iCount, iData);
+}
+
+void Renderer::SetIndexBufferOnVertexArray(uint32 vao, uint32 index)
+{
+	RendererContext::SetIndexBufferOnVertexArray(vao, index);
+}
+
 void Renderer::BindTexture(uint32 textureID, GLuint slot)
 {
 	if (s_boundTextures[slot] != textureID)
