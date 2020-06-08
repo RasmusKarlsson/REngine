@@ -26,6 +26,14 @@ namespace RENGINE
 		TEXCOORD = 4,
 		COLOR	= 8
 	};
+
+	enum VA_POINTERS
+	{
+		POSITION_POINTER = 0,
+		NORMAL_POINTER = 1,
+		TEXCOORD_POINTER = 2,
+		COLOR_POINTER = 3
+	};
 	
 	const uint32 VF_PNTC = VA::POSITION | VA::NORMAL | VA::TEXCOORD | VA::COLOR;
 	const uint32 VF_PNTC_SIZE = sizeof(SVF_PNTC);

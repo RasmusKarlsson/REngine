@@ -1,7 +1,8 @@
 #version 120
 
 //layout(location = 0) in vec3 vertexPosition_modelspace;
-attribute vec2 a_Position;
+attribute vec3 a_Position;
+attribute vec3 a_Normal;
 attribute vec2 a_Texcoord;
 uniform float u_Time;
 

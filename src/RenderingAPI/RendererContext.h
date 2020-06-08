@@ -49,6 +49,7 @@ public:
 	//Meshes
 	static uint32 GenerateVertexArray();
 	static uint32 GenerateVertexBuffer(uint32 vertexCount, uint32 vertexSize, uint32 vertexFormat, void* vertexData);
+	static void UpdateSubVertexBuffer(uint32 vbo, uint32 offset, uint32 vSize, uint32 vCount, void* vData);
 	static uint32 GenerateIndexBuffer(uint32 indexCount, int* indexData);
 	//static void CreateMesh(string name, uint32 vFormat, uint32 vCount, void* vData, uint32 &vBO, uint32 &vAO, uint32 &indexBuffer);
 	static void SetIndexBufferOnVertexArray(uint32 vao, uint32 index);

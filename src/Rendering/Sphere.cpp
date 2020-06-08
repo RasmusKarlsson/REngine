@@ -45,7 +45,7 @@ void Sphere::Create()
 			vertex.position.x = radius * vertex.normal.x;
 			vertex.position.y = radius * vertex.normal.y;
 			vertex.position.z = radius * vertex.normal.z;
-			vertex.color = glm::vec3(1.0);
+			vertex.color = vec3(1.0);
 
 			vertexBuffer.push_back(vertex);
 		}

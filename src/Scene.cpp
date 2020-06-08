@@ -118,7 +118,7 @@ Scene::Scene()
 	textMat->SetShader(Renderer::m_textShader);
 	textQuad->SetMaterial(textMat);
 	textQuad2->SetMaterial(textMat);
-	textQuad->SetScale(8.0f/ SCREEN_WIDTH,8.0f/ SCREEN_HEIGHT,1.0f);
+	textQuad->SetScale(82.0f/ SCREEN_WIDTH,82.0f/ SCREEN_HEIGHT,1.0f);
 	textQuad->SetPosition(MathHelpers::PixelPosToWorldPos(10.0f,10.0f));
 	AddEntity(textQuad);
 	

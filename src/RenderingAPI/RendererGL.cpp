@@ -357,6 +357,14 @@ uint32 RendererContext::GenerateVertexBuffer(uint32 vertexCount, uint32 vertexSi
 	return vbo;
 }
 
+void RendererContext::UpdateSubVertexBuffer(uint32 vbo, uint32 offset, uint32 vSize, uint32 vCount, void* vData)
+{
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, offset, vSize * vCount, vData);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
 uint32 RendererContext::GenerateIndexBuffer(uint32 indexCount, int* indexData)
 {
 	GLuint indexBuffer;
@@ -376,37 +384,33 @@ void RendererContext::SetIndexBufferOnVertexArray(uint32 vao, uint32 index)
 void RendererContext::SetVertexAttributePointers(uint32 vertexFormat, uint32 vertexSize)
 {
 	uint32 vertexOffset = 0;
-	uint32 attributeIndex = 0;
+
 	if(vertexFormat & RENGINE::VA::POSITION)
 	{
-		glVertexAttribPointer(attributeIndex, 3, GL_FLOAT, GL_FALSE, vertexSize, reinterpret_cast<char *>(vertexOffset));
+		glVertexAttribPointer(RENGINE::VA_POINTERS::POSITION_POINTER, 3, GL_FLOAT, GL_FALSE, vertexSize, reinterpret_cast<char *>(vertexOffset));
 		vertexOffset += 3 * sizeof(GLfloat);
-		glEnableVertexAttribArray(attributeIndex);
-		attributeIndex++;
+		glEnableVertexAttribArray(RENGINE::VA_POINTERS::POSITION_POINTER);
 	}
 	
 	if (vertexFormat & RENGINE::VA::NORMAL)
 	{
-		glVertexAttribPointer(attributeIndex, 3, GL_FLOAT, GL_FALSE, vertexSize, reinterpret_cast<char *>(vertexOffset));
+		glVertexAttribPointer(RENGINE::VA_POINTERS::NORMAL_POINTER, 3, GL_FLOAT, GL_FALSE, vertexSize, reinterpret_cast<char *>(vertexOffset));
 		vertexOffset += 3 * sizeof(GLfloat);
-		glEnableVertexAttribArray(attributeIndex);
-		attributeIndex++;
+		glEnableVertexAttribArray(RENGINE::VA_POINTERS::NORMAL_POINTER);
 	}
 	
 	if (vertexFormat & RENGINE::VA::TEXCOORD)
 	{
-		glVertexAttribPointer(attributeIndex, 2, GL_FLOAT, GL_FALSE, vertexSize, reinterpret_cast<char *>(vertexOffset));
+		glVertexAttribPointer(RENGINE::VA_POINTERS::TEXCOORD_POINTER, 2, GL_FLOAT, GL_FALSE, vertexSize, reinterpret_cast<char *>(vertexOffset));
 		vertexOffset += 2 * sizeof(GLfloat);
-		glEnableVertexAttribArray(attributeIndex);
-		attributeIndex++;
+		glEnableVertexAttribArray(RENGINE::VA_POINTERS::TEXCOORD_POINTER);
 	}
 	
 	if (vertexFormat & RENGINE::VA::COLOR)
 	{
-		glVertexAttribPointer(attributeIndex, 3, GL_FLOAT, GL_FALSE, vertexSize, reinterpret_cast<char *>(vertexOffset));
+		glVertexAttribPointer(RENGINE::VA_POINTERS::COLOR_POINTER, 3, GL_FLOAT, GL_FALSE, vertexSize, reinterpret_cast<char *>(vertexOffset));
 		vertexOffset += 3 * sizeof(GLfloat);
-		glEnableVertexAttribArray(attributeIndex);
-		attributeIndex++;
+		glEnableVertexAttribArray(RENGINE::VA_POINTERS::COLOR_POINTER);
 	}
 }
 
@@ -415,7 +419,6 @@ void RendererContext::RenderFullscreenQuad()
 	glBindVertexArray(0);
 	glDrawArrays(GL_TRIANGLES, 0, 4);
 }
-
 
 uint32 RendererContext::CreateVertexShader(std::string shaderString)
 {

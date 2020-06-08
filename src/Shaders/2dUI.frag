@@ -10,4 +10,5 @@ void main()
 {
 	vec4 diffuse = texture2D(AlbedoSampler,v_Texcoord);
 	gl_FragColor = vec4(diffuse);
+	//gl_FragColor = vec4(v_Texcoord,0.0,1.0);
 }

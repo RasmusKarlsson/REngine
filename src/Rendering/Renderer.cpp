@@ -128,6 +128,11 @@ uint32 Renderer::GenerateVertexBuffer(uint32 vCount, uint32 vSize, uint32 vForma
 	return RendererContext::GenerateVertexBuffer(vCount, vSize, vFormat, vData);
 }
 
+void Renderer::UpdateSubVertexBuffer(uint32 vbo, uint32 offset, uint32 vSize, uint32 vCount, void* vData)
+{
+	RendererContext::UpdateSubVertexBuffer(vbo, offset, vSize, vCount, vData);
+}
+
 uint32 Renderer::GenerateIndexBuffer(uint32 iCount, int* iData)
 {
 	return RendererContext::GenerateIndexBuffer(iCount, iData);

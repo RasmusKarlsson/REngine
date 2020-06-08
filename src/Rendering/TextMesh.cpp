@@ -38,38 +38,9 @@ void TextMesh::SetText(string text)
 
 void TextMesh::Create()
 {
-	vector<float> meshVertices;
-	vector<float> meshTexcoords;
 	vector<int> meshIndices;
 
 	for (uint32 i = 0; i < m_stringCapacity; ++i) {
-		float fI = static_cast<float>(i);
-		meshVertices.push_back(2.0f*fI);
-		meshVertices.push_back(1.0f);
-
-		meshVertices.push_back(2.0f*fI);
-		meshVertices.push_back(-1.0f);
-
-		meshVertices.push_back(2.0f*(fI + 1.0f));
-		meshVertices.push_back(-1.0f);
-
-		meshVertices.push_back(2.0f*(fI + 1.0f));
-		meshVertices.push_back(1.0f);
-
-		float leftUV = static_cast<float>(0) / 64.0f;
-		float rightUV = (static_cast<float>(0) + 1.0f) / 64.0f;
-
-		meshTexcoords.push_back(leftUV);
-		meshTexcoords.push_back(0.0f);
-
-		meshTexcoords.push_back(leftUV);
-		meshTexcoords.push_back(1.0f);
-
-		meshTexcoords.push_back(rightUV);
-		meshTexcoords.push_back(1.0f);
-
-		meshTexcoords.push_back(rightUV);
-		meshTexcoords.push_back(0.0f);
 
 		meshIndices.push_back(4 * i + 0);
 		meshIndices.push_back(4 * i + 1);
@@ -80,62 +51,46 @@ void TextMesh::Create()
 		meshIndices.push_back(4 * i + 0);
 	}
 
-	/*
+	
 	vector<RENGINE::SVF_PT> vertexBuffer;
-	for (uint32 i = 0; i < positionBuffer.size(); i++)
+	for (uint32 i = 0; i < m_stringCapacity; i++)
 	{
-		RENGINE::SVF_PT vertex;
-
-		vertex.position = positionBuffer[i];
-		vertex.texcoord = texcoordBuffer[i];
-		vertexBuffer.push_back(vertex);
+		float fI = static_cast<float>(i);
+		
+		RENGINE::SVF_PT vertex[4];
+		vertex[0].position = vec3(2.0f*fI, 1.0f, 0.0f);
+		vertex[1].position = vec3(2.0f*fI, -1.0f, 0.0f);
+		vertex[2].position = vec3(2.0f*(fI + 1.0f), -1.0f, 0.0f);
+		vertex[3].position = vec3(2.0f*(fI + 1.0f), 1.0f, 0.0f);
+		
+		float leftUV = 0.0f;
+		float rightUV = 0.0f;
+		
+		vertex[0].texcoord = vec2(leftUV, 0.0f);
+		vertex[1].texcoord = vec2(leftUV, 1.0f);
+		vertex[2].texcoord = vec2(rightUV, 1.0f);
+		vertex[3].texcoord = vec2(rightUV, 0.0f);
+		
+		vertexBuffer.push_back(vertex[0]);
+		vertexBuffer.push_back(vertex[1]);
+		vertexBuffer.push_back(vertex[2]);
+		vertexBuffer.push_back(vertex[3]);
 	}
 
 	Renderer::CreateMesh(
-		"Quad",
-		RENGINE::VF_PNTC,
-		RENGINE::VF_PNTC_SIZE,
+		"TextMesh",
+		RENGINE::VF_PT,
+		RENGINE::VF_PT_SIZE,
 		vertexBuffer.size(),
 		vertexBuffer.data(),
 		m_combinedVBO,
 		m_vao,
 		m_vboIndex,
-		indexBuffer.size(),
-		indexBuffer.data()
+		meshIndices.size(),
+		meshIndices.data()
 	);
-	*/
 	
-	glGenVertexArrays(1, &m_vao);
-	glBindVertexArray(m_vao);
-
-	//Vertex Buffer
-	glGenBuffers(1, &m_vertexArrayBuffers.position);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.position);
-	glBufferData(GL_ARRAY_BUFFER, meshVertices.size() * sizeof(GLfloat), meshVertices.data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	//Vertex Texcoord Buffer
-	glGenBuffers(1, &m_vertexArrayBuffers.texcoord);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
-	glBufferData(GL_ARRAY_BUFFER, meshTexcoords.size() * sizeof(GLfloat), meshTexcoords.data(), GL_DYNAMIC_DRAW);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-	
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	//Index Buffer Object
-	glGenBuffers(1, &m_vboIndex);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vboIndex);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshIndices.size() * sizeof(GLint), meshIndices.data(), GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	
-	m_triangleCount = meshVertices.size();
+	m_triangleCount = vertexBuffer.size();
 	m_indexSize = meshIndices.size();
 
 	m_created = true;
@@ -149,36 +104,39 @@ void TextMesh::UpdateTextBuffer(string newText)
 	const uint32 stringLength = m_textString.size();
 	vector<float> meshTexcoords;
 
-	for (uint32 i = 0; i < m_stringCapacity; ++i) {
-		
+	vector<RENGINE::SVF_PT> vertexBuffer;
+	for (uint32 i = 0; i < m_stringCapacity; i++)
+	{
+		float fI = static_cast<float>(i);
+
+		RENGINE::SVF_PT vertex[4];
+		vertex[0].position = vec3(2.0f*fI, 1.0f, 0.0f);
+		vertex[1].position = vec3(2.0f*fI, -1.0f, 0.0f);
+		vertex[2].position = vec3(2.0f*(fI + 1.0f), -1.0f, 0.0f);
+		vertex[3].position = vec3(2.0f*(fI + 1.0f), 1.0f, 0.0f);
+
 		uint32 found = 0;
-		if(i < stringLength) found = s_charMap.find_first_of(m_textString[i]);
+		if (i < stringLength) found = s_charMap.find_first_of(m_textString[i]);
 		if (found == string::npos)
 		{
-			found = 0;
+			found = 25;
 		}
 
 		float leftUV = static_cast<float>(found) / 64.0f;
 		float rightUV = (static_cast<float>(found) + 1.0f) / 64.0f;
 
-		meshTexcoords.push_back(leftUV);
-		meshTexcoords.push_back(0.0f);
+		vertex[0].texcoord = vec2(leftUV, 0.0f);
+		vertex[1].texcoord = vec2(leftUV, 1.0f);
+		vertex[2].texcoord = vec2(rightUV, 1.0f);
+		vertex[3].texcoord = vec2(rightUV, 0.0f);
 
-		meshTexcoords.push_back(leftUV);
-		meshTexcoords.push_back(1.0f);
-
-		meshTexcoords.push_back(rightUV);
-		meshTexcoords.push_back(1.0f);
-
-		meshTexcoords.push_back(rightUV);
-		meshTexcoords.push_back(0.0f);
+		vertexBuffer.push_back(vertex[0]);
+		vertexBuffer.push_back(vertex[1]);
+		vertexBuffer.push_back(vertex[2]);
+		vertexBuffer.push_back(vertex[3]);
 	}
-	
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers.texcoord);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, meshTexcoords.size() * sizeof(GLfloat), meshTexcoords.data());
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	
+
+	Renderer::UpdateSubVertexBuffer(m_combinedVBO, 0, RENGINE::VF_PT_SIZE, vertexBuffer.size(), vertexBuffer.data());
+
 	m_indexSize = m_textString.size() * 6;
-	
 }
