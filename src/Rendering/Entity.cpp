@@ -8,6 +8,8 @@
 
 #include <string>
 
+#include "Renderer.h"
+
 Entity::Entity()
 {
 	m_name = "DefaultEntity";
@@ -37,25 +39,10 @@ void Entity::Delete()
 	}
 
 	m_children.clear();
-
-	if (m_vertexArrayBuffers.position) {
-		glDeleteBuffers(1, &m_vertexArrayBuffers.position);
-	}
-	if (m_vertexArrayBuffers.normal) {
-		glDeleteBuffers(1, &m_vertexArrayBuffers.normal);
-	}
-	if (m_vertexArrayBuffers.color) {
-		glDeleteBuffers(1, &m_vertexArrayBuffers.color);
-	}
-	if (m_vertexArrayBuffers.texcoord) {
-		glDeleteBuffers(1, &m_vertexArrayBuffers.texcoord);
-	}
-	if (m_vboIndex) {
-		glDeleteBuffers(1, &m_vboIndex);
-	}
-	if (m_vao) {
-		glDeleteVertexArrays(1, &m_vao);
-	}
+	
+	Renderer::DeleteVertexBufferObject(m_combinedVBO);
+	Renderer::DeleteVertexBufferObject(m_vboIndex);
+	Renderer::DeleteVertexArrayObject(m_vao);
 
 	m_vao = 0;
 	m_vboIndex = 0;

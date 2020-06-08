@@ -143,6 +143,16 @@ void Renderer::SetIndexBufferOnVertexArray(uint32 vao, uint32 index)
 	RendererContext::SetIndexBufferOnVertexArray(vao, index);
 }
 
+void Renderer::DeleteVertexBufferObject(uint32 vbo)
+{
+	RendererContext::DeleteVertexBufferObject(vbo);
+}
+
+void Renderer::DeleteVertexArrayObject(uint32 vao)
+{
+	RendererContext::DeleteVertexArrayObject(vao);
+}
+
 void Renderer::BindTexture(uint32 textureID, GLuint slot)
 {
 	if (s_boundTextures[slot] != textureID)

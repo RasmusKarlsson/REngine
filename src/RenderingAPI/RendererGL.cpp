@@ -381,6 +381,18 @@ void RendererContext::SetIndexBufferOnVertexArray(uint32 vao, uint32 index)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
 }
 
+void RendererContext::DeleteVertexBufferObject(uint32 vbo)
+{
+	if(vbo)
+		glDeleteBuffers(1, &vbo);
+}
+
+void RendererContext::DeleteVertexArrayObject(uint32 vao)
+{
+	if (vao)
+		glDeleteVertexArrays(1, &vao);
+}
+
 void RendererContext::SetVertexAttributePointers(uint32 vertexFormat, uint32 vertexSize)
 {
 	uint32 vertexOffset = 0;

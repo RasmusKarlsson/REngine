@@ -157,7 +157,7 @@ void Scene::AddEntity(Entity* entity)
 {
 	char buffer[100];
 	snprintf(buffer, 100, " %s \n", (entity->GetName()));
-	Log::nlog(buffer);
+//	Log::nlog(buffer);
 	int newRenderStyle = entity->GetRenderStyle();
 	if(newRenderStyle == RENGINE::RENDER_MODE::UI)
 	{

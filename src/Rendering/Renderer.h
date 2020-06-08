@@ -47,6 +47,9 @@ public:
 	static void UpdateSubVertexBuffer(uint32 vbo, uint32 offset, uint32 vSize, uint32 vCount, void* vData);
 	static uint32 GenerateIndexBuffer(uint32 iCount, int* iData);
 	static void SetIndexBufferOnVertexArray(uint32 vao, uint32 index);
+
+	static void DeleteVertexBufferObject(uint32 vbo);
+	static void DeleteVertexArrayObject(uint32 vao);
 	
 	//Drawings
 	static void SetViewMatrix(mat4 viewMatrix);
