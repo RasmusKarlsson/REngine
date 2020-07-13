@@ -99,25 +99,16 @@ void Terrain::SetSplatMapTexture(string filename, int layer)
 }
 void Terrain::UpdateUniforms()
 {
-	glUniform1f(glGetUniformLocation(Renderer::m_currentShader, "u_waterHeight"), m_waterHeight);
-
-	mat4 worldMatrix = m_terrainMesh->GetWorldMatrix();
-	glUniformMatrix4fv(glGetUniformLocation(Renderer::m_currentShader, "u_World"), 1, GL_FALSE, value_ptr(worldMatrix));
+	Renderer::UploadUniform1f("u_waterHeight", m_waterHeight);
+	Renderer::UploadUniformMatrix4fv("u_World", value_ptr(m_terrainMesh->GetWorldMatrix()));
 }
 void Terrain::BindTextures()
 {
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, m_splatMap->GetTextureID());
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_textureLayers[0]->GetTextureID());
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_textureLayers[1]->GetTextureID());
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, m_textureLayers[2]->GetTextureID());
-
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, m_normalMap->GetTextureID());
+	Renderer::BindTexture(m_splatMap->GetTextureID(), 0);
+	Renderer::BindTexture(m_textureLayers[0]->GetTextureID(), 1);
+	Renderer::BindTexture(m_textureLayers[1]->GetTextureID(), 2);
+	Renderer::BindTexture(m_textureLayers[2]->GetTextureID(), 3);
+	Renderer::BindTexture(m_normalMap->GetTextureID(), 4);
 }
 
 void Terrain::Render(Camera* camera)
@@ -132,11 +123,8 @@ void Terrain::Render(Camera* camera)
 		for (int y = 0; y < m_nrPatchesHeight; y++)
 		{
 			vec3 patchDir = normalize(camPos - m_terrainPatches[y*m_nrPatchesWidth + x]->GetPosition());
-		//	if (dot(patchDir, camDir) > 0.2) continue;
 			int colorIndex = (x+y) % 13;
-			glUniform4fv(glGetUniformLocation(Renderer::m_currentShader, "u_WireColor"), 1, value_ptr(g_colorList[colorIndex]));
-
-//			UpdatePatchLod(m_terrainPatches[y*m_nrPatchesWidth + x], camPos);
+			Renderer::UploadUniform4fv("u_WireColor", value_ptr(g_colorList[colorIndex]));
 			Renderer::Render(*m_terrainPatches[y*m_nrPatchesWidth + x]);
 		}
 	}

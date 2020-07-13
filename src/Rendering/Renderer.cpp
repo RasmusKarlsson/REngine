@@ -153,7 +153,7 @@ void Renderer::DeleteVertexArrayObject(uint32 vao)
 	RendererContext::DeleteVertexArrayObject(vao);
 }
 
-void Renderer::BindTexture(uint32 textureID, GLuint slot)
+void Renderer::BindTexture(uint32 textureID, uint32 slot)
 {
 	if (s_boundTextures[slot] != textureID)
 	{
@@ -180,7 +180,7 @@ void Renderer::Render(Entity& entity)
 	RendererContext::UploadUniformMatrix4fv("u_invView", value_ptr(m_invViewMatrix));
 	RendererContext::UploadUniformMatrix4fv("u_invProjection", value_ptr(m_invProjectionMatrix));
 
-	RendererContext::UploadUniform1f("u_Time", static_cast<GLfloat>(timeElapsed));
+	RendererContext::UploadUniform1f("u_Time", static_cast<float>(timeElapsed));
 
 	//TODO: Move these
 	RendererContext::UploadUniform1i("Sampler0", 0);
@@ -190,7 +190,7 @@ void Renderer::Render(Entity& entity)
 	RendererContext::UploadUniform1i("Sampler4", 4);
 	
 	RendererContext::BindVertexArrayObject(entity.GetVao());
-	const GLuint indexSize = entity.GetIndexSize();
+	const uint32 indexSize = entity.GetIndexSize();
 	RendererContext::DrawElements(indexSize, RENGINE::POLYGON_TYPE_TRIANGLES, RENGINE::INDEX_TYPE_UNSIGNED_INT);
 
 	Stats::s_vertexCount += entity.GetTriangleCount();
@@ -200,6 +200,26 @@ void Renderer::Render(Entity& entity)
 void Renderer::RenderFullscreenQuad()
 {
 	RendererContext::RenderFullscreenQuad();
+}
+
+void Renderer::UploadUniform1f(const char* name, float value)
+{
+	RendererContext::UploadUniform1f(name, value);
+}
+
+void Renderer::UploadUniform1i(const char* name, int value)
+{
+	RendererContext::UploadUniform1i(name, value);
+}
+
+void Renderer::UploadUniform4fv(const char* name, float const* value)
+{
+	RendererContext::UploadUniform4fv(name, value);
+}
+
+void Renderer::UploadUniformMatrix4fv(const char* name, float const* value)
+{
+	RendererContext::UploadUniformMatrix4fv(name, value);
 }
 
 void Renderer::CompileShaders()

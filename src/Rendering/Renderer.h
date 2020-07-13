@@ -56,6 +56,13 @@ public:
 	static void SetProjectionMatrix(mat4 projectionMatrix);
 	static void Render(Entity& entity);
 	static void RenderFullscreenQuad();
+
+	//Uniforms
+
+	static void UploadUniform1f(const char* name, float value);
+	static void UploadUniform1i(const char* name, int value);
+	static void UploadUniform4fv(const char* name, float const* value);
+	static void UploadUniformMatrix4fv(const char* name, float const* value);
 	
 
 	static map<string, uint32> sm_ShaderMap;

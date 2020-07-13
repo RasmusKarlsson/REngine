@@ -21,7 +21,6 @@ Entity::Entity()
 	m_combinedVBO = 0;
 	m_triangleCount = 0;
 	m_indexSize = 0;
-	m_shader = 0;
 	m_material = nullptr;
 	UpdateMatrices();
 }
@@ -48,7 +47,6 @@ void Entity::Delete()
 	m_vboIndex = 0;
 	
 	m_triangleCount = 0;
-	m_shader = 0;
 	m_material = nullptr;
 	m_created = false;
 

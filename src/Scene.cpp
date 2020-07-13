@@ -7,6 +7,8 @@
 #pragma once
 
 #include "Scene.h"
+
+#include "Decal.h"
 #include "Entity.h"
 #include "Renderer.h"
 #include "Quad.h"
@@ -87,7 +89,7 @@ Scene::Scene()
 	AddEntity(quad3);
 
 
-	Cube* cube = new Cube();
+	Decal* cube = new Decal();
 	cube->SetName("cube");
 	cube->AddChild(quad3);
 	quad->AddChild(cube);
@@ -96,7 +98,7 @@ Scene::Scene()
 	skyMat->SetDiffuseTexture(new Texture("res/Textures/skyboxTest.png"));
 	cube->SetMaterial(skyMat);
 	cube->SetPosition(0.0f, 5.0f, 0.0f);
-	//AddEntity(cube);
+	AddEntity(cube);
 
 	m_terrain = new Terrain();
 	
@@ -240,11 +242,11 @@ void Scene::UpdateScene(double dt)
 		}
 		else
 		{
-			m_cube = new Cube();
-			m_cube->SetPosition(0.0f, 2.0f, 0.0f);
+			m_cube = new Decal();
+			m_cube->SetPosition(5.0f, 6.5f, 0.0f);
 			Material* mat = new Material();
 			Texture* tex = new Texture();
-			tex->CreateFromPNG("res/Textures/splatmap.png");
+			tex->CreateFromPNG("res/Textures/blood.png");
 			mat->SetDiffuseTexture(tex);
 			m_cube->SetMaterial(mat);
 			AddEntity(m_cube);

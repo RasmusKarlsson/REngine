@@ -42,5 +42,5 @@ public:
 
 	static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	Scene* scene;
+	Scene* m_scene;
 };

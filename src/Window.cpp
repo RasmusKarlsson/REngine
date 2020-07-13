@@ -81,7 +81,7 @@ void Window::SetWindowSize(HWND hWnd, int width, int height)
 		AdjustWindowRectEx(&rc, dwStyle, menu ? TRUE : FALSE, dwExStyle);
 
 		SetWindowPos(hWnd, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, SWP_NOZORDER | SWP_NOMOVE);
-		glViewport(0, 0, width, height);
+		Renderer::SetViewport(0, 0, width, height);
 	}
 }
 
@@ -273,13 +273,13 @@ void Window::Init() {
 	ShowCursor(FALSE);
 	DragAcceptFiles(g_hwnd,TRUE);
 
-	scene = new Scene();
+	m_scene = new Scene();
 }
 
 void Window::Render(double dt) {
 	timeElapsed += dt;
-	scene->UpdateScene((float)dt);
-	scene->RenderScene((float)dt);
+	m_scene->UpdateScene((float)dt);
+	m_scene->RenderScene((float)dt);
 
 	if (dt > 0.0 && dt < 0.1)
 	{

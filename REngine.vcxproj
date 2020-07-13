@@ -170,6 +170,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Decal.cpp" />
     <ClCompile Include="deps\HDRLoader\hdrloader.cpp" />
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\Log.cpp" />
@@ -197,6 +198,7 @@
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Decal.h" />
     <ClInclude Include="deps\HDRLoader\hdrloader.h" />
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Log.h" />

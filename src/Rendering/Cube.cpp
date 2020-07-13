@@ -55,14 +55,14 @@ void Cube::Create()
 	};
 	
 	const vector<vec3> colorBuffer = {
-		vec3(1.0f, 0.0f, 0.0f),
-		vec3(1.0f, 0.0f, 1.0f),
-		vec3(1.0f, 0.0f, 1.0f),
-		vec3(0.0f, 0.0f, 1.0f),
-		vec3(0.0f, 0.0f, 1.0f),
-		vec3(0.0f, 0.0f, 1.0f),
-		vec3(1.0f, 0.0f, 1.0f),
-		vec3(0.0f, 0.0f, 1.0f)
+		vec3(1.0f, 1.0f, 1.0f),
+		vec3(1.0f, 1.0f, 1.0f),
+		vec3(1.0f, 1.0f, 1.0f),
+		vec3(1.0f, 1.0f, 1.0f),
+		vec3(1.0f, 1.0f, 1.0f),
+		vec3(1.0f, 1.0f, 1.0f),
+		vec3(1.0f, 1.0f, 1.0f),
+		vec3(1.0f, 1.0f, 1.0f)
 	};
 	
 	vector<int> indexBuffer = {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Texture.h"
-//#include <GL/glew.h>
 #include <glm\glm.hpp>
 
 #include <iostream>

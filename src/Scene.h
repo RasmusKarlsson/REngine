@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Decal.h>
+
 #include "Camera.h"
 #include "Terrain.h"
 #include "Quad.h"
@@ -28,7 +30,7 @@ public:
 	void RenderBoundingBoxes();
 	void RenderStats();
 
-	Cube* m_cube;
+	Decal* m_cube;
 	Material* m_debugFontMaterial;
 	Texture* m_debugFontTexture;
 

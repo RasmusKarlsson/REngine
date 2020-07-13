@@ -95,11 +95,11 @@ public:
 	vec3 GetWorldRotation() const;
 
 
-	uint32 GetVao()	const			{ return m_vao; };
+	uint32 GetVao()	const { return m_vao; };
+	uint32 GetVbo()	const { return m_combinedVBO; };
 	uint32 GetVboIndex() const		{ return m_vboIndex; };
 	uint32 GetTriangleCount() const	{ return m_triangleCount; };
 	uint32 GetIndexSize() const		{ return m_indexSize; };
-	uint32 GetShader() const		{ return m_shader; };
 
 	void SetPosition(vec3 position)		{ m_LocalPosition = position;	SetDirty(); };
 	void SetScale(vec3 scale)			{ m_LocalScale = scale;			SetDirty();	};
@@ -155,13 +155,11 @@ protected:
 	std::vector<Entity*> m_children;
 
 	uint32
-		m_vao, 
-		m_vboIndex, 
+		m_vao,
+		m_vboIndex,
 		m_triangleCount,
-		m_indexSize,
-		m_shader;
+		m_indexSize;
 	
-	VertexArrayBuffers m_vertexArrayBuffers; //Remove
 	uint32 m_combinedVBO;
 	Material* m_material;
 	
