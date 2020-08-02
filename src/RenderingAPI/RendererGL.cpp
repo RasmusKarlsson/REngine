@@ -9,6 +9,8 @@
 //Static variables
 uint32 RendererContext::sm_currentShader = 0;
 
+#define GL_ALL_BUFFERS GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT
+
 void RendererContext::Initialize()
 {
 	glewExperimental = GL_TRUE;
@@ -39,7 +41,7 @@ void RendererContext::BindTexture(uint32 textureID, uint32 slot)
 void RendererContext::ClearBuffer(vec4 clearColor)
 {
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_ALL_BUFFERS);
 }
 
 void RendererContext::BindVertexArrayObject(uint32 vao)
@@ -339,7 +341,7 @@ void RendererContext::SetViewport(uint32 x, uint32 y, uint32 width, uint32 heigh
 
 uint32 RendererContext::GenerateVertexArray()
 {
-	GLuint vao;
+	uint32 vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 	return vao;
@@ -347,7 +349,7 @@ uint32 RendererContext::GenerateVertexArray()
 
 uint32 RendererContext::GenerateVertexBuffer(uint32 vertexCount, uint32 vertexSize, uint32 vertexFormat, void* vertexData)
 {
-	GLuint vbo;
+	uint32 vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * vertexSize, vertexData, GL_STATIC_DRAW);
@@ -367,7 +369,7 @@ void RendererContext::UpdateSubVertexBuffer(uint32 vbo, uint32 offset, uint32 vS
 
 uint32 RendererContext::GenerateIndexBuffer(uint32 indexCount, int* indexData)
 {
-	GLuint indexBuffer;
+	uint32 indexBuffer;
 	glGenBuffers(1, &indexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(GLint), indexData, GL_STATIC_DRAW);
@@ -429,7 +431,7 @@ void RendererContext::SetVertexAttributePointers(uint32 vertexFormat, uint32 ver
 void RendererContext::RenderFullscreenQuad()
 {
 	glBindVertexArray(0);
-	glDrawArrays(GL_TRIANGLES, 0, 4);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 uint32 RendererContext::CreateVertexShader(std::string shaderString)
@@ -510,6 +512,37 @@ uint32 RendererContext::CreateShaderProgram(uint32 vertexShader, uint32 fragment
 		int infologLength = 0;
 		glGetShaderInfoLog(programID, 4096, &infologLength, infoLogChar);
 		printf("%s", infoLogChar);
+	}
+
+	GLint count;
+
+	GLint size; // size of the variable
+	GLenum type; // type of the variable (float, vec3 or mat4, etc)
+
+	const GLsizei bufSize = 32; // maximum name length
+	GLchar name[bufSize]; // variable name in GLSL
+	GLsizei length; // name length
+
+	glUseProgram(programID);
+	glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &count);
+	printf("Active Uniforms: %d\n", count);
+
+	GLint sampler2DCount = 0;
+
+	for (int i = 0; i < count; i++)
+	{
+		glGetActiveUniform(programID, (uint32)i, bufSize, &length, &size, &type, name);
+
+		switch (type)
+		{
+		case GL_SAMPLER_2D:
+			glUniform1i(glGetUniformLocation(programID, name), sampler2DCount++);
+			break;
+		default:
+			break;
+		}
+
+		printf("Uniform #%d Type: %u Name: %s\n", i, type, name);
 	}
 	
 	return programID;

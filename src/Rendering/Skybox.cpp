@@ -23,12 +23,14 @@ void Skybox::Create()
 {
 	m_skyMesh = new Quad();
 	m_material = new Material();
-	m_equireTexture = new Texture();
-	m_equireTexture->CreateFromHDR("res/CubeMap/Sky512.hdr");
-
-	m_material->SetDiffuseTexture(m_equireTexture);
+	
 	m_skyMesh->SetMaterial(m_material);
 	m_material->SetShader(Renderer::m_skyShader);
+}
+
+void Skybox::SetSkyTexture(Texture* texture)
+{
+	m_material->SetDiffuseTexture(texture);
 }
 
 Quad* Skybox::GetSkyEntity()

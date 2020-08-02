@@ -38,8 +38,8 @@ public:
 	void SetSpecularColor(vec4 color) { m_specularColor = color; };
 	vec4 GetSpecularColor() { return m_specularColor; };
 
-	void SetShader(GLuint shader) { m_shaderID = shader; };
-	GLuint GetShader() { return m_shaderID; };
+	void SetShader(uint32 shader) { m_shaderID = shader; };
+	uint32 GetShader() { return m_shaderID; };
 
 private:
 
@@ -59,7 +59,7 @@ private:
 	vec4 m_ambientColor;
 	vec4 m_specularColor;
 
-	GLuint m_shaderID;
+	uint32 m_shaderID;
 
 	int m_renderStyle;
 };

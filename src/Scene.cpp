@@ -25,6 +25,8 @@
 #include "Stats.h"
 #include "WASDCamera.h"
 
+#include "PostEffectManager.h"
+
 extern double timeElapsed;
 extern int SCREEN_WIDTH;
 extern int SCREEN_HEIGHT;
@@ -49,20 +51,22 @@ Scene::Scene()
 	m_currentCamera->SetCameraTarget(vec3(0.0f, 5.0f, 0.0f));
 	m_currentCamera->CreateProjectionMatrix(45.0f, (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
 
-	m_fbo1 = new RenderTarget();
-	m_fbo1->CreateFBO("framebuffer1", SCREEN_WIDTH, SCREEN_HEIGHT);
-
+	m_postEffectManager = new PostEffectManager();
+	m_postEffectManager->InitializeFramebuffers();
+	m_postEffectManager->InitializePostEffects();
+	//
+	/*
 	m_fbo2 = new RenderTarget();
 	m_fbo2->CreateFBO("framebuffer2", SCREEN_WIDTH, SCREEN_HEIGHT);
-
+	m_fbo1 = new RenderTarget();
+	m_fbo1->CreateFBO("framebuffer1", SCREEN_WIDTH, SCREEN_HEIGHT);
+	*/
 
 	//Debug font
 	m_debugFontTexture = new Texture("res/Textures/font2.png");
 	m_debugFontMaterial = new Material();
 	m_debugFontMaterial->SetDiffuseTexture(m_debugFontTexture);
 	m_debugFontMaterial->SetShader(Renderer::m_textShader);
-
-	m_fullscreenQuad = new Quad();
 
 	Texture* tex = new Texture();
 	tex->CreateFromPNG("res/Textures/splatmap.png");
@@ -92,7 +96,7 @@ Scene::Scene()
 	Decal* cube = new Decal();
 	cube->SetName("cube");
 	cube->AddChild(quad3);
-	quad->AddChild(cube);
+	//quad->AddChild(cube);
 	m_cube = cube;
 	Material* skyMat = new Material();
 	skyMat->SetDiffuseTexture(new Texture("res/Textures/skyboxTest.png"));
@@ -124,6 +128,7 @@ Scene::Scene()
 	textQuad->SetPosition(MathHelpers::PixelPosToWorldPos(10.0f,10.0f));
 	AddEntity(textQuad);
 	
+	
 	m_cursorMesh = new Quad();
 	Material* cursorMat = new Material();
 	cursorMat->SetShader(Renderer::m_textShader);
@@ -143,11 +148,10 @@ Scene::Scene()
 	m_fpsMesh->SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, 30.0f));
 	AddEntity(m_fpsMesh);
 	
-
-
 	m_skybox = new Skybox();
-	//AddEntity(sky->GetSkyEntity());
-
+	Texture* skyTexture = new Texture();
+	skyTexture->CreateFromHDR("res/CubeMap/Sky512.hdr");
+	m_skybox->SetSkyTexture(skyTexture);
 }
 
 
@@ -157,13 +161,12 @@ Scene::~Scene()
 
 void Scene::AddEntity(Entity* entity)
 {
-	char buffer[100];
-	snprintf(buffer, 100, " %s \n", (entity->GetName()));
-//	Log::nlog(buffer);
+	//char buffer[100];
+	//snprintf(buffer, 100, " %s \n", (entity->GetName()));
 	int newRenderStyle = entity->GetRenderStyle();
 	if(newRenderStyle == RENGINE::RENDER_MODE::UI)
 	{
-		for (auto it = begin(m_EntityList3D); it != end(m_EntityList3D); ++it) {
+		for (auto it = begin(m_EntityListUI); it != end(m_EntityListUI); ++it) {
 			//Insert the entity sorted by render style
 			if ((*it)->GetRenderStyle() >= newRenderStyle)
 			{
@@ -282,7 +285,7 @@ void Scene::RenderScene(double dt)
 {
 	Renderer::ClearBuffer();
 
-	//m_fbo1->RenderToTexture(true);
+	m_postEffectManager->BindFramebufferForRendering();
 
 	Renderer::SetViewMatrix(m_currentCamera->GetViewMatrix());
 	Renderer::SetProjectionMatrix(m_currentCamera->GetProjectionMatrix());
@@ -294,7 +297,7 @@ void Scene::RenderScene(double dt)
 
 	m_terrain->Render(m_currentCamera);
 
-	for (auto entity : m_EntityList3D) 
+	for (auto entity : m_EntityList3D)
 	{
 		Renderer::Render(*entity);
 	}
@@ -302,77 +305,15 @@ void Scene::RenderScene(double dt)
 	Renderer::SetShader(Renderer::m_skyShader);
 	Renderer::Render(*m_skybox->GetSkyEntity());
 
+	m_postEffectManager->RenderPostEffects();
+
+	Renderer::SetRenderMode(RENGINE::RENDER_MODE::UI);
+	Renderer::SetShader(Renderer::m_fullscreenShader);
+
 	for (auto entity : m_EntityListUI)
 	{
 		Renderer::Render(*entity);
 	}
-
-	//m_fbo1->EndRenderToTexture();
-	//Renderer::SetRenderMode(RENGINE::UI);
-	//Renderer::SetShader(Renderer::m_showDepthShader);
-	
-	/*
-	Renderer::SetRenderStyle(Entity::RENDERSTYLE_2D);
-	Renderer::SetShader(Renderer::m_fullscreenShader);
-	vec2 horizontal = vec2(1.0, 0.0);
-	vec2 vertical = vec2(0.0, 1.0);
-	vec2 direction;
-	/*
-	static int pingpong = 2;
-
-	if (Input::IsPressedOnce('U')) {
-		pingpong += 2;
-	}
-	
-	for (int i = 0; i < pingpong; i++)
-	{
-		direction = (i % 2 == 0) ? horizontal : vertical;
-		m_fbo2->RenderToTexture(true);
-		glBindTexture(GL_TEXTURE_2D, m_fbo1->GetTextureID());
-		glUniform2fv(glGetUniformLocation(Renderer::m_currentShader, "u_direction"), 1, value_ptr(direction));
-		Renderer::Render(m_fullscreenQuad, glm::mat4());
-		m_fbo2->EndRenderToTexture();
-		swap(m_fbo1, m_fbo2);
-	}
-	*/
-
-	/*
-	m_fbo2->RenderToTexture(true);
-	glBindTexture(GL_TEXTURE_2D, m_fbo1->GetTextureID());
-	glUniform2fv(glGetUniformLocation(Renderer::m_currentShader, "u_direction"), 1, value_ptr(horizontal));
-	Renderer::Render(m_fullscreenQuad, glm::mat4());
-	m_fbo2->EndRenderToTexture();
-
-	swap(m_fbo1, m_fbo2);
-
-	m_fbo2->RenderToTexture(true);
-	glBindTexture(GL_TEXTURE_2D, m_fbo1->GetTextureID());
-	glUniform2fv(glGetUniformLocation(Renderer::m_currentShader, "u_direction"), 1, value_ptr(horizontal));
-	Renderer::Render(m_fullscreenQuad, glm::mat4());
-	m_fbo2->EndRenderToTexture();
-	swap(m_fbo1, m_fbo2);
-	*/
-	/*
-	m_fbo1->RenderToTexture(true);
-	glBindTexture(GL_TEXTURE_2D, m_fbo2->GetTextureID());
-	glUniform2fv(glGetUniformLocation(Renderer::m_currentShader, "u_direction"), 1, value_ptr(vertical));
-	Renderer::Render(m_fullscreenQuad, glm::mat4());
-	m_fbo1->EndRenderToTexture();*/
-
-
-
-	/*
-	glBindTexture(GL_TEXTURE_2D, m_fbo1->GetTextureID());
-
-	//glUniform2fv(glGetUniformLocation(Renderer::m_currentShader, "u_direction"), 1, value_ptr(direction));
-	Renderer::Render(m_fullscreenQuad, glm::mat4());
-	glEnable(GL_DEPTH_TEST);
-
-	*/
-
-	//glBindTexture(GL_TEXTURE_2D, m_fbo1->GetTextureID());
-	//Renderer::SetShader(Renderer::m_fullscreenShader);
-	//Renderer::RenderFullscreenQuad();
 	
 	if (m_bRenderWire)
 	{
@@ -399,9 +340,9 @@ void Scene::RenderWireFrame()
 
 	for (auto entity : m_EntityList3D) {
 		vec4 white = vec4(1.0);
-		//glUniform4fv(glGetUniformLocation(Renderer::m_currentShader, "Color"), 1, value_ptr(white));
 		Renderer::Render(*entity);
 	}
+	Renderer::SetRenderMode(RENGINE::SOLID);
 	Renderer::SetOverrideRenderMode(false);
 }
 
@@ -454,7 +395,4 @@ void Scene::RenderStats()
 	
 	statsMesh.UpdateTextBuffer("Index Count:     " + std::to_string(Stats::s_indexCount)); statsMesh.UpdateMatrices();
 	Renderer::Render(statsMesh); height += 10.0f;
-
-
-	
 }

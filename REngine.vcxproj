@@ -182,6 +182,8 @@
     <ClCompile Include="src\Rendering\Entity.cpp" />
     <ClCompile Include="src\Rendering\Material.cpp" />
     <ClCompile Include="src\Rendering\OrbitCamera.cpp" />
+    <ClCompile Include="src\Rendering\PostEffect.cpp" />
+    <ClCompile Include="src\Rendering\PostEffectManager.cpp" />
     <ClCompile Include="src\Rendering\Quad.cpp" />
     <ClCompile Include="src\Rendering\Renderer.cpp" />
     <ClCompile Include="src\Rendering\RenderTarget.cpp" />
@@ -211,6 +213,8 @@
     <ClInclude Include="src\Rendering\Entity.h" />
     <ClInclude Include="src\Rendering\Material.h" />
     <ClInclude Include="src\Rendering\OrbitCamera.h" />
+    <ClInclude Include="src\Rendering\PostEffect.h" />
+    <ClInclude Include="src\Rendering\PostEffectManager.h" />
     <ClInclude Include="src\Rendering\Quad.h" />
     <ClInclude Include="src\Rendering\Renderer.h" />
     <ClInclude Include="src\Rendering\RenderTarget.h" />

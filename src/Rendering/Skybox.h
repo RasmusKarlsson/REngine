@@ -8,6 +8,7 @@ public:
 	~Skybox();
 	Quad* GetSkyEntity();
 	void Create();
+	void SetSkyTexture(Texture* texture);
 
 private:
 

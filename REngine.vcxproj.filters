@@ -99,6 +99,12 @@
     <ClCompile Include="Decal.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="src\Rendering\PostEffect.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\PostEffectManager.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Window.h">
@@ -180,6 +186,12 @@
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Decal.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\PostEffectManager.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\PostEffect.h">
       <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,7 +15,9 @@ WASDCamera::WASDCamera()
 {
 	m_CameraPosition = vec3();
 	m_direction = vec3(0.0f,0.0f,1.0f);
-	m_speed = 0.001f;
+	m_speed = 0.1f;
+	m_phi = 0.5*pi<float>();
+	m_theta = 0.0f;
 }
 
 WASDCamera::~WASDCamera()
@@ -25,6 +27,7 @@ WASDCamera::~WASDCamera()
 
 void WASDCamera::UpdateCameraState(float dt)
 {
+	m_currentMousePos = Input::GetMousePosV(false, true);
 	float left = (float)Input::IsPressed(VK_LEFT);
 	float right = (float)Input::IsPressed(VK_RIGHT);
 	float up = (float)Input::IsPressed(VK_UP);
@@ -36,8 +39,10 @@ void WASDCamera::UpdateCameraState(float dt)
 												cosf(m_phi),
 												sinf(m_phi) * sinf(m_theta));
 
-	m_CameraPosition += m_speed*m_direction*vec3(right - left, 0.0f, up - down);
-	m_CameraTarget = m_direction;
+	printf("fi thete : %f %f \n", m_phi, m_theta);
+
+	m_CameraPosition += m_speed*m_direction*vec3(right - left, 1.0f, up - down);
+	m_CameraTarget = m_CameraPosition + m_direction;
 }
 
 
@@ -48,7 +53,7 @@ void WASDCamera::UpdateRotation(float dt)
 	{
 		if (m_bHaveMousePos)
 		{
-			vec2 mouseDiff = m_orbitSpeed * (m_currentMousePos - m_lastMousePos);
+			mouseDiff = m_orbitSpeed * (m_currentMousePos - m_lastMousePos);
 		}
 		m_lastMousePos = m_currentMousePos;
 		m_bHaveMousePos = true;
@@ -59,9 +64,9 @@ void WASDCamera::UpdateRotation(float dt)
 	}
 
 	m_theta += 1.0f*mouseDiff.x;
-	m_phi -= 1.0f*mouseDiff.y;
+	m_phi += 1.0f*mouseDiff.y;
 
-	if (m_phi < 0.001f) m_phi = 0.001f;
-	if (m_phi > pi<float>() - 0.001f) m_phi = pi<float>() - 0.001f;
+	//if (m_phi < 0.001f) m_phi = 0.001f;
+//	if (m_phi > pi<float>() - 0.001f) m_phi = pi<float>() - 0.001f;
 }
 

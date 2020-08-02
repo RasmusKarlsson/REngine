@@ -244,9 +244,11 @@ void Renderer::CompileShaders()
 	m_skyShader = RendererContext::CreateShaderProgram(
 		RendererContext::CreateVertexShader(LoadShaderFile("src/shaders/skybox.vert")),
 		RendererContext::CreateFragmentShader(LoadShaderFile("src/shaders/skybox.frag")));
+	
 	m_fullscreenShader = RendererContext::CreateShaderProgram(
-		fullscreenVertex,
-		simpleFragmentShader);
+		RendererContext::CreateVertexShader(LoadShaderFile("src/shaders/fullscreenPass.vert")),
+		RendererContext::CreateFragmentShader(LoadShaderFile("src/shaders/fxaa.frag")));
+	
 	m_gaussianShader = RendererContext::CreateShaderProgram(
 		fullscreenVertex,
 		RendererContext::CreateFragmentShader(LoadShaderFile("src/shaders/gaussianBlur.frag")));
