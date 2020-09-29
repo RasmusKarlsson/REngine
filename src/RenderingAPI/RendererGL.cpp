@@ -525,7 +525,7 @@ uint32 RendererContext::CreateShaderProgram(uint32 vertexShader, uint32 fragment
 
 	glUseProgram(programID);
 	glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &count);
-	printf("Active Uniforms: %d\n", count);
+	//printf("Active Uniforms: %d\n", count);
 
 	GLint sampler2DCount = 0;
 
@@ -542,9 +542,21 @@ uint32 RendererContext::CreateShaderProgram(uint32 vertexShader, uint32 fragment
 			break;
 		}
 
-		printf("Uniform #%d Type: %u Name: %s\n", i, type, name);
+		//printf("Uniform #%d Type: %u Name: %s\n", i, type, name);
 	}
 	
 	return programID;
+}
+
+void RendererContext::DeleteShader(uint32 shaderHandle)
+{
+	if(shaderHandle)
+		glDeleteShader(shaderHandle);
+}
+
+void RendererContext::DeleteShaderProgram(uint32 shaderHandle)
+{
+	if (shaderHandle)
+		glDeleteProgram(shaderHandle);
 }
 #endif

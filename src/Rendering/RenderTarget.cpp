@@ -56,8 +56,6 @@ void RenderTarget::CreateFBO(string name, int width, int height)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-
-	printf("fbo: %d texture: %d depth: %d renderbuffer: %d \n", m_fbo, m_textureID, m_depthID, m_renderBuffer);
 }
 
 void RenderTarget::CreateMultipleRenderTargetFrameBuffer(int width, int height)

@@ -62,6 +62,8 @@ public:
 	static uint32 CreateVertexShader(std::string shaderString);
 	static uint32 CreateFragmentShader(std::string shaderString);
 	static uint32 CreateShaderProgram(uint32 vertexShader, uint32 fragmentShader);
+	static void DeleteShader(uint32 shaderHandle);
+	static void DeleteShaderProgram(uint32 shaderHandle);
 
 private:
 	static void SetVertexAttributePointers(uint32 vertexFormat, uint32 vertexSize);

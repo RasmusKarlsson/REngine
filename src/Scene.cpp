@@ -92,11 +92,15 @@ Scene::Scene()
 	quad3->SetPosition(0.0f, 2.0f, 1.0f);
 	AddEntity(quad3);
 
+	Decal* decal = new Decal();
+	decal->SetMaterial(mat);
+	decal->SetPosition(2.0f, 8.0f, 0.0f);
+	AddEntity(decal);
 
 	Decal* cube = new Decal();
 	cube->SetName("cube");
 	cube->AddChild(quad3);
-	//quad->AddChild(cube);
+	quad->AddChild(cube);
 	m_cube = cube;
 	Material* skyMat = new Material();
 	skyMat->SetDiffuseTexture(new Texture("res/Textures/skyboxTest.png"));
@@ -150,7 +154,7 @@ Scene::Scene()
 	
 	m_skybox = new Skybox();
 	Texture* skyTexture = new Texture();
-	skyTexture->CreateFromHDR("res/CubeMap/Sky512.hdr");
+	skyTexture->CreateFromHDR("res/CubeMap/Sky.hdr");
 	m_skybox->SetSkyTexture(skyTexture);
 }
 
