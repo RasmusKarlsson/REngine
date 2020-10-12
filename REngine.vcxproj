@@ -234,6 +234,8 @@
     <None Include="ClassDiagram.cd" />
     <None Include="src\Shaders\2dUI.frag" />
     <None Include="src\Shaders\2dUI.vert" />
+    <None Include="src\Shaders\fullscreenBlur.frag" />
+    <None Include="src\Shaders\fullscreenBlur.vert" />
     <None Include="src\Shaders\fullscreenPass.vert" />
     <None Include="src\Shaders\gaussianBlur.frag" />
     <None Include="src\Shaders\showDepth.frag" />

@@ -29,8 +29,6 @@ extern "C"
 ///////////////////////////////////////////////////////////
 
 extern double timeElapsed = 0.0;
-extern int SCREEN_WIDTH = 1280;
-extern int SCREEN_HEIGHT = 720;
 
 extern bool DEFERRED_RENDERING = true;
 
@@ -49,11 +47,11 @@ bool EnterFullscreen(int width, int height);
 bool LeaveFullscreen(int width, int height);
 
 Window::Window() {
-	config.width = SCREEN_WIDTH;
-	config.height = SCREEN_HEIGHT;
+	config.width = 1280;
+	config.height = 720;
 	config.posX = CW_USEDEFAULT;
 	config.posY = 0;
-	style = WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+	style = WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_THICKFRAME;
 	staticWindow = this;
 }
 
@@ -241,6 +239,7 @@ int Window::Create(HINSTANCE hInstance, int nCmdShow) {
 
 	// init opengl loader here (extra safe version)
 	Renderer::Initialize();
+	Renderer::SetWindowSize(1280, 720);
 	
 	Renderer::PrintError(0);
 	SetWindowText(WND, (LPCSTR)glGetString(GL_VERSION));
@@ -298,7 +297,6 @@ void Window::Render(double dt) {
 			frames = 1;
 			frametimes = 0.0;
 		}
-		
 	}
 }
 
@@ -338,11 +336,13 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam,
 		if (wParam == VK_F1)
 		{
 			EnterFullscreen(1920, 1200);
+			Renderer::SetWindowSize(1920, 1200);
 			break;
 		}
 		if (wParam == VK_F2)
 		{
 			LeaveFullscreen(1280, 720);
+			Renderer::SetWindowSize(1280, 720);
 			break;
 		}
 		if (wParam == VK_F3)
@@ -367,7 +367,13 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam,
 		Input::SetMouseWheelValue(GET_WHEEL_DELTA_WPARAM(wParam));
 		break;
 
+	case WM_EXITSIZEMOVE:
 
+		RECT window;
+		GetWindowRect(g_hwnd, &window);
+		Renderer::SetWindowSize(window.left - window.right, window.bottom - window.top);
+		break;
+		
 
 	case WM_KEYUP:
 		Input::KeyUp(wParam);
@@ -456,7 +462,7 @@ bool EnterFullscreen(int width, int height)
 bool LeaveFullscreen(int width, int height)
 {
 	DWORD exstyle = WS_EX_STATICEDGE;
-	DWORD style = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+	DWORD style = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_THICKFRAME;
 
 	if (!g_glwin_fullscreen) return true;
 

@@ -10,6 +10,12 @@ PostEffect::PostEffect(std::string fragmentShaderPath)
 	m_enabled = false;
 	m_shader = new Shader("src/shaders/fullscreenPass.vert", fragmentShaderPath);
 }
+PostEffect::PostEffect(std::string vertexShaderPath, std::string fragmentShaderPath)
+{
+	m_needsDepth = false;
+	m_enabled = false;
+	m_shader = new Shader(vertexShaderPath, fragmentShaderPath);
+}
 
 PostEffect::~PostEffect()
 {

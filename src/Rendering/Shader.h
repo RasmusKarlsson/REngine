@@ -17,6 +17,7 @@ public:
 
 	static std::vector<Shader*> m_shaders;
 	static void SetShaderDirty(std::string shaderPath);
+	static bool IsShaderFileExtension(std::string shaderPath);
 	
 private:
 

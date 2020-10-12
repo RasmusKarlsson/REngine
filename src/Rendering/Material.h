@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#include "Shader.h"
+
 using namespace std;
 using namespace glm;
 
@@ -40,6 +42,12 @@ public:
 
 	void SetShader(uint32 shader) { m_shaderID = shader; };
 	uint32 GetShader() { return m_shaderID; };
+	
+	void SetShaderInstance(Shader* shader) {
+		m_shaderInstance = shader;
+		m_shaderID = 0;
+	};
+	Shader* GetShaderInstance() { return m_shaderInstance; };
 
 private:
 
@@ -60,6 +68,7 @@ private:
 	vec4 m_specularColor;
 
 	uint32 m_shaderID;
+	Shader* m_shaderInstance;
 
 	int m_renderStyle;
 };

@@ -47,6 +47,8 @@ private:
 	RenderTarget* m_fbo1;
 	RenderTarget* m_fbo2;
 	Quad* m_fullscreenQuad;
+	Quad* m_windowQuad;
+	Material* m_windowMaterial;
 
 	Skybox* m_skybox;
 };

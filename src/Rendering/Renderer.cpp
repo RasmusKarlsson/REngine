@@ -15,9 +15,9 @@
 #include "RenderingAPI/RendererContext.h"
 
 extern double timeElapsed;
-extern int SCREEN_WIDTH;
-extern int SCREEN_HEIGHT;
 
+uint32 Renderer::m_windowWidth = 1;
+uint32 Renderer::m_windowHeight = 1;
 
 uint32 Renderer::m_currentShader = 0;
 
@@ -49,6 +49,14 @@ map<string, uint32> Renderer::sm_ShaderMap;
 void Renderer::Initialize()
 {
 	RendererContext::Initialize();
+}
+
+void Renderer::SetWindowSize(uint32 width, uint32 height)
+{
+	m_windowWidth = width;
+	m_windowHeight = height;
+
+	
 }
 
 void Renderer::SetShader(uint32 shader)
@@ -168,7 +176,11 @@ void Renderer::Render(Entity& entity)
 	if(entity.GetMaterial())
 	{
 		SetRenderMode(entity.GetRenderStyle());
-		SetShader(entity.GetMaterial()->GetShader());
+		uint32 shaderID = entity.GetMaterial()->GetShader();
+		if (shaderID == 0)
+			SetShader(entity.GetMaterial()->GetShaderInstance()->GetShaderID());
+		else
+			SetShader(shaderID);
 		UploadMaterialProperties(*entity.GetMaterial());
 	}
 
@@ -205,6 +217,11 @@ void Renderer::RenderFullscreenQuad()
 void Renderer::UploadUniform1f(const char* name, float value)
 {
 	RendererContext::UploadUniform1f(name, value);
+}
+
+void Renderer::UploadUniform2fv(const char* name, float* value)
+{
+	RendererContext::UploadUniform2fv(name, value);
 }
 
 void Renderer::UploadUniform1i(const char* name, int value)

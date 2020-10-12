@@ -35,6 +35,8 @@ public:
 		RENGINE::PIXEL_TYPE pixelType,
 		uint8* pixels);
 
+	static void DeleteTexture(uint32 textureID);
+
 	static void SetTextureParameteri(RENGINE::TEXTURE_TYPE texType, RENGINE::TEXTURE_PNAME paramName, RENGINE::TEXTURE_PARAM paramValue);
 	static void GenerateMipmaps();
 

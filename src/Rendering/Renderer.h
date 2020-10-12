@@ -18,6 +18,9 @@ public:
 	//Init
 	static void Initialize();
 	static void PrintError(uint32 line);
+	static void SetWindowSize(uint32 width, uint32 height);
+	static uint32 GetWidth() { return m_windowWidth; };
+	static uint32 GetHeight() { return m_windowHeight; };
 
 	//Render States
 	static void SetOverrideRenderMode(bool value);
@@ -60,11 +63,15 @@ public:
 	//Uniforms
 
 	static void UploadUniform1f(const char* name, float value);
+	static void UploadUniform2fv(const char* name, float* value);
 	static void UploadUniform1i(const char* name, int value);
 	static void UploadUniform4fv(const char* name, float const* value);
 	static void UploadUniformMatrix4fv(const char* name, float const* value);
 	
+	static uint32 m_windowWidth;
+	static uint32 m_windowHeight;
 
+	
 	static map<string, uint32> sm_ShaderMap;
 
 	static uint32 m_currentRenderMode;

@@ -60,11 +60,22 @@ int Shader::GetShaderID()
 	return m_shaderProgramHandle;
 }
 
+bool Shader::IsShaderFileExtension(std::string shaderPath)
+{
+	if (shaderPath.find(".glsl") != std::string::npos) return true;
+	if (shaderPath.find(".frag") != std::string::npos) return true;
+	if (shaderPath.find(".vert") != std::string::npos) return true;
+	if (shaderPath.find(".GLSL") != std::string::npos) return true;
+	if (shaderPath.find(".FRAG") != std::string::npos) return true;
+	if (shaderPath.find(".VERT") != std::string::npos) return true;
+	return false;
+}
+
 void Shader::SetShaderDirty(std::string shaderPath)
 {
 	for each(Shader* shader in m_shaders)
 	{
-		if(shader->m_vertexShaderPath.find(shaderPath) || shader->m_fragmentShaderPath.find(shaderPath))
+		//if(shader->m_vertexShaderPath == (shaderPath) || shader->m_fragmentShaderPath == (shaderPath))
 		{
 			shader->SetDirty();
 		}

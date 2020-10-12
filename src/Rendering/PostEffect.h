@@ -9,6 +9,7 @@ class PostEffect
 {
 public:
 	PostEffect(std::string fragmentShaderPath);
+	PostEffect(std::string vertexShaderPath, std::string fragmentShaderPath);
 	~PostEffect();
 	void RenderPostEffect();
 	void Enable() { m_enabled = true; }

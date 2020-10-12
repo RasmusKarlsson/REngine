@@ -58,14 +58,17 @@ DWORD WINAPI ShaderDirectoryUpdate(void *data) {
 		for (;;) {
 			FILE_NOTIFY_INFORMATION* file = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(buf + offset);
 
-			if (file->Action == FILE_ACTION_RENAMED_NEW_NAME)
+			//if (file->Action == FILE_ACTION_RENAMED_NEW_NAME)
 			{
-				string fp = toUTF8(file->FileName, file->FileNameLength / sizeof(WCHAR));
+				string filepath = toUTF8(file->FileName, file->FileNameLength / sizeof(WCHAR));
 
-				//if (file->Action == FILE_ACTION_MODIFIED) 
+				if (Texture::IsImageFileExtension(filepath))
 				{
-					cout << fp << endl << " Action: " << file->Action;
-					Shader::SetShaderDirty(fp);
+					Texture::SetTextureDirty(filepath);
+				}
+				else if(Shader::IsShaderFileExtension(filepath))
+				{
+					Shader::SetShaderDirty(filepath);
 				}
 			}
 

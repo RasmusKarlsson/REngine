@@ -77,6 +77,7 @@ void Terrain::CreateTerrainMesh()
 void Terrain::SetHeightMap(string filename)
 {
 	m_heightMap = new Texture();
+	m_heightMap->SetKeepImageData();
 	m_heightMap->CreateFromPNG(filename);
 }
 

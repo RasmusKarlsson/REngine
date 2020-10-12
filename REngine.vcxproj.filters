@@ -233,5 +233,11 @@
     <None Include="src\Shaders\showDepth.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="src\Shaders\fullscreenBlur.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="src\Shaders\fullscreenBlur.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

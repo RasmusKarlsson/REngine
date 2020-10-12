@@ -49,11 +49,11 @@ Scene::Scene()
 	m_currentCamera->SetOrbitDistance(5.0f);
 	m_currentCamera->SetCameraPosition(vec3(0.0f, 5.0f, 5.0f));
 	m_currentCamera->SetCameraTarget(vec3(0.0f, 5.0f, 0.0f));
-	m_currentCamera->CreateProjectionMatrix(45.0f, (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
+	m_currentCamera->CreateProjectionMatrix(45.0f, (float)Renderer::GetWidth() / Renderer::GetHeight(), 0.1f, 1000.0f);
 
 	m_postEffectManager = new PostEffectManager();
-	m_postEffectManager->InitializeFramebuffers();
-	m_postEffectManager->InitializePostEffects();
+	m_postEffectManager->InitializeFramebuffers(Renderer::m_windowWidth, Renderer::m_windowHeight);
+	m_postEffectManager->InitializePostEffectShaders();
 	//
 	/*
 	m_fbo2 = new RenderTarget();
@@ -63,13 +63,13 @@ Scene::Scene()
 	*/
 
 	//Debug font
-	m_debugFontTexture = new Texture("res/Textures/font2.png");
+	m_debugFontTexture = new Texture("res\\Textures\\font2.png");
 	m_debugFontMaterial = new Material();
 	m_debugFontMaterial->SetDiffuseTexture(m_debugFontTexture);
 	m_debugFontMaterial->SetShader(Renderer::m_textShader);
 
 	Texture* tex = new Texture();
-	tex->CreateFromPNG("res/Textures/splatmap.png");
+	tex->CreateFromPNG("res\\Textures\\splatmap.png");
 
 	Material* mat = new Material();
 	mat->SetDiffuseTexture(tex);
@@ -79,6 +79,7 @@ Scene::Scene()
 	quad->SetMaterial(mat);
 	quad->SetPosition(0.0f, 2.0f, 0.0f);
 	AddEntity(quad);
+
 	
 	Sphere* sphere = new Sphere();
 	sphere->SetName("sphere");
@@ -103,19 +104,35 @@ Scene::Scene()
 	quad->AddChild(cube);
 	m_cube = cube;
 	Material* skyMat = new Material();
-	skyMat->SetDiffuseTexture(new Texture("res/Textures/skyboxTest.png"));
+	skyMat->SetDiffuseTexture(new Texture("res\\Textures\\skyboxTest.png"));
 	cube->SetMaterial(skyMat);
 	cube->SetPosition(0.0f, 5.0f, 0.0f);
 	AddEntity(cube);
 
+	m_windowQuad = new Quad();
+	m_windowQuad->SetScale(5.0, 2.2, 1.0);
+	m_windowQuad->SetName("quad");
+
+	m_windowMaterial = new Material();
+	Shader* frostedShader = new Shader("src\\shaders\\frostedGlass.vert", "src\\shaders\\frostedGlass.frag");
+	m_windowMaterial->SetShaderInstance(frostedShader);
+
+	m_windowMaterial->SetDiffuseTexture(m_postEffectManager->GetBlurRendertarget(2));
+	m_windowMaterial->SetNormalTexture(new Texture("res\\Textures\\hexagon.png"));
+	m_windowMaterial->SetAmbientTexture(m_postEffectManager->GetBlurRendertarget(0));
+	m_windowQuad->SetMaterial(m_windowMaterial);
+	m_windowQuad->SetPosition(0.0f, 10.0f, 6.0f);
+//	AddEntity(m_windowQuad);
+
+
 	m_terrain = new Terrain();
 	
-	m_terrain->SetHeightMap("res/Textures/heightmap257.png");
-	m_terrain->SetSplatMap("res/Textures/splatmap257.png");
-	m_terrain->SetNormalMap("res/Textures/normalmap.png");
-	m_terrain->SetSplatMapTexture("res/Textures/sand.png",0);
-	m_terrain->SetSplatMapTexture("res/Textures/grass.png",1);
-	m_terrain->SetSplatMapTexture("res/Textures/stone.png",2);
+	m_terrain->SetHeightMap("res\\Textures\\heightmap257.png");
+	m_terrain->SetSplatMap("res\\Textures\\splatmap257.png");
+	m_terrain->SetNormalMap("res\\Textures\\normalmap.png");
+	m_terrain->SetSplatMapTexture("res\\Textures\\sand.png",0);
+	m_terrain->SetSplatMapTexture("res\\Textures\\grass.png",1);
+	m_terrain->SetSplatMapTexture("res\\Textures\\stone.png",2);
 	m_terrain->CreateTerrainMesh();
 	TerrainMesh* terrainEntity = m_terrain->GetTerrainEntity();
 	terrainEntity->SetPosition(-(float)terrainEntity->GetResolution().x / 2, -3.0f, -(float)terrainEntity->GetResolution().y / 2);
@@ -128,7 +145,7 @@ Scene::Scene()
 	textMat->SetShader(Renderer::m_textShader);
 	textQuad->SetMaterial(textMat);
 	textQuad2->SetMaterial(textMat);
-	textQuad->SetScale(82.0f/ SCREEN_WIDTH,82.0f/ SCREEN_HEIGHT,1.0f);
+	textQuad->SetScale(82.0f/ Renderer::GetWidth(),82.0f/ Renderer::GetHeight(),1.0f);
 	textQuad->SetPosition(MathHelpers::PixelPosToWorldPos(10.0f,10.0f));
 	AddEntity(textQuad);
 	
@@ -137,9 +154,9 @@ Scene::Scene()
 	Material* cursorMat = new Material();
 	cursorMat->SetShader(Renderer::m_textShader);
 	Texture* cursorTex = new Texture();
-	cursorTex->CreateFromPNG("res/Textures/cursor.png");
+	cursorTex->CreateFromPNG("res\\Textures\\cursor.png");
 	cursorMat->SetDiffuseTexture(cursorTex);
-	m_cursorMesh->SetScale((float)cursorTex->GetWidth() / SCREEN_WIDTH, (float)cursorTex->GetHeight() / SCREEN_HEIGHT, 1.0f);
+	m_cursorMesh->SetScale((float)cursorTex->GetWidth() / Renderer::GetWidth(), (float)cursorTex->GetHeight() / Renderer::GetHeight(), 1.0f);
 	m_cursorMesh->SetMaterial(cursorMat);
 
 	m_cursorMesh->SetRenderStyle(RENGINE::UI);
@@ -148,13 +165,13 @@ Scene::Scene()
 	m_fpsMesh = new TextMesh();
 	m_fpsMesh->SetText("FPS: 0.00");
 	m_fpsMesh->SetMaterial(m_debugFontMaterial);
-	m_fpsMesh->SetScale(8.0f / SCREEN_WIDTH, 8.0f / SCREEN_HEIGHT, 1.0f);
+	m_fpsMesh->SetScale(8.0f / Renderer::GetWidth(), 8.0f / Renderer::GetHeight(), 1.0f);
 	m_fpsMesh->SetPosition(MathHelpers::PixelPosToWorldPos(10.0f, 30.0f));
 	AddEntity(m_fpsMesh);
 	
 	m_skybox = new Skybox();
 	Texture* skyTexture = new Texture();
-	skyTexture->CreateFromHDR("res/CubeMap/Sky.hdr");
+	skyTexture->CreateFromHDR("res\\CubeMap\\Sky512.hdr");
 	m_skybox->SetSkyTexture(skyTexture);
 }
 
@@ -253,7 +270,7 @@ void Scene::UpdateScene(double dt)
 			m_cube->SetPosition(5.0f, 6.5f, 0.0f);
 			Material* mat = new Material();
 			Texture* tex = new Texture();
-			tex->CreateFromPNG("res/Textures/blood.png");
+			tex->CreateFromPNG("res\\Textures\\blood.png");
 			mat->SetDiffuseTexture(tex);
 			m_cube->SetMaterial(mat);
 			AddEntity(m_cube);
@@ -287,6 +304,7 @@ void Scene::UpdateScene(double dt)
 
 void Scene::RenderScene(double dt)
 {
+	Renderer::SetViewport(0, 0, Renderer::GetWidth(), Renderer::GetHeight());
 	Renderer::ClearBuffer();
 
 	m_postEffectManager->BindFramebufferForRendering();
@@ -308,6 +326,15 @@ void Scene::RenderScene(double dt)
 
 	Renderer::SetShader(Renderer::m_skyShader);
 	Renderer::Render(*m_skybox->GetSkyEntity());
+
+	m_postEffectManager->RenderBlurBuffer();
+
+	m_postEffectManager->BindFbo(0,false);
+
+	Renderer::SetShader(Renderer::m_whiteShader);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+	Renderer::Render(*m_windowQuad);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	m_postEffectManager->RenderPostEffects();
 
@@ -369,7 +396,7 @@ void Scene::RenderStats()
 {
 	static TextMesh statsMesh;
 	statsMesh.SetMaterial(m_debugFontMaterial);
-	statsMesh.SetScale(8.0f / SCREEN_WIDTH, 8.0f / SCREEN_HEIGHT, 1.0f);
+	statsMesh.SetScale(8.0f / Renderer::GetWidth(), 8.0f / Renderer::GetHeight(), 1.0f);
 
 	Renderer::SetRenderMode(RENGINE::UI);
 	Renderer::SetShader(Renderer::m_textShader);
@@ -399,4 +426,10 @@ void Scene::RenderStats()
 	
 	statsMesh.UpdateTextBuffer("Index Count:     " + std::to_string(Stats::s_indexCount)); statsMesh.UpdateMatrices();
 	Renderer::Render(statsMesh); height += 10.0f;
+
+	if(!Stats::s_shaderError.empty())
+	{
+		statsMesh.UpdateTextBuffer("Shader Error:     " + Stats::s_shaderError); statsMesh.UpdateMatrices();
+		Renderer::Render(statsMesh); height += 10.0f;
+	}
 }

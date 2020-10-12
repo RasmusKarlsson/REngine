@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 
 class Stats
@@ -9,6 +10,8 @@ public:
 	static int s_vertexCount;
 	static int s_indexCount;
 	static int s_renderStyleChanges;
+
+	static std::string s_shaderError;
 	
 	static void Reset()
 	{

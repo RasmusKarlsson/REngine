@@ -1,4 +1,7 @@
 
+#include <vector>
+
+#include "Stats.h"
 #if defined (RENGINE_OPENGL)
 
 #include "RenderingAPI/RendererContext.h"
@@ -181,6 +184,11 @@ uint32 RendererContext::CreateTexture(uint32 width, uint32 height, RENGINE::PIXE
 	
 	glTexImage2D(GL_TEXTURE_2D, 0, glInternalPixelFormat, width, height, 0, glPixelFormat, glPixelType, pixels);
 	return textureID;
+}
+
+void RendererContext::DeleteTexture(uint32 textureID)
+{
+	glDeleteTextures(1, &textureID);
 }
 
 void RendererContext::GenerateMipmaps()
@@ -455,6 +463,11 @@ uint32 RendererContext::CreateVertexShader(std::string shaderString)
 			int infologLength = 0;
 			glGetShaderInfoLog(vertexShaderID, 4096, &infologLength, infoLogChar);
 			printf("%s", infoLogChar);
+
+			std::vector<char> v(infologLength);
+			glGetShaderInfoLog(vertexShaderID, infologLength, NULL, v.data());
+			std::string s(begin(v), end(v));
+			Stats::s_shaderError = s;
 		}
 	}
 	return vertexShaderID;
@@ -481,6 +494,11 @@ uint32 RendererContext::CreateFragmentShader(std::string shaderString)
 			int infologLength = 0;
 			glGetShaderInfoLog(fragmentShaderID, 4096, &infologLength, infoLogChar);
 			printf("%s", infoLogChar);
+			
+			std::vector<char> v(infologLength);
+			glGetShaderInfoLog(fragmentShaderID, infologLength, NULL, v.data());
+			std::string s(begin(v), end(v));
+			Stats::s_shaderError = s;
 		}
 	}
 	return fragmentShaderID;

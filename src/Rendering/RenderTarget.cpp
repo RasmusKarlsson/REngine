@@ -1,5 +1,14 @@
 #include "RenderTarget.h"
 
+RenderTarget::RenderTarget()
+{
+	
+}
+
+RenderTarget::~RenderTarget()
+{
+	glDeleteBuffers(1, &m_fbo);
+}
 
 void RenderTarget::CreateFBO(string name, int width, int height)
 {
