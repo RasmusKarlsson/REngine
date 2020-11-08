@@ -21,6 +21,7 @@ public:
 	~Scene();
 
 	Camera* GetCurrentCamera() { return m_currentCamera; };
+	PostEffectManager* GetPosteffectManager() { return m_postEffectManager; };
 
 	void AddEntity(Entity* entity);
 

@@ -1,0 +1,2 @@
+fix UI aspect ratio
+fix window scale issue when moving the window.

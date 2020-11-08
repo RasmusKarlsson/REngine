@@ -48,7 +48,7 @@ void TerrainMesh::CreatePatchFromHeightmap(Texture* texture, uint32 xStart, uint
 	uint32 realSize = texture->GetWidth();
 
 	m_resolution = ivec2(width, depth);
-	m_heightScale = 0.75f;
+	m_heightScale = 0.5f;
 	m_size = 0.1f;
 
 	m_bbox.SetBoundingBox(vec3(0.0f), vec3(width, m_size*m_heightScale*256.0f, depth));

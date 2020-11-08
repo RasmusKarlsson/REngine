@@ -24,14 +24,7 @@ Texture::Texture()
 
 Texture::~Texture()
 {
-	auto it = m_textures.begin();
-	while (it != m_textures.end())
-	{
-		auto curr = it++;
-		if (*curr == this) {
-			m_textures.erase(curr);
-		}
-	}
+	m_textures.erase(std::find(m_textures.begin(), m_textures.end(), this));
 }
 
 Texture::Texture(string filename)

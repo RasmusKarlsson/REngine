@@ -5,7 +5,6 @@
 ///////////////////////////////////////////////////////////
 
 #include "Sphere.h"
-
 #include "Renderer.h"
 
 Sphere::Sphere()
@@ -24,7 +23,6 @@ void Sphere::Create()
 	double radius = 1;
 	
 	m_bbox.SetBoundingBox(vec3(-radius), vec3(radius));
-
 
 	for (double latNumber = 0; latNumber <= latitudeBands; latNumber++) {
 		double theta = latNumber * M_PI / latitudeBands;

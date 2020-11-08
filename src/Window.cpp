@@ -51,7 +51,8 @@ Window::Window() {
 	config.height = 720;
 	config.posX = CW_USEDEFAULT;
 	config.posY = 0;
-	style = WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_THICKFRAME;
+	style = WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_THICKFRAME;
+
 	staticWindow = this;
 }
 
@@ -80,6 +81,12 @@ void Window::SetWindowSize(HWND hWnd, int width, int height)
 
 		SetWindowPos(hWnd, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, SWP_NOZORDER | SWP_NOMOVE);
 		Renderer::SetViewport(0, 0, width, height);
+		Renderer::SetWindowSize(width, height);
+		if (m_scene)
+		{
+			m_scene->GetCurrentCamera()->CreateProjectionMatrix(45.0f, static_cast<float>(width) / static_cast<float>(height), 0.1f, 1000.0f);
+			m_scene->GetPosteffectManager()->InitializeFramebuffers(width, height);
+		}
 	}
 }
 
@@ -269,7 +276,7 @@ ATOM Window::RegisterClass(HINSTANCE hInstance) {
 
 void Window::Init() {
 
-	ShowCursor(FALSE);
+	ShowCursor(TRUE);
 	DragAcceptFiles(g_hwnd,TRUE);
 
 	m_scene = new Scene();
@@ -370,8 +377,9 @@ LRESULT CALLBACK Window::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam,
 	case WM_EXITSIZEMOVE:
 
 		RECT window;
-		GetWindowRect(g_hwnd, &window);
-		Renderer::SetWindowSize(window.left - window.right, window.bottom - window.top);
+		DwmGetWindowAttribute(g_hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &window, sizeof(window));
+		staticWindow->SetWindowSize(g_hwnd, window.right - window.left, window.bottom - window.top);
+		Renderer::SetWindowSize(window.right - window.left, window.bottom - window.top);
 		break;
 		
 
@@ -484,15 +492,9 @@ bool LeaveFullscreen(int width, int height)
 	RECT desktop;
 	const HWND hDesktop = GetDesktopWindow();
 	GetWindowRect(hDesktop, &desktop);
-//	RECT desktop;
 	HRESULT stat = DwmGetWindowAttribute(g_hwnd,DWMWA_EXTENDED_FRAME_BOUNDS,&desktop,sizeof(desktop));
 	int posX = (desktop.right - desktop.left) / 2 - width / 2;
 	int posY = (desktop.bottom - desktop.top) / 2 - height / 2;
-//	printf()
-	//int border_thickness = GetSystemMetrics(SM_CYCAPTION)+ GetSystemMetrics(SM_CXSIZEFRAME);;
-
-//	SetWindowLong(g_hwnd, GWL_EXSTYLE, exstyle);
-//	SetWindowLong(g_hwnd, GWL_STYLE, style);
 	SetWindowPos(g_hwnd, HWND_TOP, posX, posY, width, height, SWP_SHOWWINDOW);
 
 	Renderer::SetViewport(0, 0, width, height);

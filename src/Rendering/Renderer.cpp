@@ -57,6 +57,7 @@ void Renderer::SetWindowSize(uint32 width, uint32 height)
 	m_windowHeight = height;
 
 	
+	
 }
 
 void Renderer::SetShader(uint32 shader)

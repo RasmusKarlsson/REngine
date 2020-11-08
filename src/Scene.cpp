@@ -54,13 +54,6 @@ Scene::Scene()
 	m_postEffectManager = new PostEffectManager();
 	m_postEffectManager->InitializeFramebuffers(Renderer::m_windowWidth, Renderer::m_windowHeight);
 	m_postEffectManager->InitializePostEffectShaders();
-	//
-	/*
-	m_fbo2 = new RenderTarget();
-	m_fbo2->CreateFBO("framebuffer2", SCREEN_WIDTH, SCREEN_HEIGHT);
-	m_fbo1 = new RenderTarget();
-	m_fbo1->CreateFBO("framebuffer1", SCREEN_WIDTH, SCREEN_HEIGHT);
-	*/
 
 	//Debug font
 	m_debugFontTexture = new Texture("res\\Textures\\font2.png");
@@ -115,11 +108,13 @@ Scene::Scene()
 
 	m_windowMaterial = new Material();
 	Shader* frostedShader = new Shader("src\\shaders\\frostedGlass.vert", "src\\shaders\\frostedGlass.frag");
-	m_windowMaterial->SetShaderInstance(frostedShader);
+	Shader* rainGlassShader = new Shader("src\\shaders\\frostedGlass.vert", "src\\shaders\\rainGlass.frag");
+	m_windowMaterial->SetShaderInstance(rainGlassShader);
 
 	m_windowMaterial->SetDiffuseTexture(m_postEffectManager->GetBlurRendertarget(2));
-	m_windowMaterial->SetNormalTexture(new Texture("res\\Textures\\hexagon.png"));
+	m_windowMaterial->SetNormalTexture(new Texture("res\\Textures\\bluenoise256b.png"));
 	m_windowMaterial->SetAmbientTexture(m_postEffectManager->GetBlurRendertarget(0));
+	m_windowMaterial->SetSpecularTexture(new Texture("res\\Textures\\rain5.png"));
 	m_windowQuad->SetMaterial(m_windowMaterial);
 	m_windowQuad->SetPosition(0.0f, 10.0f, 6.0f);
 //	AddEntity(m_windowQuad);
@@ -331,10 +326,10 @@ void Scene::RenderScene(double dt)
 
 	m_postEffectManager->BindFbo(0,false);
 
+	m_windowMaterial->SetDiffuseTexture(m_postEffectManager->GetBlurRendertarget(2));
+	m_windowMaterial->SetAmbientTexture(m_postEffectManager->GetBlurRendertarget(0));
 	Renderer::SetShader(Renderer::m_whiteShader);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	Renderer::Render(*m_windowQuad);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	m_postEffectManager->RenderPostEffects();
 

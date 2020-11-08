@@ -7,7 +7,7 @@ attribute vec3 a_Color;
 uniform float u_Time;
 
 varying vec2 v_Texcoord;
-varying vec2 v_NdcTexcoord;
+varying vec4 v_NdcTexcoord;
 varying float v_VertexID;
 varying float v_homo;
 varying vec3 v_Normal;
@@ -21,8 +21,7 @@ void main(){
 	v_Texcoord = a_Texcoord;
 	v_Color = a_Color;
 	v_Normal = a_Normal;
-	vec3 ndc = gl_Position.xyz / gl_Position.w; 
-	v_NdcTexcoord = ndc.xy*0.5+0.5;
+	v_NdcTexcoord = gl_Position;
 
 }
 
